@@ -13,17 +13,18 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from 'sonner';
-import { Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, History, Phone, AlertCircle } from 'lucide-react';
+import { Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, History, Phone, AlertCircle, Loader2 } from 'lucide-react';
 import type { Lead, PricingOverride, AdminStats } from '@shared/types';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 export function AdminPage() {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [hideOptOuts, setHideOptOuts] = useState(false);
-  const { data: leads } = useQuery({
+  const { data: leads, isLoading: leadsLoading } = useQuery({
     queryKey: ['admin-leads'],
     queryFn: () => api<Lead[]>('/api/admin/leads'),
     enabled: isAuthenticated
@@ -31,7 +32,8 @@ export function AdminPage() {
   const { data: stats } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => api<AdminStats>('/api/admin/stats'),
-    enabled: isAuthenticated
+    enabled: isAuthenticated,
+    refetchInterval: 30000
   });
   const { data: overrides } = useQuery({
     queryKey: ['admin-pricing'],
@@ -44,6 +46,9 @@ export function AdminPage() {
       queryClient.invalidateQueries({ queryKey: ['admin-leads'] });
       queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       toast.success("Lead purged from secure storage");
+    },
+    onError: () => {
+      toast.error("Failed to delete lead");
     }
   });
   const updatePricing = useMutation({
@@ -83,13 +88,13 @@ export function AdminPage() {
           <CardDescription>Enterprise Admin Portal</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input 
-            type="password" 
-            value={password} 
-            onChange={e => setPassword(e.target.value)} 
-            placeholder="••••••••" 
-            onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)} 
-            className="h-12" 
+          <Input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            placeholder="••••••••"
+            onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
+            className="h-12"
           />
           <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Invalid credentials")} className="w-full btn-gradient h-12">Verify Authority</Button>
         </CardContent>
@@ -136,6 +141,26 @@ export function AdminPage() {
             </Card>
           ))}
         </section>
+        {stats?.dailyLeads && (
+          <Card className="p-6 border-none shadow-soft">
+            <CardHeader className="px-0 pt-0">
+              <CardTitle className="text-lg font-bold">Volume Trends (14 Days)</CardTitle>
+            </CardHeader>
+            <div className="h-[300px] w-full mt-4">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={stats.dailyLeads}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} opacity={0.1} />
+                  <XAxis dataKey="date" tick={{fontSize: 10}} tickFormatter={(val) => val.split('-').slice(1).join('/')} />
+                  <YAxis tick={{fontSize: 10}} />
+                  <Tooltip />
+                  <Legend iconType="circle" />
+                  <Bar name="Confirmed" dataKey="confirmed" stackId="a" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar name="Pending" dataKey="pending" stackId="a" fill="hsl(var(--muted-foreground)/0.2)" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </Card>
+        )}
         <Tabs defaultValue="pipeline" className="space-y-8">
           <TabsList className="bg-white border p-1 rounded-xl shadow-sm h-12">
             <TabsTrigger value="pipeline" className="px-8 rounded-lg">Pipeline Analytics</TabsTrigger>
@@ -154,7 +179,9 @@ export function AdminPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredLeads.map(lead => (
+                  {leadsLoading ? (
+                    <TableRow><TableCell colSpan={5} className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
+                  ) : filteredLeads.map(lead => (
                     <TableRow key={lead.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell className="text-[10px] text-muted-foreground font-mono pl-4">{format(lead.createdAt, 'MMM dd, HH:mm')}</TableCell>
                       <TableCell>
@@ -210,8 +237,18 @@ export function AdminPage() {
                               </div>
                             </PopoverContent>
                           </Popover>
-                          <Button variant="ghost" size="icon" onClick={() => deleteLead.mutate(lead.id)} className="text-red-400 hover:text-red-600 hover:bg-red-50">
-                            <Trash2 className="w-4 h-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            disabled={deleteLead.isPending}
+                            onClick={() => {
+                              if(window.confirm("Purge this lead from database?")) {
+                                deleteLead.mutate(lead.id);
+                              }
+                            }} 
+                            className="text-red-400 hover:text-red-600 hover:bg-red-50"
+                          >
+                            {deleteLead.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                           </Button>
                         </div>
                       </TableCell>
@@ -234,12 +271,12 @@ export function AdminPage() {
                       <Label className="text-[10px] uppercase font-bold text-muted-foreground">Admin Price Override (EUR/MO)</Label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">€</span>
-                        <Input 
-                          type="number" 
-                          step="0.01" 
-                          defaultValue={ov.basePricePerMonth} 
-                          onBlur={(e) => updatePricing.mutate({ ...ov, basePricePerMonth: parseFloat(e.target.value) })} 
-                          className="pl-8 h-12 font-bold text-lg" 
+                        <Input
+                          type="number"
+                          step="0.01"
+                          defaultValue={ov.basePricePerMonth}
+                          onBlur={(e) => updatePricing.mutate({ ...ov, basePricePerMonth: parseFloat(e.target.value) })}
+                          className="pl-8 h-12 font-bold text-lg"
                         />
                       </div>
                     </div>

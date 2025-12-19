@@ -16,12 +16,12 @@ import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { MailCheck, Loader2 } from 'lucide-react';
-import type { LeadFormData } from '@shared/types';
+import type { LeadFormData, Timing } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),
   contactName: z.string().min(2, "Required"),
   email: z.string().email("Invalid email"),
-  phone: z.string().min(6, "Invalid phone").regex(/^[0-9+\s-()]+$/, "Invalid characters"),
+  phone: z.string().min(6, "Invalid phone").regex(/^[0-9+\s\-().]+$/, "Invalid characters"),
   seats: z.number().min(1, "Minimum 1 seat"),
   vpnStatus: z.enum(['active', 'replacing', 'none'] as const),
 });
@@ -32,7 +32,7 @@ export function LeadFormPage() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
-  const form = useForm<LeadFormData>({
+  const form = useForm<LeadFormData & { timing: Timing }>({
     resolver: zodResolver(leadSchema),
     defaultValues: {
       vpnStatus: 'active',
@@ -40,7 +40,8 @@ export function LeadFormPage() {
       companyName: "",
       contactName: "",
       email: "",
-      phone: ""
+      phone: "",
+      timing: 'immediate'
     }
   });
   const steps = [
@@ -48,7 +49,7 @@ export function LeadFormPage() {
     { title: t('form.steps.requirements') },
     { title: t('form.steps.legal') }
   ];
-  const handleFormSubmit: SubmitHandler<LeadFormData> = async (data) => {
+  const handleFormSubmit: SubmitHandler<LeadFormData & { timing: Timing }> = async (data) => {
     if (!turnstileToken) {
       toast.error("Please complete the bot verification.");
       return;
@@ -57,11 +58,11 @@ export function LeadFormPage() {
     try {
       await api('/api/submit', {
         method: 'POST',
-        body: JSON.stringify({ ...data, turnstileToken, timing: 'immediate' })
+        body: JSON.stringify({ ...data, turnstileToken })
       });
       setSubmitted(true);
     } catch (e) {
-      toast.error("Submission failed. Please try again.");
+      toast.error("Submission failed. Please check your data and try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -109,6 +110,7 @@ export function LeadFormPage() {
                       <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.companyName')}</Label>
                         <Input {...form.register('companyName')} className="h-14 rounded-xl" placeholder="Global Corp" />
+                        {form.formState.errors.companyName && <p className="text-xs text-destructive">{form.formState.errors.companyName.message}</p>}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">

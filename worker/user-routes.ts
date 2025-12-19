@@ -5,7 +5,7 @@ import { IndexedEntity, Entity } from "./core-utils";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, TimeSeriesData
+  VerificationToken, OptOutToken, AdminStats, TimeSeriesData
 } from "@shared/types";
 import { calculateTCO, calculateScores } from "../src/lib/calculator";
 import vendors from "../data/vendors.json";
@@ -77,6 +77,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         status: 'pending',
         contactAllowed: true,
         consentGiven: true,
+        timing: input.timing || 'immediate',
         consentRecord: {
           ipHash: btoa(ip).slice(0, 12),
           userAgent: c.req.header('user-agent') || 'unknown',
@@ -104,7 +105,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const tokenData = await tokenEntity.getState();
     const leadEntity = new LeadEntity(c.env, tokenData.leadId);
     const leadState = await leadEntity.getState();
-    // Idempotency check: If already confirmed and has comparisonId, return it.
     if (leadState.status === 'confirmed' && leadState.comparisonId) {
       return ok(c, { comparisonId: leadState.comparisonId });
     }
@@ -148,28 +148,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await tokenEntity.patch({ usedAt: Date.now() });
     return ok(c, { comparisonId: snapshotId });
   });
-  app.get('/api/sample-comparison', async (c) => {
-    const seats = 250;
-    const allVendorResults = await Promise.all(vendors.map(async (v) => {
-      const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
-      const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
-      return {
-        id: v.id,
-        name: v.name,
-        pricing: basePricing,
-        features: vendorFeatures,
-        tco: calculateTCO(seats, basePricing)
-      };
-    }));
-    const tcos = allVendorResults.map(r => r.tco);
-    const results: ComparisonResult[] = allVendorResults.map(r => ({
-      vendorId: r.id,
-      vendorName: r.name,
-      tcoYear1: r.tco,
-      scores: calculateScores(r.features, r.tco, Math.max(...tcos), Math.min(...tcos)),
-      features: r.features
-    }));
-    return ok(c, { id: "sample", leadId: "sample", results, inputs: { seats, vpnStatus: 'active' }, createdAt: Date.now(), isSample: true });
+  app.post('/api/opt-out', async (c) => {
+    const { token } = await c.req.json();
+    const optOutEntity = new OptOutTokenEntity(c.env, token);
+    if (!await optOutEntity.exists()) return bad(c, 'Invalid token');
+    const tokenData = await optOutEntity.getState();
+    const leadEntity = new LeadEntity(c.env, tokenData.leadId);
+    await leadEntity.patch({ contactAllowed: false, optedOutAt: Date.now() });
+    return ok(c, { success: true });
   });
   app.get('/api/comparison/:id', async (c) => {
     const id = c.req.param('id');
@@ -180,6 +166,48 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/admin/leads', async (c) => {
     const leads = await LeadEntity.list(c.env, null, 1000);
     return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
+  });
+  app.delete('/api/admin/leads/:id', async (c) => {
+    const id = c.req.param('id');
+    const deleted = await LeadEntity.delete(c.env, id);
+    return ok(c, { success: deleted });
+  });
+  app.get('/api/admin/stats', async (c) => {
+    const leadRes = await LeadEntity.list(c.env, null, 2000);
+    const leads = leadRes.items;
+    const totalLeads = leads.length;
+    const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
+    const pendingLeads = totalLeads - confirmedLeads;
+    const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
+    const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, curr) => acc + (curr.seats || 0), 0) / totalLeads) : 0;
+    // Simple vpn tally
+    const vpnTally: Record<string, number> = {};
+    leads.forEach(l => { vpnTally[l.vpnStatus] = (vpnTally[l.vpnStatus] || 0) + 1; });
+    const mostCommonVpn = Object.entries(vpnTally).sort((a, b) => b[1] - a[1])[0]?.[0] || 'none';
+    // Last 14 days daily leads
+    const dailyLeads: TimeSeriesData[] = [];
+    const now = new Date();
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      const dayLeads = leads.filter(l => new Date(l.createdAt).toISOString().split('T')[0] === dateStr);
+      dailyLeads.push({
+        date: dateStr,
+        pending: dayLeads.filter(l => l.status === 'pending').length,
+        confirmed: dayLeads.filter(l => l.status === 'confirmed').length
+      });
+    }
+    const stats: AdminStats = {
+      totalLeads,
+      pendingLeads,
+      confirmedLeads,
+      conversionRate,
+      avgSeats,
+      mostCommonVpn,
+      dailyLeads
+    };
+    return ok(c, stats);
   });
   app.get('/api/admin/leads/export', async (c) => {
     const leadsRes = await LeadEntity.list(c.env, null, 1000);
