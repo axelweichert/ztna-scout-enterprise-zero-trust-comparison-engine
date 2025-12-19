@@ -4,6 +4,20 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   en: {
     translation: {
+      layout: {
+        header: {
+          tooltips: {
+            vonBusch: "Developed by von Busch Digital",
+            cloudflare: "Powered by Cloudflare Infrastructure",
+            ubiquiti: "Security Audit Framework"
+          }
+        },
+        footer: {
+          imprint: "Imprint",
+          privacy: "Privacy Policy",
+          credit: "Engineered with precision for"
+        }
+      },
       home: {
         hero: {
           badge: "B2B Analysis Engine",
@@ -11,7 +25,7 @@ const resources = {
           title2: "Comparison Redefined",
           description: "Stop guessing. Compare 13+ ZTNA providers with deterministic TCO projections and BSI compliance scoring.",
           cta_primary: "Start Free Analysis",
-          cta_secondary: "View Sample PDF"
+          cta_secondary: "Explore Live Sample"
         },
         steps: {
           title: "The ZTNA Scout Methodology",
@@ -46,11 +60,26 @@ const resources = {
           title: "Verification Sent",
           desc: "To ensure data integrity, please check your corporate inbox and click the verification link to unlock your report."
         }
+      },
+      results: {
+        title: "Comparison Result",
+        subtitle: "Enterprise Analysis for {{seats}} Users",
+        export_pdf: "Download Report",
+        tco_title: "12-Month Financial Projection",
+        bsi_qualified: "BSI Qualified Provider",
+        disclaimer: "Pricing estimates based on market list values. This report does not constitute a binding offer."
       }
     }
   },
   de: {
     translation: {
+      layout: {
+        footer: {
+          imprint: "Impressum",
+          privacy: "Datenschutz",
+          credit: "Entwickelt mit Präzision für"
+        }
+      },
       home: {
         hero: {
           badge: "B2B Analyse Engine",
@@ -58,7 +87,7 @@ const resources = {
           title2: "Vergleich neu gedacht",
           description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
           cta_primary: "Analyse starten",
-          cta_secondary: "Beispiel-PDF ansehen"
+          cta_secondary: "Live-Beispiel ansehen"
         },
         steps: {
           title: "Die ZTNA Scout Methodik",
@@ -90,6 +119,11 @@ const resources = {
           title: "E-Mail Bestätigung",
           desc: "Bitte prüfen Sie Ihr Postfach und klicken Sie auf den Bestätigungslink, um Ihren Bericht freizuschalten."
         }
+      },
+      results: {
+        title: "Analyse-Ergebnis",
+        subtitle: "Enterprise-Vergleich für {{seats}} Benutzer",
+        bsi_qualified: "BSI-qualifizierter Anbieter"
       }
     }
   },
@@ -99,14 +133,46 @@ const resources = {
         hero: {
           badge: "Moteur d'analyse B2B",
           title1: "Sécurité d'entreprise",
-          title2: "Comparaison Redéfinie",
-          description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO déterministes.",
+          title2: "La comparaison redéfinie",
+          description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO déterministes et des scores de conformité BSI.",
           cta_primary: "Lancer l'analyse",
-          cta_secondary: "Exemple PDF"
+          cta_secondary: "Voir un exemple"
+        },
+        steps: {
+          title: "La méthodologie ZTNA Scout",
+          subtitle: "Comment nous fournissons des analyses de précision.",
+          step1: { title: "Définir le périmètre", desc: "Identifier le nombre d'utilisateurs et l'architecture existante." },
+          step2: { title: "Balayage du marché", desc: "Comparaison avec les prix catalogue et les matrices de fonctionnalités." },
+          step3: { title: "Rapport stratégique", desc: "Recevez un export PDF professionnel avec projections TCO." }
+        },
+        faq: {
+          title: "Perspectives stratégiques",
+          q1: "Les données sont-elles à jour ?",
+          a1: "Notre équipe vérifie les prix chaque trimestre. Dernière mise à jour : mai 2024.",
+          q2: "Pourquoi Cloudflare ?",
+          a2: "Cloudflare propose actuellement la plateforme ZTNA la plus robuste et qualifiée BSI.",
+          q4: "Mes données sont-elles en sécurité ?",
+          a4: "Nous sommes strictement conformes au RGPD. Données stockées sur infrastructure Cloudflare chiffrée."
         }
+      },
+      form: {
+        steps: { company: "Entité", requirements: "Architecture", legal: "Conformité" },
+        legal: {
+          processing: "Je consens au traitement de mes données d'entreprise (Obligatoire).",
+          contact: "Je consens à un suivi professionnel par un architecte certifié (Obligatoire).",
+          marketing: "Je souhaite recevoir les mises à jour trimestrielles (Optionnel)."
+        },
+        options: { vpn_active: "VPN hérité actif", vpn_replacing: "Migration en cours", vpn_none: "Cloud Native" }
       }
     }
   }
 };
-i18n.use(LanguageDetector).use(initReactI18next).init({ resources, fallbackLng: 'en', interpolation: { escapeValue: false } });
+i18n
+  .use(LanguageDetector)
+  .use(initReactI18next)
+  .init({
+    resources,
+    fallbackLng: 'en',
+    interpolation: { escapeValue: false }
+  });
 export default i18n;
