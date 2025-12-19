@@ -6,42 +6,42 @@ const resources = {
     translation: {
       hero: {
         title: "ZTNA Scout",
-        subtitle: "Find the best Zero Trust solution for your enterprise."
+        subtitle: "Navigate the Zero Trust landscape with data-driven vendor comparisons."
       },
       form: {
         steps: {
-          company: "Company",
-          requirements: "Requirements",
-          consent: "Consent"
+          company: "Organization",
+          requirements: "Infrastructure",
+          consent: "Agreement"
         },
         labels: {
           companyName: "Company Name",
-          contactPerson: "Contact Person",
-          workEmail: "Work Email",
-          seats: "Number of Users (Seats)",
-          vpnStatus: "Current Network Security",
-          consent: "I agree to receive the personalized ZTNA comparison and consent to be contacted by a security expert."
+          contactPerson: "Primary Contact",
+          workEmail: "Corporate Email Address",
+          seats: "Deployment Scale (Seats)",
+          vpnStatus: "Existing Network Architecture",
+          consent: "I hereby request the ZTNA analysis and consent to professional follow-up from a certified security architect."
         },
         buttons: {
-          continue: "Continue",
-          back: "Back",
-          submit: "Get My Comparison",
-          generating: "Generating..."
+          continue: "Next Step",
+          back: "Previous",
+          submit: "Generate Enterprise Report",
+          generating: "Calculating TCO..."
         },
         options: {
-          vpn_active: "Using Legacy VPN",
-          vpn_replacing: "Replacing VPN",
-          vpn_none: "Cloud Native / No VPN"
+          vpn_active: "Legacy VPN Infrastructure",
+          vpn_replacing: "Active Migration Phase",
+          vpn_none: "Cloud Native / SDP Architecture"
         }
       },
       results: {
-        title: "Your ZTNA Comparison",
-        subtitle: "Based on {{seats}} seats.",
-        tco_title: "Estimated TCO (Year 1)",
-        score: "Score",
-        bsi_qualified: "BSI QUALIFIED",
-        export_pdf: "Export PDF",
-        disclaimer: "Prices are estimates based on market research. Final pricing may vary."
+        title: "Enterprise Comparison Matrix",
+        subtitle: "Analysis generated for {{seats}} users.",
+        tco_title: "12-Month TCO Projection",
+        score: "Scout Score",
+        bsi_qualified: "BSI CERTIFIED",
+        export_pdf: "Export Consultant Report",
+        disclaimer: "Figures are based on standard market list prices. Custom enterprise discounts are not reflected."
       }
     }
   },
@@ -49,42 +49,85 @@ const resources = {
     translation: {
       hero: {
         title: "ZTNA Scout",
-        subtitle: "Finden Sie die beste Zero Trust Lösung für Ihr Unternehmen."
+        subtitle: "Die datengestützte Entscheidungshilfe für Ihre Zero Trust Strategie."
       },
       form: {
         steps: {
           company: "Unternehmen",
-          requirements: "Anforderungen",
+          requirements: "Infrastruktur",
           consent: "Zustimmung"
         },
         labels: {
           companyName: "Unternehmensname",
           contactPerson: "Ansprechpartner",
-          workEmail: "Geschäftliche E-Mail",
-          seats: "Anzahl der Benutzer (Seats)",
-          vpnStatus: "Aktuelle Netzwerksicherheit",
-          consent: "Ich stimme dem Erhalt des personalisierten ZTNA-Vergleichs zu und willige ein, von einem Experten kontaktiert zu werden."
+          workEmail: "Geschäftliche E-Mail-Adresse",
+          seats: "Anzahl der Lizenzen (Seats)",
+          vpnStatus: "Aktuelle Netzwerkarchitektur",
+          consent: "Ich fordere den ZTNA-Vergleich an und erkläre mich mit einer Kontaktaufnahme durch einen Sicherheitsexperten einverstanden."
         },
         buttons: {
           continue: "Weiter",
           back: "Zurück",
-          submit: "Vergleich anfordern",
-          generating: "Wird erstellt..."
+          submit: "Bericht Erstellen",
+          generating: "Berechne TCO..."
         },
         options: {
-          vpn_active: "Nutze klassisches VPN",
-          vpn_replacing: "VPN-Ablösung läuft",
-          vpn_none: "Cloud Native / Kein VPN"
+          vpn_active: "Klassische VPN-Struktur",
+          vpn_replacing: "In Umstellung auf ZTNA",
+          vpn_none: "Cloud Native / Ohne VPN"
         }
       },
       results: {
-        title: "Ihr ZTNA-Vergleich",
-        subtitle: "Basierend auf {{seats}} Benutzern.",
-        tco_title: "Geschätzte TCO (Jahr 1)",
-        score: "Bewertung",
+        title: "Enterprise Vergleichsmatrix",
+        subtitle: "Analyse für {{seats}} Benutzer.",
+        tco_title: "TCO-Projektion (12 Monate)",
+        score: "Scout Score",
         bsi_qualified: "BSI QUALIFIZIERT",
-        export_pdf: "PDF Exportieren",
-        disclaimer: "Die Preise sind Schätzungen basierend auf Marktforschung. Endpreise können abweichen."
+        export_pdf: "Bericht Exportieren (PDF)",
+        disclaimer: "Die Preise basieren auf Markt-Listenpreisen. Individuelle Rahmenverträge sind nicht berücksichtigt."
+      }
+    }
+  },
+  fr: {
+    translation: {
+      hero: {
+        title: "ZTNA Scout",
+        subtitle: "Comparez les solutions Zero Trust avec une approche basée sur les données."
+      },
+      form: {
+        steps: {
+          company: "Entreprise",
+          requirements: "Infrastructure",
+          consent: "Consentement"
+        },
+        labels: {
+          companyName: "Nom de l'entreprise",
+          contactPerson: "Contact Principal",
+          workEmail: "Adresse E-mail Professionnelle",
+          seats: "��chelle de déploiement (Sièges)",
+          vpnStatus: "Architecture Réseau Actuelle",
+          consent: "Je demande la comparaison ZTNA et j'accepte d'être contacté par un expert en cybersécurité."
+        },
+        buttons: {
+          continue: "Suivant",
+          back: "Retour",
+          submit: "Générer le Rapport",
+          generating: "Calcul du TCO..."
+        },
+        options: {
+          vpn_active: "Infrastructure VPN Classique",
+          vpn_replacing: "En phase de migration",
+          vpn_none: "Cloud Native / Sans VPN"
+        }
+      },
+      results: {
+        title: "Matrice Comparative Enterprise",
+        subtitle: "Analyse générée pour {{seats}} utilisateurs.",
+        tco_title: "Projection TCO (12 mois)",
+        score: "Score Scout",
+        bsi_qualified: "QUALIFIÉ BSI",
+        export_pdf: "Exporter le Rapport",
+        disclaimer: "Les prix sont des estimations basées sur les tarifs du marché. Les remises d'entreprise ne sont pas incluses."
       }
     }
   }

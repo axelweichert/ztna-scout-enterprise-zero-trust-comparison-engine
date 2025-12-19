@@ -30,7 +30,6 @@ class PricingOverrideEntity extends Entity<PricingOverride> {
   };
 }
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
-  // Public Submission
   app.post('/api/submit', async (c) => {
     try {
       const input = await c.req.json();
@@ -44,8 +43,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
         const currentPricing: PricingModel = {
           ...basePricing,
-          basePricePerMonth: override?.basePricePerMonth ?? basePricing.basePricePerMonth,
-          isQuoteOnly: override?.isQuoteOnly ?? basePricing.isQuoteOnly
+          basePricePerMonth: (override && override.basePricePerMonth > 0) ? override.basePricePerMonth : basePricing.basePricePerMonth,
+          isQuoteOnly: override ? override.isQuoteOnly : basePricing.isQuoteOnly
         };
         const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
         return {
@@ -77,37 +76,54 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await ComparisonEntity.create(c.env, snapshot);
       return ok(c, { id: comparisonId });
     } catch (e) {
-      return bad(c, 'Process error');
+      console.error(e);
+      return bad(c, 'Failed to process infrastructure analysis');
     }
   });
   app.get('/api/comparison/:id', async (c) => {
     const id = c.req.param('id');
     try {
       const comp = new ComparisonEntity(c.env, id);
-      if (!await comp.exists()) return notFound(c);
+      if (!await comp.exists()) return notFound(c, 'Snapshot expired or not found');
       return ok(c, await comp.getState());
     } catch (e) {
-      return bad(c, 'Retrieval error');
+      return bad(c, 'System retrieval error');
     }
   });
-  // Admin Routes
   app.get('/api/admin/leads', async (c) => {
-    const leads = await LeadEntity.list(c.env, null, 100);
-    return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
+    try {
+      const leads = await LeadEntity.list(c.env, null, 1000);
+      return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
+    } catch (e) {
+      return bad(c, 'Lead database inaccessible');
+    }
   });
   app.get('/api/admin/pricing', async (c) => {
-    const data = await Promise.all(vendors.map(async (v) => {
-      const inst = new PricingOverrideEntity(c.env, v.id);
-      if (await inst.exists()) return inst.getState();
-      const base = pricing.find(p => p.vendorId === v.id);
-      return { vendorId: v.id, basePricePerMonth: base?.basePricePerMonth || 0, isQuoteOnly: base?.isQuoteOnly || false, updatedAt: 0 };
-    }));
-    return ok(c, data);
+    try {
+      const data = await Promise.all(vendors.map(async (v) => {
+        const inst = new PricingOverrideEntity(c.env, v.id);
+        if (await inst.exists()) return inst.getState();
+        const base = pricing.find(p => p.vendorId === v.id);
+        return { 
+          vendorId: v.id, 
+          basePricePerMonth: base?.basePricePerMonth || 0, 
+          isQuoteOnly: base?.isQuoteOnly || false, 
+          updatedAt: 0 
+        };
+      }));
+      return ok(c, data);
+    } catch (e) {
+      return bad(c, 'Override catalog offline');
+    }
   });
   app.post('/api/admin/pricing', async (c) => {
-    const update = await c.req.json<PricingOverride>();
-    const inst = new PricingOverrideEntity(c.env, update.vendorId);
-    await inst.save({ ...update, updatedAt: Date.now() });
-    return ok(c, { success: true });
+    try {
+      const update = await c.req.json<PricingOverride>();
+      const inst = new PricingOverrideEntity(c.env, update.vendorId);
+      await inst.save({ ...update, updatedAt: Date.now() });
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Failed to persist market override');
+    }
   });
 }
