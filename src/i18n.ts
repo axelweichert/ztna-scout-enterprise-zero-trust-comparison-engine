@@ -48,13 +48,11 @@ const resources = {
       },
       form: {
         steps: { company: "Entity", requirements: "Architecture", legal: "Compliance" },
-        labels: { companyName: "Entity Name", contactPerson: "Liaison Name", workEmail: "Corporate Email", seats: "Deployment Scale", vpnStatus: "Legacy State" },
+        labels: { companyName: "Entity Name", contactPerson: "Liaison Name", phone: "Phone Number", workEmail: "Corporate Email", seats: "Deployment Scale", vpnStatus: "Legacy State" },
         buttons: { continue: "Proceed", back: "Return", submit: "Verify & Generate", generating: "Processing Analysis..." },
         options: { vpn_active: "Active Legacy VPN", vpn_replacing: "Ongoing Migration", vpn_none: "SDP / Cloud Native" },
         legal: {
-          processing: "I consent to the processing of my corporate data for the purpose of this analysis (Required).",
-          contact: "I consent to professional follow-up by a certified security architect (Required).",
-          marketing: "I would like to receive quarterly security landscape updates (Optional)."
+          disclaimer: "Your data is used exclusively for the generation of this analysis and professional follow-up by certified security architects. No data is shared with third parties. You can object to contact at any time using the link in our verification emails."
         },
         submitted: {
           title: "Verification Sent",
@@ -68,6 +66,12 @@ const resources = {
         tco_title: "12-Month Financial Projection",
         bsi_qualified: "BSI Qualified Provider",
         disclaimer: "Pricing estimates based on market list values. This report does not constitute a binding offer."
+      },
+      optOut: {
+        title: "Objection to Contact",
+        success: "Your preference has been updated. No further professional follow-up will occur for this inquiry.",
+        error: "Invalid or expired link. Please contact support if you wish to update your preferences.",
+        back: "Return to Site"
       }
     }
   },
@@ -85,7 +89,7 @@ const resources = {
           badge: "B2B Analyse Engine",
           title1: "Enterprise Security",
           title2: "Vergleich neu gedacht",
-          description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
+          description: "Schluss mit Sch��tzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen"
         },
@@ -110,10 +114,9 @@ const resources = {
       },
       form: {
         steps: { company: "Unternehmen", requirements: "Infrastruktur", legal: "Compliance" },
+        labels: { phone: "Telefonnummer" },
         legal: {
-          processing: "Ich stimme der Datenverarbeitung zum Zwecke der Analyse zu (Erforderlich).",
-          contact: "Ich wünsche eine Kontaktaufnahme durch einen Security-Experten (Erforderlich).",
-          marketing: "Ich möchte quartalsweise Sicherheits-Updates erhalten (Optional)."
+          disclaimer: "Ihre Daten werden ausschließlich zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten verwendet. Es erfolgt keine Weitergabe an Dritte. Sie können der Kontaktaufnahme jederzeit über den Link in unseren Bestätigungs-E-Mails widersprechen."
         },
         submitted: {
           title: "E-Mail Bestätigung",
@@ -124,6 +127,12 @@ const resources = {
         title: "Analyse-Ergebnis",
         subtitle: "Enterprise-Vergleich für {{seats}} Benutzer",
         bsi_qualified: "BSI-qualifizierter Anbieter"
+      },
+      optOut: {
+        title: "Widerspruch zur Kontaktaufnahme",
+        success: "Ihre Präferenz wurde aktualisiert. Es erfolgt keine weitere professionelle Kontaktaufnahme zu dieser Anfrage.",
+        error: "Ungültiger oder abgelaufener Link. Bitte kontaktieren Sie den Support.",
+        back: "Zurück zur Website"
       }
     }
   },
@@ -157,12 +166,15 @@ const resources = {
       },
       form: {
         steps: { company: "Entité", requirements: "Architecture", legal: "Conformité" },
+        labels: { phone: "Numéro de téléphone" },
         legal: {
-          processing: "Je consens au traitement de mes données d'entreprise (Obligatoire).",
-          contact: "Je consens à un suivi professionnel par un architecte certifié (Obligatoire).",
-          marketing: "Je souhaite recevoir les mises à jour trimestrielles (Optionnel)."
+          disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes certifiés. Aucune donnée n'est partagée. Vous pouvez vous opposer au contact via le lien dans nos emails."
         },
         options: { vpn_active: "VPN hérité actif", vpn_replacing: "Migration en cours", vpn_none: "Cloud Native" }
+      },
+      optOut: {
+        title: "Opposition au contact",
+        success: "Votre préférence a été mise à jour. Aucun autre suivi ne sera effectué."
       }
     }
   }
