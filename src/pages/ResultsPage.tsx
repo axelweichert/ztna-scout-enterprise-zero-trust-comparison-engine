@@ -52,7 +52,7 @@ export function ResultsPage() {
       <Footer />
     </div>
   );
-  const sortedResults = [...snapshot.results].sort((a, b) => b.scores.totalScore - a.scores.totalScore);
+  const sortedResults = [...snapshot.results].sort((a, b) => (b.scores?.totalScore ?? 0) - (a.scores?.totalScore ?? 0));
   const top3 = sortedResults.slice(0, 3);
   const chartData = sortedResults.map(r => ({
     name: r.vendorName,
@@ -67,9 +67,9 @@ export function ResultsPage() {
     { key: 'hasFWaaS', label: 'Firewall-as-a-Service' },
     { key: 'hasRBI', label: 'Remote Browser Isolation' }
   ];
-  const filteredFeatures = hideSimilar 
+  const filteredFeatures = hideSimilar
     ? featureKeys.filter(fk => {
-        const values = top3.map(v => (v.features as any)[fk.key]);
+        const values = top3.map(v => (v.features as any)?.[fk.key]);
         return !values.every(v => v === values[0]);
       })
     : featureKeys;
@@ -83,7 +83,7 @@ export function ResultsPage() {
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <span className="font-bold text-sm">Top Match:</span>
-            <Badge className="bg-primary text-[10px]">{sortedResults[0].vendorName}</Badge>
+            <Badge className="bg-primary text-[10px]">{sortedResults[0]?.vendorName}</Badge>
           </div>
           <Button size="sm" className="btn-gradient h-8" onClick={() => navigate(`/vergleich/${id}/print`)}>
             <Printer className="mr-2 h-3.5 w-3.5" /> Export PDF
@@ -96,7 +96,7 @@ export function ResultsPage() {
             <h1 className="text-display tracking-tight leading-none">
               {snapshot.isSample ? "Sample Security Analysis" : t('results.title')}
             </h1>
-            <p className="text-xl text-muted-foreground">{t('results.subtitle', { seats: snapshot.inputs.seats })}</p>
+            <p className="text-xl text-muted-foreground">{t('results.subtitle', { seats: snapshot.inputs?.seats })}</p>
           </div>
           <div className="flex gap-4">
             <Button variant="ghost" asChild className="hidden sm:flex h-14 px-8 border">
@@ -123,8 +123,8 @@ export function ResultsPage() {
                   <div className="p-4 bg-muted/30 rounded-xl space-y-1">
                     <p className="text-xs font-bold text-muted-foreground uppercase">Expert Take</p>
                     <p className="text-sm leading-relaxed italic">
-                      {i === 0 ? "Exceptional balance of cost and compliance. Ideal for regulated industries." : 
-                       i === 1 ? "Premium feature set with advanced threat protection. Recommended for high-risk profiles." : 
+                      {i === 0 ? "Exceptional balance of cost and compliance. Ideal for regulated industries." :
+                       i === 1 ? "Premium feature set with advanced threat protection. Recommended for high-risk profiles." :
                        "Scalable architecture with simple implementation paths."}
                     </p>
                   </div>
@@ -160,7 +160,7 @@ export function ResultsPage() {
                     <td className="p-6 font-semibold text-foreground/80">{label}</td>
                     {top3.map(v => (
                       <td key={v.vendorId} className="p-6 text-center">
-                        {(v.features as any)[key] ? (
+                        {(v.features as any)?.[key] ? (
                           <div className="bg-green-100 text-green-700 p-1.5 rounded-full inline-flex"><Check className="h-4 w-4" /></div>
                         ) : (
                           <div className="bg-red-50 text-red-300 p-1.5 rounded-full inline-flex"><X className="h-4 w-4" /></div>
@@ -228,16 +228,16 @@ export function ResultsPage() {
               <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Weighted Analysis</h4>
               <div className="space-y-4">
                 {[
-                  { label: 'Feature Richness (40%)', val: selectedVendor?.scores.featureScore },
-                  { label: 'Price Competitiveness (40%)', val: selectedVendor?.scores.priceScore },
-                  { label: 'Regulatory Compliance (20%)', val: selectedVendor?.scores.complianceScore }
+                  { label: 'Feature Richness (40%)', val: selectedVendor?.scores?.featureScore },
+                  { label: 'Price Competitiveness (40%)', val: selectedVendor?.scores?.priceScore },
+                  { label: 'Regulatory Compliance (20%)', val: selectedVendor?.scores?.complianceScore }
                 ].map((stat, i) => (
                   <div key={i} className="space-y-2">
                     <div className="flex justify-between text-sm font-semibold">
                       <span>{stat.label}</span>
                       <span>{stat.val}/100</span>
                     </div>
-                    <Progress value={stat.val} className="h-2" />
+                    <Progress value={stat.val ?? 0} className="h-2" />
                   </div>
                 ))}
               </div>
@@ -246,7 +246,7 @@ export function ResultsPage() {
               <div className="flex justify-between items-center bg-slate-50 p-6 rounded-2xl border">
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase">Total Score</p>
-                  <p className="text-4xl font-display font-bold text-primary">{selectedVendor?.scores.totalScore}</p>
+                  <p className="text-4xl font-display font-bold text-primary">{selectedVendor?.scores?.totalScore}</p>
                 </div>
                 <Badge variant="outline" className="h-10 px-4 text-lg font-bold">
                   Ranked #{sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1}
