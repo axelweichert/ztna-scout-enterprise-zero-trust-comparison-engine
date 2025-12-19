@@ -1,233 +1,149 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useForm, SubmitHandler } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import Turnstile from 'react-turnstile';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Steps } from '@/components/ui/steps';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { MailCheck, Loader2 } from 'lucide-react';
-import type { LeadFormData, AppConfig } from '@shared/types';
 const leadSchema = z.object({
-  companyName: z.string().min(2, "Required"),
-  contactName: z.string().min(2, "Required"),
-  email: z.string().email("Invalid email"),
-  phone: z.string().min(6, "Invalid phone").regex(/^[0-9+\s\-().]+$/, "Invalid characters"),
-  seats: z.number().min(1, "Minimum 1 seat"),
-  vpnStatus: z.enum(['active', 'replacing', 'none'] as const),
-  timing: z.enum(['immediate', '3_months', '6_months', 'planning'] as const),
-  budgetRange: z.string().min(1, "Required"),
+  companyName: z.string().min(2, "Company name required"),
+  contactName: z.string().min(2, "Contact name required"),
+  email: z.string().email("Invalid email address"),
+  seats: z.coerce.number().min(1, "Minimum 1 seat required"),
+  vpnStatus: z.enum(['active', 'replacing', 'none']),
+  consentGiven: z.boolean().refine(v => v === true, "Consent required")
 });
+type LeadFormData = z.infer<typeof leadSchema>;
 export function LeadFormPage() {
-  const { t } = useTranslation();
   const [step, setStep] = useState(0);
-  const [submitted, setSubmitted] = useState(false);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const form = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
-    defaultValues: {
-      vpnStatus: 'active',
-      seats: 50,
-      companyName: "",
-      contactName: "",
-      email: "",
-      phone: "",
-      timing: 'immediate',
-      budgetRange: 'med'
-    }
+    defaultValues: { vpnStatus: 'active', consentGiven: false }
   });
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const config = await api<AppConfig>('/api/config');
-        setTurnstileSiteKey(config.turnstileSiteKey);
-      } catch (error) {
-        console.error('Failed to fetch config:', error);
-        // Fallback to demo key if config fetch fails
-        setTurnstileSiteKey("1x00000000000000000000AA");
-      }
-    };
-    fetchConfig();
-  }, []);
   const steps = [
-    { title: t('form.steps.company') },
-    { title: t('form.steps.requirements') },
-    { title: t('form.steps.legal') }
+    { title: "Company" },
+    { title: "Requirements" },
+    { title: "Consent" }
   ];
-  const handleFormSubmit: SubmitHandler<LeadFormData> = async (data) => {
-    if (!turnstileToken) {
-      toast.error("Please complete the bot verification.");
-      return;
-    }
-    setIsProcessing(true);
+  const onSubmit = async (data: LeadFormData) => {
     try {
-      await api('/api/submit', {
+      const result = await api<{ id: string }>('/api/submit', {
         method: 'POST',
-        body: JSON.stringify({ ...data, turnstileToken })
+        body: JSON.stringify(data)
       });
-      setSubmitted(true);
+      toast.success("Comparison generated!");
+      navigate(`/vergleich/${result.id}`);
     } catch (e) {
-      toast.error("Submission failed. Please check your data and try again.");
-    } finally {
-      setIsProcessing(false);
+      toast.error("Failed to submit form. Please try again.");
     }
   };
   const nextStep = async () => {
-    const fields = step === 0
-      ? ['companyName', 'contactName', 'email', 'phone']
-      : ['seats', 'vpnStatus', 'timing', 'budgetRange'];
+    const fields = step === 0 ? ['companyName', 'contactName', 'email'] : ['seats', 'vpnStatus'];
     const isValid = await form.trigger(fields as any);
     if (isValid) setStep(s => s + 1);
   };
-  if (submitted) return (
-    <div className="min-h-screen flex flex-col bg-slate-50">
-      <Header />
-      <main className="flex-1 flex items-center justify-center p-4">
-        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full">
-          <Card className="text-center p-12 shadow-2xl border-none bg-white rounded-3xl">
-            <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
-              <MailCheck className="w-10 h-10 text-primary" />
-            </div>
-            <h2 className="text-3xl font-display font-bold mb-4">{t('form.submitted.title')}</h2>
-            <p className="text-muted-foreground mb-8 leading-relaxed">{t('form.submitted.desc')}</p>
-            <Button className="w-full btn-gradient py-6" onClick={() => navigate('/')}>Return Home</Button>
-          </Card>
-        </motion.div>
-      </main>
-      <Footer />
-    </div>
-  );
   return (
-    <div className="min-h-screen flex flex-col bg-background">
-      <Header />
-      <main className="flex-1 max-w-7xl mx-auto px-4 py-12 md:py-20 w-full">
-        <div className="max-w-2xl mx-auto">
-          <Steps steps={steps} currentStep={step} className="mb-16" />
-          <Card className="shadow-2xl border-primary/5 bg-white/80 backdrop-blur-xl rounded-3xl overflow-hidden">
-            <CardHeader className="pt-10 px-8 text-center border-b bg-slate-50/50">
-              <CardTitle className="text-2xl font-display">{steps[step].title}</CardTitle>
-            </CardHeader>
-            <CardContent className="p-8">
-              <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-8">
-                <AnimatePresence mode="wait">
-                  {step === 0 && (
-                    <motion.div key="s0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                      <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.companyName')}</Label>
-                        <Input {...form.register('companyName')} className="h-14 rounded-xl" placeholder="Global Corp" />
-                        {form.formState.errors.companyName && <p className="text-xs text-destructive">{form.formState.errors.companyName.message}</p>}
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.contactPerson')}</Label>
-                          <Input {...form.register('contactName')} className="h-14 rounded-xl" placeholder="Jane Doe" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.phone')}</Label>
-                          <Input {...form.register('phone')} type="tel" className="h-14 rounded-xl" placeholder="+49 521 1234567" />
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.workEmail')}</Label>
-                        <Input {...form.register('email')} type="email" className="h-14 rounded-xl" placeholder="jane.doe@company.com" />
-                      </div>
-                      <Button type="button" className="w-full btn-gradient py-7 text-lg shadow-lg rounded-xl" onClick={nextStep}>{t('form.buttons.continue')}</Button>
-                    </motion.div>
-                  )}
-                  {step === 1 && (
-                    <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.seats')}</Label>
-                          <Input {...form.register('seats', { valueAsNumber: true })} type="number" className="h-14 rounded-xl" />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.budgetRange')}</Label>
-                          <select {...form.register('budgetRange')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
-                            <option value="low">{t('form.options.budget_low')}</option>
-                            <option value="med">{t('form.options.budget_med')}</option>
-                            <option value="high">{t('form.options.budget_high')}</option>
-                            <option value="enterprise">{t('form.options.budget_enterprise')}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.vpnStatus')}</Label>
-                          <select {...form.register('vpnStatus')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
-                            <option value="active">{t('form.options.vpn_active')}</option>
-                            <option value="replacing">{t('form.options.vpn_replacing')}</option>
-                            <option value="none">{t('form.options.vpn_none')}</option>
-                          </select>
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.timing')}</Label>
-                          <select {...form.register('timing')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
-                            <option value="immediate">{t('form.options.timing_immediate')}</option>
-                            <option value="3_months">{t('form.options.timing_3m')}</option>
-                            <option value="6_months">{t('form.options.timing_6m')}</option>
-                            <option value="planning">{t('form.options.timing_planning')}</option>
-                          </select>
-                        </div>
-                      </div>
-                      <div className="flex gap-4 pt-4">
-                        <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(0)}>{t('form.buttons.back')}</Button>
-                        <Button type="button" className="flex-1 btn-gradient py-7 shadow-lg" onClick={nextStep}>{t('form.buttons.continue')}</Button>
-                      </div>
-                    </motion.div>
-                  )}
-                  {step === 2 && (
-                    <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                      <div className="p-6 border rounded-2xl bg-slate-50/50 space-y-4">
-                        <h4 className="font-bold text-sm uppercase tracking-wider">{t('form.steps.legal')}</h4>
-                        <p className="text-sm leading-relaxed text-muted-foreground italic">
-                          {t('form.legal.disclaimer')}
-                        </p>
-                      </div>
-                      <div className="flex justify-center py-4">
-                        {turnstileSiteKey ? (
-                          <Turnstile
-                            sitekey={turnstileSiteKey}
-                            onVerify={(token) => setTurnstileToken(token)}
-                          />
-                        ) : (
-                          <div className="h-[65px] flex items-center justify-center">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                          </div>
-                        )}
-                      </div>
-                      <div className="flex gap-4">
-                        <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(1)} disabled={isProcessing}>{t('form.buttons.back')}</Button>
-                        <Button type="submit" className="flex-1 btn-gradient py-7 shadow-xl" disabled={isProcessing || !turnstileSiteKey}>
-                          {isProcessing ? (
-                            <>
-                              <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                              {t('form.buttons.generating')}
-                            </>
-                          ) : t('form.buttons.submit')}
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </form>
-            </CardContent>
-          </Card>
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-10 lg:py-12">
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-10 space-y-4">
+          <h1 className="text-4xl font-display font-bold text-gradient">ZTNA Scout</h1>
+          <p className="text-muted-foreground">Find the best Zero Trust solution for your enterprise.</p>
         </div>
-      </main>
-      <Footer />
+        <Steps steps={steps} currentStep={step} />
+        <Card className="mt-8 shadow-soft border-primary/5">
+          <CardHeader>
+            <CardTitle>{steps[step].title}</CardTitle>
+            <CardDescription>Please provide your details for the personalized comparison.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+              <AnimatePresence mode="wait">
+                {step === 0 && (
+                  <motion.div
+                    key="step0"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-2">
+                      <Label>Company Name</Label>
+                      <Input {...form.register('companyName')} placeholder="Acme Corp" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Contact Name</Label>
+                      <Input {...form.register('contactName')} placeholder="Jane Doe" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Business Email</Label>
+                      <Input {...form.register('email')} type="email" placeholder="jane@acme.com" />
+                    </div>
+                    <Button type="button" className="w-full btn-gradient" onClick={nextStep}>Continue</Button>
+                  </motion.div>
+                )}
+                {step === 1 && (
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-4"
+                  >
+                    <div className="space-y-2">
+                      <Label>Number of Seats</Label>
+                      <Input {...form.register('seats')} type="number" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label>Current VPN Status</Label>
+                      <select {...form.register('vpnStatus')} className="w-full flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+                        <option value="active">Using Legacy VPN</option>
+                        <option value="replacing">Looking to Replace VPN</option>
+                        <option value="none">Cloud Native / No VPN</option>
+                      </select>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(0)}>Back</Button>
+                      <Button type="button" className="flex-1 btn-gradient" onClick={nextStep}>Continue</Button>
+                    </div>
+                  </motion.div>
+                )}
+                {step === 2 && (
+                  <motion.div
+                    key="step2"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    className="space-y-6"
+                  >
+                    <div className="flex items-start space-x-3 bg-muted/30 p-4 rounded-lg">
+                      <Checkbox 
+                        id="consent" 
+                        onCheckedChange={(checked) => form.setValue('consentGiven', checked === true)} 
+                        checked={form.watch('consentGiven')}
+                      />
+                      <Label htmlFor="consent" className="text-sm leading-tight cursor-pointer">
+                        I agree to the privacy policy and consent to being contacted by ZTNA experts for a free consultation.
+                      </Label>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button type="button" variant="outline" className="flex-1" onClick={() => setStep(1)}>Back</Button>
+                      <Button type="submit" className="flex-1 btn-gradient">Get Comparison</Button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
