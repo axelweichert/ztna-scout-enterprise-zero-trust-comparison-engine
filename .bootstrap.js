@@ -82,7 +82,8 @@ function runSetupCommands() {
     "bun add react-i18next@^15.0.2",
     "bun add i18next-browser-languagedetector@^8.0.0",
     "bun add i18next react-i18next i18next-browser-languagedetector",
-    "bun add i18next-browser-languagedetector"
+    "bun add i18next-browser-languagedetector",
+    "bun add react-turnstile"
 ];
     
     if (commands.length === 0) {
