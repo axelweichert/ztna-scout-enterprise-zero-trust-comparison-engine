@@ -1,10 +1,9 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { ok, bad, notFound } from './core-utils';
-import { IndexedEntity } from "./core-utils";
-import type { Lead, ComparisonSnapshot, ComparisonResult, PricingModel, FeatureMatrix } from "@shared/types";
+import { IndexedEntity, Entity } from "./core-utils";
+import type { Lead, ComparisonSnapshot, ComparisonResult, PricingModel, FeatureMatrix, PricingOverride } from "@shared/types";
 import { calculateTCO, calculateScores } from "../src/lib/calculator";
-// Data Imports (In a real worker we would fetch these or bundle them)
 import vendors from "../data/vendors.json";
 import features from "../data/features.json";
 import pricing from "../data/pricing.json";
@@ -24,32 +23,39 @@ class ComparisonEntity extends IndexedEntity<ComparisonSnapshot> {
     id: "", leadId: "", results: [], inputs: { seats: 0, vpnStatus: 'none' }, createdAt: 0
   };
 }
+class PricingOverrideEntity extends Entity<PricingOverride> {
+  static readonly entityName = "pricing-override";
+  static readonly initialState: PricingOverride = {
+    vendorId: "", basePricePerMonth: 0, isQuoteOnly: false, updatedAt: 0
+  };
+}
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
+  // Public Submission
   app.post('/api/submit', async (c) => {
     try {
       const input = await c.req.json();
-      // 1. Create Lead in DO
       const leadId = crypto.randomUUID();
-      const lead: Lead = {
-        ...input,
-        id: leadId,
-        createdAt: Date.now()
-      };
+      const lead: Lead = { ...input, id: leadId, createdAt: Date.now() };
       await LeadEntity.create(c.env, lead);
-      // 2. Run Calculations
       const seats = lead.seats;
-      // First, get all TCOs to find min/max for normalization
-      const allVendorResults = vendors.map(v => {
-        const vendorPricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
-        const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
-        return { 
-          id: v.id, 
-          name: v.name, 
-          pricing: vendorPricing, 
-          features: vendorFeatures,
-          tco: calculateTCO(seats, vendorPricing)
+      const allVendorResults = await Promise.all(vendors.map(async (v) => {
+        const overrideInst = new PricingOverrideEntity(c.env, v.id);
+        const override = await overrideInst.exists() ? await overrideInst.getState() : null;
+        const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
+        const currentPricing: PricingModel = {
+          ...basePricing,
+          basePricePerMonth: override?.basePricePerMonth ?? basePricing.basePricePerMonth,
+          isQuoteOnly: override?.isQuoteOnly ?? basePricing.isQuoteOnly
         };
-      });
+        const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
+        return {
+          id: v.id,
+          name: v.name,
+          pricing: currentPricing,
+          features: vendorFeatures,
+          tco: calculateTCO(seats, currentPricing)
+        };
+      }));
       const tcos = allVendorResults.map(r => r.tco);
       const maxTco = Math.max(...tcos);
       const minTco = Math.min(...tcos);
@@ -60,7 +66,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         scores: calculateScores(r.features, r.tco, maxTco, minTco),
         features: r.features
       }));
-      // 3. Store Comparison Snapshot
       const comparisonId = crypto.randomUUID();
       const snapshot: ComparisonSnapshot = {
         id: comparisonId,
@@ -72,21 +77,37 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await ComparisonEntity.create(c.env, snapshot);
       return ok(c, { id: comparisonId });
     } catch (e) {
-      console.error('Submit Error:', e);
-      return bad(c, 'Failed to process lead');
+      return bad(c, 'Process error');
     }
   });
   app.get('/api/comparison/:id', async (c) => {
     const id = c.req.param('id');
     try {
       const comp = new ComparisonEntity(c.env, id);
-      if (!await comp.exists()) {
-        return notFound(c, 'Comparison not found');
-      }
-      const data = await comp.getState();
-      return ok(c, data);
+      if (!await comp.exists()) return notFound(c);
+      return ok(c, await comp.getState());
     } catch (e) {
-      return bad(c, 'Error retrieving comparison');
+      return bad(c, 'Retrieval error');
     }
+  });
+  // Admin Routes
+  app.get('/api/admin/leads', async (c) => {
+    const leads = await LeadEntity.list(c.env, null, 100);
+    return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
+  });
+  app.get('/api/admin/pricing', async (c) => {
+    const data = await Promise.all(vendors.map(async (v) => {
+      const inst = new PricingOverrideEntity(c.env, v.id);
+      if (await inst.exists()) return inst.getState();
+      const base = pricing.find(p => p.vendorId === v.id);
+      return { vendorId: v.id, basePricePerMonth: base?.basePricePerMonth || 0, isQuoteOnly: base?.isQuoteOnly || false, updatedAt: 0 };
+    }));
+    return ok(c, data);
+  });
+  app.post('/api/admin/pricing', async (c) => {
+    const update = await c.req.json<PricingOverride>();
+    const inst = new PricingOverrideEntity(c.env, update.vendorId);
+    await inst.save({ ...update, updatedAt: Date.now() });
+    return ok(c, { success: true });
   });
 }
