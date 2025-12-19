@@ -53,6 +53,24 @@ export function AdminPage() {
       toast.success("Market positioning updated");
     }
   });
+  const handleExportCSV = async () => {
+    try {
+      const response = await fetch('/api/admin/leads/export');
+      if (!response.ok) throw new Error('Export failed');
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ztna_scout_leads_${format(new Date(), 'yyyy-MM-dd')}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success("CSV Export generated with UTF-8 encoding");
+    } catch (err) {
+      toast.error("Failed to generate export");
+    }
+  };
   const filteredLeads = leads?.filter(l => !hideOptOuts || l.contactAllowed) || [];
   if (!isAuthenticated) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -87,7 +105,9 @@ export function AdminPage() {
               <Switch checked={hideOptOuts} onCheckedChange={setHideOptOuts} />
               <Label className="text-xs font-bold whitespace-nowrap">Filter Opt-Outs</Label>
             </div>
-            <Button variant="outline" className="h-12 border-2"><Download className="mr-2 w-4 h-4" /> Reports</Button>
+            <Button onClick={handleExportCSV} variant="outline" className="h-12 border-2">
+              <Download className="mr-2 w-4 h-4" /> Reports
+            </Button>
           </div>
         </header>
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6">

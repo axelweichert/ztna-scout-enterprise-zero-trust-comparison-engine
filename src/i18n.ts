@@ -41,7 +41,7 @@ const resources = {
         faq: {
           title: "Strategic Insights",
           q1: "Is the data up to date?",
-          a1: `Our research team verifies pricing and feature matrixes quarterly. {{freshness}}`,
+          a1: "Our research team verifies pricing and feature matrixes quarterly. {{freshness}}",
           q2: "Why Cloudflare focused?",
           a2: "As a premier security architecture firm, we believe Cloudflare offers the most robust BSI-qualified ZTNA platform today.",
           q3: "Are the prices final?",
@@ -96,7 +96,7 @@ const resources = {
           badge: "B2B Analyse Engine",
           title1: "Enterprise Security",
           title2: "Vergleich neu gedacht",
-          description: "Schluss mit Sch��tzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
+          description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen"
         },
@@ -110,7 +110,7 @@ const resources = {
         faq: {
           title: "Strategische Einblicke",
           q1: "Sind die Daten aktuell?",
-          a1: `Unser Research-Team prüft Preise und Features quartalsweise. {{freshness}}`,
+          a1: "Unser Research-Team prüft Preise und Features quartalsweise. {{freshness}}",
           q2: "Warum Cloudflare?",
           a2: "Cloudflare bietet derzeit die am stärksten BSI-qualifizierte ZTNA-Plattform am Markt.",
           q3: "Sind die Preise fix?",
@@ -167,7 +167,7 @@ const resources = {
         faq: {
           title: "Perspectives stratégiques",
           q1: "Les données sont-elles à jour ?",
-          a1: "Notre équipe vérifie les prix chaque trimestre. Dernière mise à jour : mai 2024.",
+          a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}",
           q2: "Pourquoi Cloudflare ?",
           a2: "Cloudflare propose actuellement la plateforme ZTNA la plus robuste et qualifiée BSI.",
           q4: "Mes données sont-elles en sécurité ?",
