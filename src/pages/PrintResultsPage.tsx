@@ -35,10 +35,11 @@ export function PrintResultsPage() {
         <div className="flex justify-between items-end border-b-2 border-black pb-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold uppercase tracking-tighter">ZTNA Scout Report</h1>
-            <p className="text-sm text-gray-600">Enterprise Security Comparison Matrix</p>
+            <p className="text-sm text-gray-600">Enterprise Security Comparison Matrix - {t('common.data_freshness')}</p>
           </div>
           <div className="text-right text-xs">
             <p>Generated: {format(snapshot.createdAt, 'PPP')}</p>
+            <p className="font-bold">{t('common.data_freshness')}</p>
             <p>ID: {snapshot.id.slice(0, 8)}</p>
           </div>
         </div>
