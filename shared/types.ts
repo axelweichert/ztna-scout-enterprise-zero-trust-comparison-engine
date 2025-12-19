@@ -12,7 +12,7 @@ export interface Lead {
   email: string;
   seats: number;
   vpnStatus: VpnStatus;
-  budgetRange: string;
+  budgetRange?: string;
   timing: Timing;
   consentGiven: boolean;
   createdAt: number;

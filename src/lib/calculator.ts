@@ -27,15 +27,17 @@ export function calculateScores(
   if (features.hasFWaaS) featureScore += featureWeight.hasFWaaS;
   if (features.hasRBI) featureScore += featureWeight.hasRBI;
   // Price Score (0-100, lower TCO is better)
-  const priceScore = maxTco === minTco ? 100 : Math.max(0, 100 * (1 - (tco - minTco) / (maxTco - minTco)));
+  // Inverse linear normalization
+  const range = maxTco - minTco;
+  const priceScore = range === 0 ? 100 : Math.max(0, 100 * (1 - (tco - minTco) / range));
   // Compliance Score (0 or 100 based on BSI)
   const complianceScore = features.isBSIQualified ? 100 : 0;
-  // Total Score (Weighted)
+  // Total Score (Weighted: 40% Features, 40% Price, 20% Compliance)
   const totalScore = (featureScore * 0.4) + (priceScore * 0.4) + (complianceScore * 0.2);
   return {
-    featureScore,
-    priceScore,
-    complianceScore,
+    featureScore: Math.round(featureScore),
+    priceScore: Math.round(priceScore),
+    complianceScore: Math.round(complianceScore),
     totalScore: Math.round(totalScore)
   };
 }
