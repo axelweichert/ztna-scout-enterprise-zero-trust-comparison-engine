@@ -3,7 +3,7 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
-// Template Demo Types (Restored to fix build errors)
+// Template Demo Types
 export interface User {
   id: string;
   name: string;
@@ -22,6 +22,16 @@ export interface ChatMessage {
 // ZTNA Scout Types
 export type VpnStatus = 'active' | 'replacing' | 'none';
 export type Timing = 'immediate' | '3_months' | '6_months' | 'planning';
+export type LeadStatus = 'pending' | 'confirmed' | 'deleted';
+export interface ConsentRecord {
+  ipHash: string;
+  userAgent: string;
+  timestamp: number;
+  acceptedTextVersion: string;
+  processingAccepted: boolean;
+  followUpAccepted: boolean;
+  marketingAccepted: boolean;
+}
 export interface Lead {
   id: string;
   companyName: string;
@@ -33,6 +43,16 @@ export interface Lead {
   timing: Timing;
   consentGiven: boolean;
   createdAt: number;
+  status: LeadStatus;
+  confirmedAt?: number;
+  marketingOptIn: boolean;
+  consentRecord?: ConsentRecord;
+}
+export interface VerificationToken {
+  hash: string;
+  leadId: string;
+  expiresAt: number;
+  usedAt?: number;
 }
 export interface Vendor {
   id: string;
@@ -52,9 +72,9 @@ export interface FeatureMatrix {
 }
 export interface PricingModel {
   vendorId: string;
-  basePricePerMonth: number; // in EUR
+  basePricePerMonth: number;
   isQuoteOnly: boolean;
-  installationFee: number; // default 4000
+  installationFee: number;
 }
 export interface PricingOverride {
   vendorId: string;
@@ -67,10 +87,10 @@ export interface ComparisonResult {
   vendorName: string;
   tcoYear1: number;
   scores: {
-    featureScore: number; // 0-100
-    priceScore: number;   // 0-100
-    complianceScore: number; // 0-100
-    totalScore: number;   // Weighted average
+    featureScore: number;
+    priceScore: number;
+    complianceScore: number;
+    totalScore: number;
   };
   features: FeatureMatrix;
 }
@@ -86,6 +106,9 @@ export interface ComparisonSnapshot {
 }
 export interface AdminStats {
   totalLeads: number;
-  totalComparisons: number;
-  recentLeads: Lead[];
+  pendingLeads: number;
+  confirmedLeads: number;
+  conversionRate: number;
+  avgSeats: number;
+  mostCommonVpn: string;
 }
