@@ -6,34 +6,24 @@ import { api } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { useTranslation } from 'react-i18next';
 export function VerifyPage() {
   const { token } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [comparisonId, setComparisonId] = useState<string | null>(null);
   useEffect(() => {
-    let timer: NodeJS.Timeout;
     const verifyToken = async () => {
       try {
         const res = await api<{ comparisonId: string }>(`/api/verify/${token}`);
         setComparisonId(res.comparisonId);
         setStatus('success');
         // Auto-redirect after 3 seconds
-        timer = setTimeout(() => navigate(`/vergleich/${res.comparisonId}`), 3000);
+        setTimeout(() => navigate(`/vergleich/${res.comparisonId}`), 3000);
       } catch (e) {
         setStatus('error');
       }
     };
-    if (token) {
-      verifyToken();
-    } else {
-      setStatus('error');
-    }
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
+    if (token) verifyToken();
   }, [token, navigate]);
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
@@ -47,18 +37,17 @@ export function VerifyPage() {
           {status === 'loading' && (
             <div className="space-y-6">
               <Loader2 className="w-16 h-16 text-primary animate-spin mx-auto" />
-              <h2 className="text-2xl font-display font-bold">{t('verify.loading')}</h2>
+              <h2 className="text-2xl font-display font-bold">Verifying your request...</h2>
+              <p className="text-muted-foreground">This will only take a moment.</p>
             </div>
           )}
           {status === 'success' && (
             <div className="space-y-6">
               <CheckCircle2 className="w-16 h-16 text-green-500 mx-auto" />
-              <h2 className="text-2xl font-display font-bold">{t('verify.success')}</h2>
-              <p className="text-muted-foreground">
-                {t('verify.success_desc', { id: comparisonId?.slice(0, 8) })}
-              </p>
+              <h2 className="text-2xl font-display font-bold">Identity Verified!</h2>
+              <p className="text-muted-foreground">Your enterprise analysis is ready. Redirecting you now...</p>
               <Button onClick={() => navigate(`/vergleich/${comparisonId}`)} className="btn-gradient w-full py-6 mt-4 group">
-                {t('optOut.back')}
+                Go to Results
                 <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </Button>
             </div>
@@ -66,10 +55,10 @@ export function VerifyPage() {
           {status === 'error' && (
             <div className="space-y-6">
               <XCircle className="w-16 h-16 text-red-500 mx-auto" />
-              <h2 className="text-2xl font-display font-bold">{t('verify.error')}</h2>
-              <p className="text-muted-foreground">{t('verify.error_desc')}</p>
+              <h2 className="text-2xl font-display font-bold">Verification Failed</h2>
+              <p className="text-muted-foreground">The link may have expired or is invalid. Please start a new comparison.</p>
               <Button onClick={() => navigate('/')} variant="outline" className="w-full py-6 mt-4">
-                {t('optOut.back')}
+                Back to Start
               </Button>
             </div>
           )}
