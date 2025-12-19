@@ -33,15 +33,14 @@ export interface ConsentRecord {
   userAgent: string;
   timestamp: number;
   acceptedTextVersion: string;
-  processingAccepted: boolean;
-  followUpAccepted: boolean;
-  marketingAccepted: boolean;
+  disclaimerAccepted: boolean;
 }
 export interface Lead {
   id: string;
   companyName: string;
   contactName: string;
   email: string;
+  phone: string;
   seats: number;
   vpnStatus: VpnStatus;
   budgetRange?: string;
@@ -50,14 +49,28 @@ export interface Lead {
   createdAt: number;
   status: LeadStatus;
   confirmedAt?: number;
-  marketingOptIn: boolean;
+  contactAllowed: boolean;
+  optedOutAt?: number;
   consentRecord?: ConsentRecord;
+}
+export interface LeadFormData {
+  companyName: string;
+  contactName: string;
+  email: string;
+  phone: string;
+  seats: number;
+  vpnStatus: VpnStatus;
 }
 export interface VerificationToken {
   hash: string;
   leadId: string;
   expiresAt: number;
   usedAt?: number;
+}
+export interface OptOutToken {
+  hash: string;
+  leadId: string;
+  createdAt: number;
 }
 export interface Vendor {
   id: string;

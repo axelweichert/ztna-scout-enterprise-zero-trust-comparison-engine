@@ -17,6 +17,7 @@ import { AdminPage } from '@/pages/AdminPage';
 import { PrintResultsPage } from '@/pages/PrintResultsPage';
 import { VerifyPage } from '@/pages/VerifyPage';
 import { LegalPage } from '@/pages/LegalPage';
+import { OptOutPage } from '@/pages/OptOutPage';
 import { Toaster } from '@/components/ui/sonner';
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5 } },
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
   { path: "/vergleich/:id", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/vergleich/:id/print", element: <PrintResultsPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/verify/:token", element: <VerifyPage />, errorElement: <RouteErrorBoundary /> },
+  { path: "/opt-out", element: <OptOutPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/admin", element: <AdminPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/impressum", element: <LegalPage type="imprint" />, errorElement: <RouteErrorBoundary /> },
   { path: "/datenschutz", element: <LegalPage type="privacy" />, errorElement: <RouteErrorBoundary /> },
