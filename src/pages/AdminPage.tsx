@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api-client';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -16,6 +16,7 @@ import { Download, Shield, Trash2, ShieldCheck, Mail, BarChart3, TrendingUp, His
 import type { Lead, PricingOverride, AdminStats } from '@shared/types';
 import { format } from 'date-fns';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { cn } from "@/lib/utils";
 export function AdminPage() {
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
