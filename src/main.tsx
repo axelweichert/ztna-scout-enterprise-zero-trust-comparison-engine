@@ -1,4 +1,5 @@
 import '@/lib/errorReporter';
+import './i18n';
 import { enableMapSet } from "immer";
 enableMapSet();
 import { StrictMode } from 'react'
@@ -13,12 +14,14 @@ import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css'
 import { LeadFormPage } from '@/pages/LeadFormPage';
 import { ResultsPage } from '@/pages/ResultsPage';
+import { AdminPage } from '@/pages/AdminPage';
+import { PrintResultsPage } from '@/pages/PrintResultsPage';
 import { Toaster } from '@/components/ui/sonner';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      staleTime: 1000 * 60 * 5,
     },
   },
 });
@@ -31,6 +34,16 @@ const router = createBrowserRouter([
   {
     path: "/vergleich/:id",
     element: <ResultsPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/vergleich/:id/print",
+    element: <PrintResultsPage />,
+    errorElement: <RouteErrorBoundary />,
+  },
+  {
+    path: "/admin",
+    element: <AdminPage />,
     errorElement: <RouteErrorBoundary />,
   },
 ]);

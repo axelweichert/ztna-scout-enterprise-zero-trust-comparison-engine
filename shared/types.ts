@@ -3,6 +3,23 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
+// Template Demo Types (Restored to fix build errors)
+export interface User {
+  id: string;
+  name: string;
+}
+export interface Chat {
+  id: string;
+  title: string;
+}
+export interface ChatMessage {
+  id: string;
+  chatId: string;
+  userId: string;
+  text: string;
+  ts: number;
+}
+// ZTNA Scout Types
 export type VpnStatus = 'active' | 'replacing' | 'none';
 export type Timing = 'immediate' | '3_months' | '6_months' | 'planning';
 export interface Lead {
@@ -39,6 +56,12 @@ export interface PricingModel {
   isQuoteOnly: boolean;
   installationFee: number; // default 4000
 }
+export interface PricingOverride {
+  vendorId: string;
+  basePricePerMonth: number;
+  isQuoteOnly: boolean;
+  updatedAt: number;
+}
 export interface ComparisonResult {
   vendorId: string;
   vendorName: string;
@@ -60,4 +83,9 @@ export interface ComparisonSnapshot {
     vpnStatus: VpnStatus;
   };
   createdAt: number;
+}
+export interface AdminStats {
+  totalLeads: number;
+  totalComparisons: number;
+  recentLeads: Lead[];
 }
