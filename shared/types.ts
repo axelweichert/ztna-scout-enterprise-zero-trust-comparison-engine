@@ -23,6 +23,11 @@ export interface ChatMessage {
 export type VpnStatus = 'active' | 'replacing' | 'none';
 export type Timing = 'immediate' | '3_months' | '6_months' | 'planning';
 export type LeadStatus = 'pending' | 'confirmed' | 'deleted';
+export interface TimeSeriesData {
+  date: string;
+  pending: number;
+  confirmed: number;
+}
 export interface ConsentRecord {
   ipHash: string;
   userAgent: string;
@@ -103,6 +108,7 @@ export interface ComparisonSnapshot {
     vpnStatus: VpnStatus;
   };
   createdAt: number;
+  isSample?: boolean;
 }
 export interface AdminStats {
   totalLeads: number;
@@ -111,4 +117,5 @@ export interface AdminStats {
   conversionRate: number;
   avgSeats: number;
   mostCommonVpn: string;
+  dailyLeads: TimeSeriesData[];
 }
