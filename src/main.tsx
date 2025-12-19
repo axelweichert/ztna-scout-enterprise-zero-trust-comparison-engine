@@ -14,7 +14,14 @@ import '@/index.css'
 import { LeadFormPage } from '@/pages/LeadFormPage';
 import { ResultsPage } from '@/pages/ResultsPage';
 import { Toaster } from '@/components/ui/sonner';
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      staleTime: 1000 * 60 * 5, // 5 minutes
+    },
+  },
+});
 const router = createBrowserRouter([
   {
     path: "/",
@@ -32,7 +39,7 @@ createRoot(document.getElementById('root')!).render(
     <QueryClientProvider client={queryClient}>
       <ErrorBoundary>
         <RouterProvider router={router} />
-        <Toaster richColors />
+        <Toaster richColors position="top-center" closeButton />
       </ErrorBoundary>
     </QueryClientProvider>
   </StrictMode>,

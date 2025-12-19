@@ -1,4 +1,7 @@
 [
   { "vendorId": "cloudflare", "url": "https://www.cloudflare.com/bsi", "verifiedAt": "2024-05-01" },
-  { "vendorId": "zscaler", "url": "https://www.zscaler.com/pricing", "verifiedAt": "2024-04-15" }
+  { "vendorId": "zscaler", "url": "https://www.zscaler.com/pricing", "verifiedAt": "2024-04-15" },
+  { "vendorId": "akamai", "url": "https://www.akamai.com/products/security", "verifiedAt": "2024-04-20" },
+  { "vendorId": "paloalto", "url": "https://www.paloaltonetworks.com/prisma/access", "verifiedAt": "2024-04-10" },
+  { "vendorId": "netskope", "url": "https://www.netskope.com/products/ztna", "verifiedAt": "2024-04-05" }
 ]
