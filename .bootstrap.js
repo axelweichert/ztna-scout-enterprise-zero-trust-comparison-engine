@@ -80,7 +80,8 @@ function runSetupCommands() {
     const commands = [
     "bun add i18next@^23.16.0",
     "bun add react-i18next@^15.0.2",
-    "bun add i18next-browser-languagedetector@^8.0.0"
+    "bun add i18next-browser-languagedetector@^8.0.0",
+    "bun add i18next react-i18next i18next-browser-languagedetector"
 ];
     
     if (commands.length === 0) {
