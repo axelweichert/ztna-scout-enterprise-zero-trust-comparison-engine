@@ -56,6 +56,14 @@ async function verifyTurnstile(token: string, secret: string) {
   return outcome.success;
 }
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
+  // UTF-8 middleware for all API routes
+  app.use('/api/*', async (c, next) => {
+    await next();
+    const contentType = c.res.headers.get('Content-Type');
+    if (contentType && !contentType.includes('charset')) {
+      c.res.headers.set('Content-Type', `${contentType}; charset=utf-8`);
+    }
+  });
   app.post('/api/submit', async (c) => {
     try {
       const { turnstileToken, ...input } = await c.req.json();
@@ -79,20 +87,35 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         }
       };
       await LeadEntity.create(c.env, lead);
-      // Create Verification Token (DOI)
       const token = crypto.randomUUID();
       const tokenEntity = new VerificationTokenEntity(c.env, token);
       await tokenEntity.save({ hash: token, leadId, expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) });
-      // Create Opt-Out Token (Persistent)
       const optOutToken = crypto.randomUUID();
       const optOutEntity = new OptOutTokenEntity(c.env, optOutToken);
       await optOutEntity.save({ hash: optOutToken, leadId, createdAt: Date.now() });
-      console.log(`[DOI EMAIL] (UTF-8) Link: /verify/${token}`);
-      console.log(`[OPT-OUT] (UTF-8) Token: ${optOutToken}`);
-      return c.json({ success: true, data: { leadId, requiresVerification: true } }, 200, { 'Content-Type': 'application/json; charset=utf-8' });
+      console.log(`[DOI EMAIL] Link: /verify/${token}`);
+      console.log(`[OPT-OUT] Token: ${optOutToken}`);
+      return c.json({ success: true, data: { leadId, requiresVerification: true } });
     } catch (e) {
       return bad(c, 'Submission failed');
     }
+  });
+  app.get('/api/admin/leads/export', async (c) => {
+    const leadsRes = await LeadEntity.list(c.env, null, 1000);
+    const leads = leadsRes.items.sort((a, b) => b.createdAt - a.createdAt);
+    // Müller & François validation test cases
+    const header = "ID;Created;Company;Contact;Email;Phone;Seats;Status;ContactAllowed\n";
+    const rows = leads.map(l => {
+      const date = new Date(l.createdAt).toISOString();
+      return `${l.id};${date};${l.companyName};${l.contactName};${l.email};${l.phone};${l.seats};${l.status};${l.contactAllowed}`;
+    }).join("\n");
+    const csvContent = "\uFEFF" + header + rows; // Add BOM for Excel compatibility
+    return new Response(csvContent, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="ztna_scout_leads_export.csv"'
+      }
+    });
   });
   app.post('/api/opt-out', async (c) => {
     const { token } = await c.req.json();
