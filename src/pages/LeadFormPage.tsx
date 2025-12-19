@@ -17,19 +17,14 @@ import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { MailCheck, Loader2 } from 'lucide-react';
-import type { VpnStatus } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),
   contactName: z.string().min(2, "Required"),
   email: z.string().email("Invalid email"),
   seats: z.number().min(1, "Minimum 1 seat"),
   vpnStatus: z.enum(['active', 'replacing', 'none'] as const),
-  processingAccepted: z.literal(true, {
-    errorMap: () => ({ message: "You must accept the terms" })
-  }),
-  followUpAccepted: z.literal(true, {
-    errorMap: () => ({ message: "Follow-up consent required" })
-  }),
+  processingAccepted: z.boolean().refine(v => v === true, { message: "Required" }),
+  followUpAccepted: z.boolean().refine(v => v === true, { message: "Required" }),
   marketingAccepted: z.boolean().default(false)
 });
 type LeadFormData = z.infer<typeof leadSchema>;
@@ -44,8 +39,8 @@ export function LeadFormPage() {
     resolver: zodResolver(leadSchema),
     defaultValues: {
       vpnStatus: 'active',
-      processingAccepted: undefined, // Forces validation
-      followUpAccepted: undefined, // Forces validation
+      processingAccepted: false,
+      followUpAccepted: false,
       marketingAccepted: false,
       seats: 50,
       companyName: "",
@@ -77,8 +72,8 @@ export function LeadFormPage() {
     }
   };
   const nextStep = async () => {
-    const fields = step === 0 
-      ? ['companyName', 'contactName', 'email'] 
+    const fields = step === 0
+      ? ['companyName', 'contactName', 'email']
       : ['seats', 'vpnStatus'];
     const isValid = await form.trigger(fields as any);
     if (isValid) setStep(s => s + 1);
@@ -155,11 +150,11 @@ export function LeadFormPage() {
                     <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                       <div className="space-y-4">
                         <div className="flex items-start gap-4 p-4 border rounded-xl bg-slate-50/50">
-                          <Checkbox id="c1" onCheckedChange={(v) => form.setValue('processingAccepted', v === true as any, { shouldValidate: true })} checked={form.watch('processingAccepted')} className="mt-1" />
+                          <Checkbox id="c1" onCheckedChange={(v) => form.setValue('processingAccepted', v === true, { shouldValidate: true })} checked={form.watch('processingAccepted')} className="mt-1" />
                           <Label htmlFor="c1" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">{t('form.legal.processing')}</Label>
                         </div>
                         <div className="flex items-start gap-4 p-4 border rounded-xl bg-slate-50/50">
-                          <Checkbox id="c2" onCheckedChange={(v) => form.setValue('followUpAccepted', v === true as any, { shouldValidate: true })} checked={form.watch('followUpAccepted')} className="mt-1" />
+                          <Checkbox id="c2" onCheckedChange={(v) => form.setValue('followUpAccepted', v === true, { shouldValidate: true })} checked={form.watch('followUpAccepted')} className="mt-1" />
                           <Label htmlFor="c2" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">{t('form.legal.contact')}</Label>
                         </div>
                         <div className="flex items-start gap-4 p-4 border rounded-xl">

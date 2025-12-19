@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -22,17 +22,21 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Card, CardContent } from '@/components/ui/card';
+const fadeIn: Variants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { 
+      delay: i * 0.1, 
+      duration: 0.6, 
+      ease: [0.22, 1, 0.36, 1] as any
+    }
+  })
+};
 export function HomePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const fadeIn = {
-    hidden: { opacity: 0, y: 30 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: i * 0.1, duration: 0.6, ease: [0.22, 1, 0.36, 1] }
-    })
-  };
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary selection:text-white">
       <Header />
@@ -81,9 +85,9 @@ export function HomePage() {
                 {t('home.hero.cta_primary')}
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
+              <Button
+                size="lg"
+                variant="outline"
                 onClick={() => navigate('/vergleich/sample')}
                 className="h-16 px-12 text-lg rounded-2xl border-2 hover:bg-slate-50 transition-colors gap-2"
               >
@@ -91,7 +95,6 @@ export function HomePage() {
                 {t('home.hero.cta_secondary')}
               </Button>
             </motion.div>
-            {/* Trust Bar */}
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -113,7 +116,6 @@ export function HomePage() {
             </motion.div>
           </div>
         </section>
-        {/* How it Works */}
         <section className="py-32 bg-slate-50/50 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-24">
@@ -144,10 +146,9 @@ export function HomePage() {
             </div>
           </div>
         </section>
-        {/* FAQ Section */}
         <section className="py-32">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
               viewport={{ once: true }}
