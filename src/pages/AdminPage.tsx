@@ -76,7 +76,10 @@ export function AdminPage() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-1">
             <h1 className="text-4xl font-display font-bold tracking-tight">Executive Dashboard</h1>
-            <p className="text-muted-foreground italic">Lead lifecycle and market positioning analytics</p>
+            <div className="flex items-center gap-2">
+              <p className="text-muted-foreground italic">Lead lifecycle and market positioning analytics</p>
+              <Badge variant="outline" className="text-[10px] py-0">{t('common.data_freshness')}</Badge>
+            </div>
           </div>
           <div className="flex gap-3">
             <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-dashed mr-4">

@@ -1,9 +1,13 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
+import appConfig from '../data/app_config.json';
 const resources = {
   en: {
     translation: {
+      common: {
+        data_freshness: appConfig.data_freshness.en
+      },
       layout: {
         header: {
           tooltips: {
@@ -37,7 +41,7 @@ const resources = {
         faq: {
           title: "Strategic Insights",
           q1: "Is the data up to date?",
-          a1: "Our research team verifies pricing and feature matrixes quarterly. Last update: May 2024.",
+          a1: `Our research team verifies pricing and feature matrixes quarterly. {{freshness}}`,
           q2: "Why Cloudflare focused?",
           a2: "As a premier security architecture firm, we believe Cloudflare offers the most robust BSI-qualified ZTNA platform today.",
           q3: "Are the prices final?",
@@ -77,6 +81,9 @@ const resources = {
   },
   de: {
     translation: {
+      common: {
+        data_freshness: appConfig.data_freshness.de
+      },
       layout: {
         footer: {
           imprint: "Impressum",
@@ -103,7 +110,7 @@ const resources = {
         faq: {
           title: "Strategische Einblicke",
           q1: "Sind die Daten aktuell?",
-          a1: "Unser Research-Team prüft Preise und Features quartalsweise. Letztes Update: Mai 2024.",
+          a1: `Unser Research-Team prüft Preise und Features quartalsweise. {{freshness}}`,
           q2: "Warum Cloudflare?",
           a2: "Cloudflare bietet derzeit die am stärksten BSI-qualifizierte ZTNA-Plattform am Markt.",
           q3: "Sind die Preise fix?",
@@ -138,6 +145,9 @@ const resources = {
   },
   fr: {
     translation: {
+      common: {
+        data_freshness: appConfig.data_freshness.fr
+      },
       home: {
         hero: {
           badge: "Moteur d'analyse B2B",

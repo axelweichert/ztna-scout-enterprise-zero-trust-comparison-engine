@@ -173,7 +173,7 @@ export function HomePage() {
                       {t(`home.faq.q${i}`)}
                     </AccordionTrigger>
                     <AccordionContent className="text-muted-foreground text-lg pb-8 leading-relaxed max-w-2xl">
-                      {t(`home.faq.a${i}`)}
+                      {t(`home.faq.a${i}`, { freshness: t('common.data_freshness') })}
                     </AccordionContent>
                   </AccordionItem>
                 </motion.div>

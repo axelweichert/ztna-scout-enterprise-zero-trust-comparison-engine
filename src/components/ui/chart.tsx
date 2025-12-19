@@ -72,7 +72,7 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 const ChartTooltip = RechartsPrimitive.Tooltip
 const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
+  RechartsPrimitive.TooltipProps<any, any> &
     React.ComponentProps<"div"> & {
       hideLabel?: boolean
       hideIndicator?: boolean
@@ -209,7 +209,7 @@ const ChartTooltipContent = React.forwardRef<
     )
   }
 )
-ChartTooltipContent.displayName = "ChartTooltip"
+ChartTooltipContent.displayName = "ChartTooltipContent"
 const ChartLegend = RechartsPrimitive.Legend
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
@@ -220,7 +220,7 @@ const ChartLegendContent = React.forwardRef<
     }
 >(({ className, hideIcon = false, payload, verticalAlign = "bottom", nameKey }, ref) => {
   const { config } = useChart()
-  if (!(payload as any[])?.length) {
+  if (!payload?.length) {
     return null
   }
   return (
@@ -232,7 +232,7 @@ const ChartLegendContent = React.forwardRef<
         className
       )}
     >
-      {(payload as any[]).map((item) => {
+      {payload.map((item: any) => {
         const key = `${nameKey || item.dataKey || "value"}`
         const itemConfig = config[key as keyof typeof config]
         return (
@@ -259,7 +259,7 @@ const ChartLegendContent = React.forwardRef<
     </div>
   )
 })
-ChartLegendContent.displayName = "ChartLegend"
+ChartLegendContent.displayName = "ChartLegendContent"
 export {
   ChartContainer,
   ChartTooltip,
