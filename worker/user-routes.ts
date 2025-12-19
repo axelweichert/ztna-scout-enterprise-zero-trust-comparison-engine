@@ -56,7 +56,6 @@ async function verifyTurnstile(token: string, secret: string) {
   return outcome.success;
 }
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
-  // UTF-8 middleware for all API routes
   app.use('/api/*', async (c, next) => {
     await next();
     const contentType = c.res.headers.get('Content-Type');
@@ -93,51 +92,23 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const optOutToken = crypto.randomUUID();
       const optOutEntity = new OptOutTokenEntity(c.env, optOutToken);
       await optOutEntity.save({ hash: optOutToken, leadId, createdAt: Date.now() });
-      console.log(`[DOI EMAIL] Link: /verify/${token}`);
-      console.log(`[OPT-OUT] Token: ${optOutToken}`);
-      return c.json({ success: true, data: { leadId, requiresVerification: true } });
+      return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
       return bad(c, 'Submission failed');
     }
-  });
-  app.get('/api/admin/leads/export', async (c) => {
-    const leadsRes = await LeadEntity.list(c.env, null, 1000);
-    const leads = leadsRes.items.sort((a, b) => b.createdAt - a.createdAt);
-    // Müller & François validation test cases
-    const header = "ID;Created;Company;Contact;Email;Phone;Seats;Status;ContactAllowed\n";
-    const rows = leads.map(l => {
-      const date = new Date(l.createdAt).toISOString();
-      return `${l.id};${date};${l.companyName};${l.contactName};${l.email};${l.phone};${l.seats};${l.status};${l.contactAllowed}`;
-    }).join("\n");
-    const csvContent = "\uFEFF" + header + rows; // Add BOM for Excel compatibility
-    return new Response(csvContent, {
-      headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': 'attachment; filename="ztna_scout_leads_export.csv"'
-      }
-    });
-  });
-  app.post('/api/opt-out', async (c) => {
-    const { token } = await c.req.json();
-    if (!token) return bad(c, 'Token required');
-    const tokenEntity = new OptOutTokenEntity(c.env, token);
-    if (!await tokenEntity.exists()) return notFound(c, 'Invalid token');
-    const { leadId } = await tokenEntity.getState();
-    const leadInst = new LeadEntity(c.env, leadId);
-    if (!await leadInst.exists()) return notFound(c, 'Lead not found');
-    await leadInst.patch({ contactAllowed: false, optedOutAt: Date.now() });
-    return ok(c, { message: 'Opt-out successful' });
   });
   app.get('/api/verify/:token', async (c) => {
     const token = c.req.param('token');
     const tokenEntity = new VerificationTokenEntity(c.env, token);
     if (!await tokenEntity.exists()) return notFound(c, 'Invalid or expired token');
     const tokenData = await tokenEntity.getState();
-    if (tokenData.usedAt || tokenData.expiresAt < Date.now()) return bad(c, 'Token expired or used');
     const leadEntity = new LeadEntity(c.env, tokenData.leadId);
-    await leadEntity.patch({ status: 'confirmed', confirmedAt: Date.now() });
-    await tokenEntity.patch({ usedAt: Date.now() });
-    const lead = await leadEntity.getState();
+    const leadState = await leadEntity.getState();
+    // Idempotency check: If already confirmed and has comparisonId, return it.
+    if (leadState.status === 'confirmed' && leadState.comparisonId) {
+      return ok(c, { comparisonId: leadState.comparisonId });
+    }
+    if (tokenData.usedAt || tokenData.expiresAt < Date.now()) return bad(c, 'Token expired or used');
     const allVendorResults = await Promise.all(vendors.map(async (v) => {
         const overrideInst = new PricingOverrideEntity(c.env, v.id);
         const override = await overrideInst.exists() ? await overrideInst.getState() : null;
@@ -153,7 +124,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
           name: v.name,
           pricing: currentPricing,
           features: vendorFeatures,
-          tco: calculateTCO(lead.seats, currentPricing)
+          tco: calculateTCO(leadState.seats, currentPricing)
         };
     }));
     const tcos = allVendorResults.map(r => r.tco);
@@ -164,15 +135,18 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       scores: calculateScores(r.features, r.tco, Math.max(...tcos), Math.min(...tcos)),
       features: r.features
     }));
+    const snapshotId = crypto.randomUUID();
     const snapshot: ComparisonSnapshot = {
-      id: crypto.randomUUID(),
-      leadId: lead.id,
+      id: snapshotId,
+      leadId: leadState.id,
       results,
-      inputs: { seats: lead.seats, vpnStatus: lead.vpnStatus },
+      inputs: { seats: leadState.seats, vpnStatus: leadState.vpnStatus },
       createdAt: Date.now()
     };
     await ComparisonEntity.create(c.env, snapshot);
-    return ok(c, { comparisonId: snapshot.id });
+    await leadEntity.patch({ status: 'confirmed', confirmedAt: Date.now(), comparisonId: snapshotId });
+    await tokenEntity.patch({ usedAt: Date.now() });
+    return ok(c, { comparisonId: snapshotId });
   });
   app.get('/api/sample-comparison', async (c) => {
     const seats = 250;
@@ -207,35 +181,26 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const leads = await LeadEntity.list(c.env, null, 1000);
     return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
   });
-  app.get('/api/admin/stats', async (c) => {
+  app.get('/api/admin/leads/export', async (c) => {
     const leadsRes = await LeadEntity.list(c.env, null, 1000);
-    const leads = leadsRes.items;
-    const now = new Date();
-    const dailyLeads: TimeSeriesData[] = Array.from({ length: 30 }).map((_, i) => {
-      const d = new Date();
-      d.setDate(now.getDate() - (29 - i));
-      const dateStr = d.toISOString().split('T')[0];
-      const dayLeads = leads.filter(l => new Date(l.createdAt).toISOString().split('T')[0] === dateStr);
-      return {
-        date: dateStr,
-        pending: dayLeads.filter(l => l.status === 'pending').length,
-        confirmed: dayLeads.filter(l => l.status === 'confirmed').length
-      };
-    });
-    const confirmed = leads.filter(l => l.status === 'confirmed').length;
-    return ok(c, {
-      totalLeads: leads.length,
-      pendingLeads: leads.length - confirmed,
-      confirmedLeads: confirmed,
-      conversionRate: leads.length ? Math.round((confirmed / leads.length) * 100) : 0,
-      avgSeats: leads.length ? Math.round(leads.reduce((acc, l) => acc + l.seats, 0) / leads.length) : 0,
-      mostCommonVpn: "Legacy VPN",
-      dailyLeads
+    const leads = leadsRes.items.sort((a, b) => b.createdAt - a.createdAt);
+    const header = "ID;Created;Company;Contact;Email;Phone;Seats;Status;ContactAllowed\n";
+    const rows = leads.map(l => {
+      const date = new Date(l.createdAt).toISOString();
+      return `${l.id};${date};${l.companyName};${l.contactName};${l.email};${l.phone};${l.seats};${l.status};${l.contactAllowed}`;
+    }).join("\n");
+    const csvContent = "\uFEFF" + header + rows;
+    return new Response(csvContent, {
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': 'attachment; filename="ztna_scout_leads_export.csv"'
+      }
     });
   });
-  app.delete('/api/admin/leads/:id', async (c) => {
-    const id = c.req.param('id');
-    await LeadEntity.delete(c.env, id);
+  app.post('/api/admin/pricing', async (c) => {
+    const update = await c.req.json<PricingOverride>();
+    const inst = new PricingOverrideEntity(c.env, update.vendorId);
+    await inst.save({ ...update, updatedAt: Date.now() });
     return ok(c, { success: true });
   });
   app.get('/api/admin/pricing', async (c) => {
@@ -246,11 +211,5 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return { vendorId: v.id, basePricePerMonth: base?.basePricePerMonth || 0, isQuoteOnly: base?.isQuoteOnly || false, updatedAt: 0 };
     }));
     return ok(c, data);
-  });
-  app.post('/api/admin/pricing', async (c) => {
-    const update = await c.req.json<PricingOverride>();
-    const inst = new PricingOverrideEntity(c.env, update.vendorId);
-    await inst.save({ ...update, updatedAt: Date.now() });
-    return ok(c, { success: true });
   });
 }
