@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api-client';
 import type { ComparisonSnapshot } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, ResponsiveContainer, Cell, CartesianGrid, LabelList } from 'recharts';
@@ -9,6 +10,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 export function PrintResultsPage() {
   const { id } = useParams();
+  const { t } = useTranslation();
   const { data: snapshot, isLoading } = useQuery({
     queryKey: ['comparison', id],
     queryFn: () => api<ComparisonSnapshot>(`/api/comparison/${id}`),
@@ -22,7 +24,7 @@ export function PrintResultsPage() {
     }
   }, [snapshot]);
   if (isLoading || !snapshot) return <div className="p-10 text-center">Preparing report...</div>;
-  const sortedResults = [...snapshot.results].sort((a, b) => b.scores.totalScore - a.scores.totalScore);
+  const sortedResults = [...snapshot.results].sort((a, b) => (b.scores?.totalScore ?? 0) - (a.scores?.totalScore ?? 0));
   const chartData = sortedResults.map(r => ({
     name: r.vendorName,
     tco: r.tcoYear1,
@@ -52,7 +54,7 @@ export function PrintResultsPage() {
             </div>
             <div className="bg-gray-50 p-4 border col-span-2">
               <p className="text-gray-500 uppercase text-[10px] font-bold">Top Recommendation</p>
-              <p className="text-xl font-bold">{sortedResults[0].vendorName} (Score: {sortedResults[0].scores.totalScore})</p>
+              <p className="text-xl font-bold">{sortedResults[0]?.vendorName} (Score: {sortedResults[0]?.scores?.totalScore})</p>
             </div>
           </div>
         </section>
@@ -90,9 +92,9 @@ export function PrintResultsPage() {
               {sortedResults.map((r) => (
                 <tr key={r.vendorId} className="border-b">
                   <td className="p-2 font-bold border">{r.vendorName}</td>
-                  <td className="p-2 text-center border">{r.scores.priceScore}</td>
-                  <td className="p-2 text-center border">{r.scores.featureScore}</td>
-                  <td className="p-2 text-center border font-bold bg-gray-50">{r.scores.totalScore}</td>
+                  <td className="p-2 text-center border">{r.scores?.priceScore}</td>
+                  <td className="p-2 text-center border">{r.scores?.featureScore}</td>
+                  <td className="p-2 text-center border font-bold bg-gray-50">{r.scores?.totalScore}</td>
                 </tr>
               ))}
             </tbody>

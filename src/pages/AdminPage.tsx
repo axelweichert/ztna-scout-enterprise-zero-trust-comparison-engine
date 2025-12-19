@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api-client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -12,12 +13,12 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from 'sonner';
-import { Download, Shield, Trash2, ShieldCheck, Mail, BarChart3, TrendingUp, History, Phone, AlertCircle } from 'lucide-react';
+import { Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, History, Phone, AlertCircle } from 'lucide-react';
 import type { Lead, PricingOverride, AdminStats } from '@shared/types';
 import { format } from 'date-fns';
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { cn } from "@/lib/utils";
 export function AdminPage() {
+  const { t } = useTranslation();
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
