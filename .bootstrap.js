@@ -83,7 +83,8 @@ function runSetupCommands() {
     "bun add i18next-browser-languagedetector@^8.0.0",
     "bun add i18next react-i18next i18next-browser-languagedetector",
     "bun add i18next-browser-languagedetector",
-    "bun add react-turnstile"
+    "bun add react-turnstile",
+    "bun add recharts"
 ];
     
     if (commands.length === 0) {
