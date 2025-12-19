@@ -24,31 +24,36 @@ export function AppLayout({ children, container = false, className, contentClass
   const changeLanguage = (lng: string) => {
     i18n.changeLanguage(lng);
   };
+  const leftHeaderSlot = (
+    <div className="flex items-center gap-2">
+      <SidebarTrigger />
+      <span className="hidden lg:inline-block font-bold text-xs tracking-widest text-muted-foreground uppercase">Admin Panel</span>
+    </div>
+  );
+  const rightHeaderSlot = (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm" className="gap-2 h-8">
+          <Languages className="h-4 w-4" />
+          <span className="uppercase text-xs font-bold">{i18n.language.slice(0, 2)}</span>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={() => changeLanguage('en')}>English</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => changeLanguage('de')}>Deutsch</DropdownMenuItem>
+        <DropdownMenuItem onClick={() => changeLanguage('fr')}>Français</DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
   return (
     <SidebarProvider defaultOpen={false}>
       <AppSidebar />
       <SidebarInset className={cn("flex flex-col min-h-screen", className)}>
-        <Header className="sticky top-0 z-50">
-          <div className="flex items-center gap-2 mr-4">
-            <SidebarTrigger />
-            <span className="hidden lg:inline-block font-bold text-xs tracking-widest text-muted-foreground uppercase">Admin Panel</span>
-          </div>
-          <div className="flex items-center gap-4 ml-auto">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="gap-2 h-8">
-                  <Languages className="h-4 w-4" />
-                  <span className="uppercase text-xs font-bold">{i18n.language.slice(0, 2)}</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => changeLanguage('en')}>English</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => changeLanguage('de')}>Deutsch</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => changeLanguage('fr')}>Français</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </Header>
+        <Header 
+          className="sticky top-0 z-50"
+          leftSlot={leftHeaderSlot}
+          rightSlot={rightHeaderSlot}
+        />
         <main className="flex-1">
           {container ? (
             <div className={cn("max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12", contentClassName)}>
