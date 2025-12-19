@@ -10,24 +10,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Steps } from '@/components/ui/steps';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { MailCheck, Loader2 } from 'lucide-react';
+import { MailCheck, Loader2, Phone } from 'lucide-react';
+import type { LeadFormData } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),
   contactName: z.string().min(2, "Required"),
   email: z.string().email("Invalid email"),
+  phone: z.string().min(6, "Invalid phone").regex(/^[0-9+\s-()]+$/, "Invalid characters"),
   seats: z.number().min(1, "Minimum 1 seat"),
   vpnStatus: z.enum(['active', 'replacing', 'none'] as const),
-  processingAccepted: z.boolean().refine(v => v === true, { message: "Required" }),
-  followUpAccepted: z.boolean().refine(v => v === true, { message: "Required" }),
-  marketingAccepted: z.boolean().default(false)
 });
-type LeadFormData = z.infer<typeof leadSchema>;
 export function LeadFormPage() {
   const { t } = useTranslation();
   const [step, setStep] = useState(0);
@@ -39,13 +36,11 @@ export function LeadFormPage() {
     resolver: zodResolver(leadSchema),
     defaultValues: {
       vpnStatus: 'active',
-      processingAccepted: false,
-      followUpAccepted: false,
-      marketingAccepted: false,
       seats: 50,
       companyName: "",
       contactName: "",
-      email: ""
+      email: "",
+      phone: ""
     }
   });
   const steps = [
@@ -62,7 +57,7 @@ export function LeadFormPage() {
     try {
       await api('/api/submit', {
         method: 'POST',
-        body: JSON.stringify({ ...data, turnstileToken, timing: 'immediate', consentGiven: true })
+        body: JSON.stringify({ ...data, turnstileToken, timing: 'immediate' })
       });
       setSubmitted(true);
     } catch (e) {
@@ -73,7 +68,7 @@ export function LeadFormPage() {
   };
   const nextStep = async () => {
     const fields = step === 0
-      ? ['companyName', 'contactName', 'email']
+      ? ['companyName', 'contactName', 'email', 'phone']
       : ['seats', 'vpnStatus'];
     const isValid = await form.trigger(fields as any);
     if (isValid) setStep(s => s + 1);
@@ -115,9 +110,15 @@ export function LeadFormPage() {
                         <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.companyName')}</Label>
                         <Input {...form.register('companyName')} className="h-14 rounded-xl" placeholder="Global Corp" />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.contactPerson')}</Label>
-                        <Input {...form.register('contactName')} className="h-14 rounded-xl" placeholder="Jane Doe" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.contactPerson')}</Label>
+                          <Input {...form.register('contactName')} className="h-14 rounded-xl" placeholder="Jane Doe" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.phone')}</Label>
+                          <Input {...form.register('phone')} type="tel" className="h-14 rounded-xl" placeholder="+49 521 1234567" />
+                        </div>
                       </div>
                       <div className="space-y-2">
                         <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.workEmail')}</Label>
@@ -148,19 +149,11 @@ export function LeadFormPage() {
                   )}
                   {step === 2 && (
                     <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                      <div className="space-y-4">
-                        <div className="flex items-start gap-4 p-4 border rounded-xl bg-slate-50/50">
-                          <Checkbox id="c1" onCheckedChange={(v) => form.setValue('processingAccepted', v === true, { shouldValidate: true })} checked={form.watch('processingAccepted')} className="mt-1" />
-                          <Label htmlFor="c1" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">{t('form.legal.processing')}</Label>
-                        </div>
-                        <div className="flex items-start gap-4 p-4 border rounded-xl bg-slate-50/50">
-                          <Checkbox id="c2" onCheckedChange={(v) => form.setValue('followUpAccepted', v === true, { shouldValidate: true })} checked={form.watch('followUpAccepted')} className="mt-1" />
-                          <Label htmlFor="c2" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">{t('form.legal.contact')}</Label>
-                        </div>
-                        <div className="flex items-start gap-4 p-4 border rounded-xl">
-                          <Checkbox id="c3" onCheckedChange={(v) => form.setValue('marketingAccepted', v === true)} checked={form.watch('marketingAccepted')} className="mt-1" />
-                          <Label htmlFor="c3" className="text-sm leading-relaxed text-muted-foreground cursor-pointer">{t('form.legal.marketing')}</Label>
-                        </div>
+                      <div className="p-6 border rounded-2xl bg-slate-50/50 space-y-4">
+                        <h4 className="font-bold text-sm uppercase tracking-wider">{t('form.steps.legal')}</h4>
+                        <p className="text-sm leading-relaxed text-muted-foreground italic">
+                          {t('form.legal.disclaimer')}
+                        </p>
                       </div>
                       <div className="flex justify-center py-4">
                         <Turnstile sitekey="1x00000000000000000000AA" onVerify={(token) => setTurnstileToken(token)} />

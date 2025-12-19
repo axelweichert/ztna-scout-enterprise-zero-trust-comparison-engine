@@ -6,11 +6,14 @@ CREATE TABLE IF NOT EXISTS leads (
   company_name TEXT NOT NULL,
   contact_name TEXT NOT NULL,
   email TEXT NOT NULL,
+  phone TEXT NOT NULL,
   seats INTEGER NOT NULL,
   vpn_status TEXT NOT NULL, -- 'active' | 'replacing' | 'none'
   budget_range TEXT,
   timing TEXT, -- 'immediate' | '3_months' | '6_months' | 'planning'
   consent_given BOOLEAN NOT NULL,
+  contact_allowed INTEGER DEFAULT 1,
+  opted_out_at INTEGER DEFAULT NULL,
   created_at INTEGER NOT NULL
 );
 -- Table: comparisons

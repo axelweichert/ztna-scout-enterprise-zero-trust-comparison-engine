@@ -5,7 +5,7 @@ import { IndexedEntity, Entity } from "./core-utils";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, LeadStatus, TimeSeriesData
+  VerificationToken, OptOutToken, TimeSeriesData
 } from "@shared/types";
 import { calculateTCO, calculateScores } from "../src/lib/calculator";
 import vendors from "../data/vendors.json";
@@ -15,10 +15,10 @@ class LeadEntity extends IndexedEntity<Lead> {
   static readonly entityName = "lead";
   static readonly indexName = "leads";
   static readonly initialState: Lead = {
-    id: "", companyName: "", contactName: "", email: "",
+    id: "", companyName: "", contactName: "", email: "", phone: "",
     seats: 0, vpnStatus: 'none', budgetRange: "",
     timing: 'planning', consentGiven: false, createdAt: 0,
-    status: 'pending', marketingOptIn: false
+    status: 'pending', contactAllowed: true
   };
 }
 class ComparisonEntity extends IndexedEntity<ComparisonSnapshot> {
@@ -31,6 +31,10 @@ class ComparisonEntity extends IndexedEntity<ComparisonSnapshot> {
 class VerificationTokenEntity extends Entity<VerificationToken> {
   static readonly entityName = "v-token";
   static readonly initialState: VerificationToken = { hash: "", leadId: "", expiresAt: 0 };
+}
+class OptOutTokenEntity extends Entity<OptOutToken> {
+  static readonly entityName = "opt-out-token";
+  static readonly initialState: OptOutToken = { hash: "", leadId: "", createdAt: 0 };
 }
 class PricingOverrideEntity extends Entity<PricingOverride> {
   static readonly entityName = "pricing-override";
@@ -64,58 +68,42 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         id: leadId,
         createdAt: Date.now(),
         status: 'pending',
+        contactAllowed: true,
+        consentGiven: true,
         consentRecord: {
           ipHash: btoa(ip).slice(0, 12),
           userAgent: c.req.header('user-agent') || 'unknown',
           timestamp: Date.now(),
-          acceptedTextVersion: "v1.2024",
-          processingAccepted: input.processingAccepted,
-          followUpAccepted: input.followUpAccepted,
-          marketingAccepted: input.marketingAccepted
+          acceptedTextVersion: "v2.2024",
+          disclaimerAccepted: true
         }
       };
       await LeadEntity.create(c.env, lead);
+      // Create Verification Token (DOI)
       const token = crypto.randomUUID();
       const tokenEntity = new VerificationTokenEntity(c.env, token);
       await tokenEntity.save({ hash: token, leadId, expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) });
+      // Create Opt-Out Token (Persistent)
+      const optOutToken = crypto.randomUUID();
+      const optOutEntity = new OptOutTokenEntity(c.env, optOutToken);
+      await optOutEntity.save({ hash: optOutToken, leadId, createdAt: Date.now() });
       console.log(`[DOI EMAIL] Link: /verify/${token}`);
+      console.log(`[OPT-OUT] Token: ${optOutToken}`);
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
       return bad(c, 'Submission failed');
     }
   });
-  app.get('/api/sample-comparison', async (c) => {
-    const seats = 250;
-    const allVendorResults = await Promise.all(vendors.map(async (v) => {
-      const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
-      const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
-      return {
-        id: v.id,
-        name: v.name,
-        pricing: basePricing,
-        features: vendorFeatures,
-        tco: calculateTCO(seats, basePricing)
-      };
-    }));
-    const tcos = allVendorResults.map(r => r.tco);
-    const maxTco = Math.max(...tcos);
-    const minTco = Math.min(...tcos);
-    const results: ComparisonResult[] = allVendorResults.map(r => ({
-      vendorId: r.id,
-      vendorName: r.name,
-      tcoYear1: r.tco,
-      scores: calculateScores(r.features, r.tco, maxTco, minTco),
-      features: r.features
-    }));
-    const snapshot: ComparisonSnapshot = {
-      id: "sample",
-      leadId: "sample-user",
-      results,
-      inputs: { seats, vpnStatus: 'active' },
-      createdAt: Date.now(),
-      isSample: true
-    };
-    return ok(c, snapshot);
+  app.post('/api/opt-out', async (c) => {
+    const { token } = await c.req.json();
+    if (!token) return bad(c, 'Token required');
+    const tokenEntity = new OptOutTokenEntity(c.env, token);
+    if (!await tokenEntity.exists()) return notFound(c, 'Invalid token');
+    const { leadId } = await tokenEntity.getState();
+    const leadInst = new LeadEntity(c.env, leadId);
+    if (!await leadInst.exists()) return notFound(c, 'Lead not found');
+    await leadInst.patch({ contactAllowed: false, optedOutAt: Date.now() });
+    return ok(c, { message: 'Opt-out successful' });
   });
   app.get('/api/verify/:token', async (c) => {
     const token = c.req.param('token');
@@ -163,6 +151,29 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await ComparisonEntity.create(c.env, snapshot);
     return ok(c, { comparisonId: snapshot.id });
   });
+  app.get('/api/sample-comparison', async (c) => {
+    const seats = 250;
+    const allVendorResults = await Promise.all(vendors.map(async (v) => {
+      const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
+      const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
+      return {
+        id: v.id,
+        name: v.name,
+        pricing: basePricing,
+        features: vendorFeatures,
+        tco: calculateTCO(seats, basePricing)
+      };
+    }));
+    const tcos = allVendorResults.map(r => r.tco);
+    const results: ComparisonResult[] = allVendorResults.map(r => ({
+      vendorId: r.id,
+      vendorName: r.name,
+      tcoYear1: r.tco,
+      scores: calculateScores(r.features, r.tco, Math.max(...tcos), Math.min(...tcos)),
+      features: r.features
+    }));
+    return ok(c, { id: "sample", leadId: "sample", results, inputs: { seats, vpnStatus: 'active' }, createdAt: Date.now(), isSample: true });
+  });
   app.get('/api/comparison/:id', async (c) => {
     const id = c.req.param('id');
     const comp = new ComparisonEntity(c.env, id);
@@ -176,7 +187,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/admin/stats', async (c) => {
     const leadsRes = await LeadEntity.list(c.env, null, 1000);
     const leads = leadsRes.items;
-    // Generate daily leads chart (last 30 days)
     const now = new Date();
     const dailyLeads: TimeSeriesData[] = Array.from({ length: 30 }).map((_, i) => {
       const d = new Date();
