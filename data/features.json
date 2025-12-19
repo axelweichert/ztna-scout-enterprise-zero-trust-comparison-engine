@@ -1,0 +1,15 @@
+[
+  { "vendorId": "cloudflare", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": true },
+  { "vendorId": "zscaler", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "akamai", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": false, "hasFWaaS": false, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "paloalto", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "netskope", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "fortinet", "hasZTNA": true, "hasSWG": true, "hasCASB": false, "hasDLP": false, "hasFWaaS": true, "hasRBI": false, "isBSIQualified": false },
+  { "vendorId": "cisco", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "broadcom", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "forcepoint", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": false, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "iboss", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "checkpoint", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "perimeter81", "hasZTNA": true, "hasSWG": false, "hasCASB": false, "hasDLP": false, "hasFWaaS": true, "hasRBI": false, "isBSIQualified": false },
+  { "vendorId": "barracuda", "hasZTNA": true, "hasSWG": true, "hasCASB": false, "hasDLP": false, "hasFWaaS": true, "hasRBI": false, "isBSIQualified": false }
+]
