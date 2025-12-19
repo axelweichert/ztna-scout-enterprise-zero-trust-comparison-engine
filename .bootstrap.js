@@ -77,18 +77,7 @@ function updateWranglerJsonc() {
 }
 
 function runSetupCommands() {
-    const commands = [
-    "bun add i18next@^23.16.0",
-    "bun add react-i18next@^15.0.2",
-    "bun add i18next-browser-languagedetector@^8.0.0",
-    "bun add i18next react-i18next i18next-browser-languagedetector",
-    "bun add i18next-browser-languagedetector",
-    "bun add react-turnstile recharts date-fns i18next react-i18next i18next-browser-languagedetector",
-    "bun add recharts",
-    "bun add lucide-react clsx tailwind-merge date-fns recharts",
-    "bun add date-fns",
-    "bun add react-i18next i18next i18next-browser-languagedetector"
-];
+    const commands = [];
     
     if (commands.length === 0) {
         console.log('⊘ No setup commands to run');

@@ -1,0 +1,15 @@
+[
+  { "vendorId": "cloudflare", "basePricePerMonth": 12.50, "isQuoteOnly": false, "installationFee": 4000 },
+  { "vendorId": "zscaler", "basePricePerMonth": 35.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "akamai", "basePricePerMonth": 28.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "paloalto", "basePricePerMonth": 45.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "netskope", "basePricePerMonth": 32.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "fortinet", "basePricePerMonth": 18.00, "isQuoteOnly": false, "installationFee": 4000 },
+  { "vendorId": "cisco", "basePricePerMonth": 30.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "broadcom", "basePricePerMonth": 40.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "forcepoint", "basePricePerMonth": 25.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "iboss", "basePricePerMonth": 22.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "checkpoint", "basePricePerMonth": 24.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "perimeter81", "basePricePerMonth": 15.00, "isQuoteOnly": false, "installationFee": 2000 },
+  { "vendorId": "barracuda", "basePricePerMonth": 14.00, "isQuoteOnly": false, "installationFee": 3000 }
+]
