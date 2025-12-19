@@ -15,7 +15,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { MailCheck, Loader2, Phone } from 'lucide-react';
+import { MailCheck, Loader2 } from 'lucide-react';
 import type { LeadFormData } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),

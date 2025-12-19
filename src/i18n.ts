@@ -6,7 +6,8 @@ const resources = {
   en: {
     translation: {
       common: {
-        data_freshness: appConfig.data_freshness.en
+        data_freshness: appConfig.data_freshness.en,
+        currency_symbol: "€"
       },
       layout: {
         header: {
@@ -56,7 +57,7 @@ const resources = {
         buttons: { continue: "Proceed", back: "Return", submit: "Verify & Generate", generating: "Processing Analysis..." },
         options: { vpn_active: "Active Legacy VPN", vpn_replacing: "Ongoing Migration", vpn_none: "SDP / Cloud Native" },
         legal: {
-          disclaimer: "Your data is used exclusively for the generation of this analysis and professional follow-up by certified security architects. No data is shared with third parties. You can object to contact at any time using the link in our verification emails."
+          disclaimer: "Your data is used exclusively for the generation of this analysis and professional follow-up by certified security architects at von Busch Digital (security@vonbusch.digital). No data is shared with third parties. You can object to contact at any time using the link in our verification emails."
         },
         submitted: {
           title: "Verification Sent",
@@ -69,22 +70,45 @@ const resources = {
         export_pdf: "Download Report",
         tco_title: "12-Month Financial Projection",
         bsi_qualified: "BSI Qualified Provider",
-        disclaimer: "Pricing estimates based on market list values. This report does not constitute a binding offer."
+        disclaimer: "Pricing estimates based on market list values. This report does not constitute a binding offer.",
+        matrix: {
+          title: "Capability Matrix",
+          capability: "Capability",
+          show_all: "Show All Rows",
+          diff_only: "Highlight Differences",
+          best_fit: "Best Fit",
+          deep_dive: "Analysis Deep-Dive"
+        }
       },
       optOut: {
         title: "Objection to Contact",
         success: "Your preference has been updated. No further professional follow-up will occur for this inquiry.",
         error: "Invalid or expired link. Please contact support if you wish to update your preferences.",
         back: "Return to Site"
+      },
+      verify: {
+        loading: "Verifying your request...",
+        success: "Identity Verified!",
+        success_desc: "Your enterprise analysis report (ID: {{id}}) is ready. Redirecting you now...",
+        error: "Verification Failed",
+        error_desc: "The link may have expired or is invalid. Please start a new comparison."
       }
     }
   },
   de: {
     translation: {
       common: {
-        data_freshness: appConfig.data_freshness.de
+        data_freshness: appConfig.data_freshness.de,
+        currency_symbol: "€"
       },
       layout: {
+        header: {
+          tooltips: {
+            vonBusch: "Entwickelt von von Busch Digital",
+            cloudflare: "Powered by Cloudflare Infrastructure",
+            ubiquiti: "Security Audit Framework"
+          }
+        },
         footer: {
           imprint: "Impressum",
           privacy: "Datenschutz",
@@ -121,9 +145,11 @@ const resources = {
       },
       form: {
         steps: { company: "Unternehmen", requirements: "Infrastruktur", legal: "Compliance" },
-        labels: { phone: "Telefonnummer" },
+        labels: { companyName: "Firmenname", contactPerson: "Ansprechpartner", phone: "Telefonnummer", workEmail: "Geschäftliche E-Mail", seats: "Anzahl Benutzer", vpnStatus: "VPN Status" },
+        buttons: { continue: "Weiter", back: "Zurück", submit: "Bestätigen & Generieren", generating: "Analysiere..." },
+        options: { vpn_active: "Aktives Legacy VPN", vpn_replacing: "Migration läuft", vpn_none: "SDP / Cloud Native" },
         legal: {
-          disclaimer: "Ihre Daten werden ausschließlich zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten verwendet. Es erfolgt keine Weitergabe an Dritte. Sie können der Kontaktaufnahme jederzeit über den Link in unseren Bestätigungs-E-Mails widersprechen."
+          disclaimer: "Ihre Daten werden ausschließlich zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital (security@vonbusch.digital) verwendet. Es erfolgt keine Weitergabe an Dritte. Sie können der Kontaktaufnahme jederzeit über den Link in unseren Bestätigungs-E-Mails widersprechen."
         },
         submitted: {
           title: "E-Mail Bestätigung",
@@ -133,20 +159,53 @@ const resources = {
       results: {
         title: "Analyse-Ergebnis",
         subtitle: "Enterprise-Vergleich für {{seats}} Benutzer",
-        bsi_qualified: "BSI-qualifizierter Anbieter"
+        export_pdf: "Bericht herunterladen",
+        tco_title: "12-Monate TCO Projektion",
+        bsi_qualified: "BSI-qualifizierter Anbieter",
+        disclaimer: "Preisangaben basieren auf Markt-Listenpreisen. Kein verbindliches Angebot.",
+        matrix: {
+          title: "Fähigkeiten-Matrix",
+          capability: "Funktion",
+          show_all: "Alle Zeilen",
+          diff_only: "Unterschiede hervorheben",
+          best_fit: "Beste Wahl",
+          deep_dive: "Analyse-Details"
+        }
       },
       optOut: {
         title: "Widerspruch zur Kontaktaufnahme",
         success: "Ihre Präferenz wurde aktualisiert. Es erfolgt keine weitere professionelle Kontaktaufnahme zu dieser Anfrage.",
         error: "Ungültiger oder abgelaufener Link. Bitte kontaktieren Sie den Support.",
         back: "Zurück zur Website"
+      },
+      verify: {
+        loading: "Verifiziere Anfrage...",
+        success: "Identität bestätigt!",
+        success_desc: "Ihr Analyse-Bericht (ID: {{id}}) ist bereit. Weiterleitung erfolgt...",
+        error: "Verifizierung fehlgeschlagen",
+        error_desc: "Link abgelaufen oder ungültig. Bitte starten Sie erneut."
       }
     }
   },
   fr: {
     translation: {
       common: {
-        data_freshness: appConfig.data_freshness.fr
+        data_freshness: appConfig.data_freshness.fr,
+        currency_symbol: "€"
+      },
+      layout: {
+        header: {
+          tooltips: {
+            vonBusch: "Développé par von Busch Digital",
+            cloudflare: "Propulsé par Cloudflare",
+            ubiquiti: "Cadre d'audit de sécurité"
+          }
+        },
+        footer: {
+          imprint: "Mentions Légales",
+          privacy: "Confidentialité",
+          credit: "Conçu avec précision pour"
+        }
       },
       home: {
         hero: {
@@ -176,15 +235,45 @@ const resources = {
       },
       form: {
         steps: { company: "Entité", requirements: "Architecture", legal: "Conformité" },
-        labels: { phone: "Numéro de téléphone" },
+        labels: { companyName: "Nom de l'entreprise", contactPerson: "Nom du contact", phone: "Numéro de téléphone", workEmail: "Email professionnel", seats: "Nombre d'utilisateurs", vpnStatus: "État du VPN" },
+        buttons: { continue: "Continuer", back: "Retour", submit: "Vérifier & Générer", generating: "Analyse en cours..." },
+        options: { vpn_active: "VPN hérité actif", vpn_replacing: "Migration en cours", vpn_none: "Cloud Native" },
         legal: {
-          disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes certifiés. Aucune donnée n'est partagée. Vous pouvez vous opposer au contact via le lien dans nos emails."
+          disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes certifiés de von Busch Digital (security@vonbusch.digital). Aucune donnée n'est partagée. Vous pouvez vous opposer au contact via le lien dans nos emails."
         },
-        options: { vpn_active: "VPN hérité actif", vpn_replacing: "Migration en cours", vpn_none: "Cloud Native" }
+        submitted: {
+          title: "Vérification envoyée",
+          desc: "Veuillez vérifier votre boîte de réception et cliquer sur le lien de vérification pour débloquer votre rapport."
+        }
+      },
+      results: {
+        title: "Résultat de l'analyse",
+        subtitle: "Comparaison pour {{seats}} utilisateurs",
+        export_pdf: "Télécharger le rapport",
+        tco_title: "Projection TCO sur 12 mois",
+        bsi_qualified: "Fournisseur qualifié BSI",
+        disclaimer: "Estimations basées sur les prix catalogue. Pas d'offre contractuelle.",
+        matrix: {
+          title: "Matrice des capacités",
+          capability: "Fonctionnalité",
+          show_all: "Toutes les lignes",
+          diff_only: "Afficher les différences",
+          best_fit: "Meilleur choix",
+          deep_dive: "Détails de l'analyse"
+        }
       },
       optOut: {
         title: "Opposition au contact",
-        success: "Votre préférence a été mise à jour. Aucun autre suivi ne sera effectué."
+        success: "Votre préférence a été mise à jour. Aucun autre suivi ne sera effectué.",
+        error: "Lien invalide ou expiré.",
+        back: "Retour au site"
+      },
+      verify: {
+        loading: "Vérification...",
+        success: "Identité vérifiée!",
+        success_desc: "Votre rapport (ID: {{id}}) est prêt. Redirection...",
+        error: "Échec de la vérification",
+        error_desc: "Lien expiré ou invalide."
       }
     }
   }

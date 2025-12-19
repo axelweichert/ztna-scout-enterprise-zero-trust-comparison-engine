@@ -52,6 +52,7 @@ export interface Lead {
   contactAllowed: boolean;
   optedOutAt?: number;
   consentRecord?: ConsentRecord;
+  comparisonId?: string;
 }
 export interface LeadFormData {
   companyName: string;

@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils';
 export function ResultsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [selectedVendor, setSelectedVendor] = useState<ComparisonResult | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [hideSimilar, setHideSimilar] = useState(false);
@@ -32,11 +32,16 @@ export function ResultsPage() {
     queryFn: () => api<ComparisonSnapshot>(id === 'sample' ? '/api/sample-comparison' : `/api/comparison/${id}`),
     retry: 1
   });
+  const currencyFormatter = new Intl.NumberFormat(i18n.language, {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0
+  });
   if (isLoading) return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <div className="max-w-7xl mx-auto px-4 py-20 space-y-12 flex-1 w-full">
-        <Skeleton className="h-16 w-3/4" />
+      <div className="max-w-7xl mx-auto px-4 py-20 space-y-12 flex-1 w-full text-center">
+        <Skeleton className="h-16 w-3/4 mx-auto" />
         <Skeleton className="h-[400px] w-full" />
       </div>
       <Footer />
@@ -86,12 +91,12 @@ export function ResultsPage() {
             <Badge className="bg-primary text-[10px]">{sortedResults[0]?.vendorName}</Badge>
           </div>
           <Button size="sm" className="btn-gradient h-8" onClick={() => navigate(`/vergleich/${id}/print`)}>
-            <Printer className="mr-2 h-3.5 w-3.5" /> Export PDF
+            <Printer className="mr-2 h-3.5 w-3.5" /> {t('results.export_pdf')}
           </Button>
         </div>
       </div>
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 md:py-16">
-        <header className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-primary/10 pb-12 mb-20">
+        <header className="flex flex-col md:flex-row justify-between items-end gap-8 border-b border-primary/10 pb-12 mb-20 text-pretty">
           <div className="space-y-4">
             <h1 className="text-display tracking-tight leading-none">
               {snapshot.isSample ? "Sample Security Analysis" : t('results.title')}
@@ -115,7 +120,7 @@ export function ResultsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {top3.map((v, i) => (
               <Card key={v.vendorId} className={cn("relative overflow-hidden border-2", i === 0 ? "border-primary shadow-xl" : "border-muted shadow-sm")}>
-                {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">Best Fit</div>}
+                {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">{t('results.matrix.best_fit')}</div>}
                 <CardHeader>
                   <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
                 </CardHeader>
@@ -128,7 +133,7 @@ export function ResultsPage() {
                        "Scalable architecture with simple implementation paths."}
                     </p>
                   </div>
-                  <Button variant="outline" className="w-full" onClick={() => setSelectedVendor(v)}>Analysis Deep-Dive</Button>
+                  <Button variant="outline" className="w-full" onClick={() => setSelectedVendor(v)}>{t('results.matrix.deep_dive')}</Button>
                 </CardContent>
               </Card>
             ))}
@@ -136,17 +141,17 @@ export function ResultsPage() {
         </section>
         <section className="space-y-8 mb-20">
           <div className="flex justify-between items-center">
-            <h2 className="text-3xl font-display font-bold">Capability Matrix</h2>
+            <h2 className="text-3xl font-display font-bold">{t('results.matrix.title')}</h2>
             <Button variant="ghost" size="sm" onClick={() => setHideSimilar(!hideSimilar)} className={cn("gap-2", hideSimilar && "text-primary")}>
               <Filter className="w-4 h-4" />
-              {hideSimilar ? "Show All Rows" : "Highlight Differences"}
+              {hideSimilar ? t('results.matrix.show_all') : t('results.matrix.diff_only')}
             </Button>
           </div>
           <div className="overflow-x-auto rounded-2xl border bg-white shadow-lg">
             <table className="w-full border-collapse">
               <thead className="sticky top-0 z-10">
                 <tr className="bg-slate-50 border-b">
-                  <th className="p-6 text-left text-sm font-bold uppercase tracking-wider text-muted-foreground w-1/4">Capability</th>
+                  <th className="p-6 text-left text-sm font-bold uppercase tracking-wider text-muted-foreground w-1/4">{t('results.matrix.capability')}</th>
                   {top3.map(v => (
                     <th key={v.vendorId} className="p-6 text-center">
                       <p className="font-bold text-lg">{v.vendorName}</p>
@@ -189,7 +194,7 @@ export function ResultsPage() {
                         return (
                           <div className="bg-white p-4 shadow-xl border rounded-lg">
                             <p className="font-bold mb-1">{payload[0].payload.name}</p>
-                            <p className="text-primary font-bold text-lg">€{payload[0].value?.toLocaleString()}</p>
+                            <p className="text-primary font-bold text-lg">{currencyFormatter.format(payload[0].value as number)}</p>
                             <p className="text-[10px] text-muted-foreground uppercase font-bold mt-2">12-Month Est. TCO</p>
                           </div>
                         );
@@ -214,7 +219,6 @@ export function ResultsPage() {
             <p className="text-sm text-slate-300 leading-relaxed italic">{t('results.disclaimer')}</p>
           </div>
         </div>
-        <p className="text-center text-[10px] text-muted-foreground mt-8 uppercase tracking-widest">{t('common.data_freshness')}</p>
       </main>
       <Footer />
       <Dialog open={!!selectedVendor} onOpenChange={() => setSelectedVendor(null)}>
