@@ -20,7 +20,7 @@ export function Steps({ steps, currentStep, className }: StepsProps) {
             <div className="flex flex-col items-center relative group">
               <div
                 className={cn(
-                  "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300 z-10 bg-background",
+                  "w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-300",
                   isCompleted ? "bg-primary border-primary text-primary-foreground" :
                   isActive ? "border-primary text-primary font-bold scale-110 shadow-sm" :
                   "border-muted text-muted-foreground"
@@ -37,7 +37,7 @@ export function Steps({ steps, currentStep, className }: StepsProps) {
             </div>
             {idx < steps.length - 1 && (
               <div className={cn(
-                "flex-1 h-[2px] mx-[-2px] transition-colors duration-500",
+                "flex-1 h-[2px] mx-2 transition-colors duration-500",
                 idx < currentStep ? "bg-primary" : "bg-muted"
               )} />
             )}
