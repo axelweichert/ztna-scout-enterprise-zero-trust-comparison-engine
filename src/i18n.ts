@@ -4,6 +4,20 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const resources = {
   en: {
     translation: {
+      layout: {
+        header: {
+          tooltips: {
+            vonBusch: "von Busch GmbH - Security Architect",
+            cloudflare: "Cloudflare Zero Trust Platform",
+            ubiquiti: "Ubiquiti Networks Architecture"
+          }
+        },
+        footer: {
+          imprint: "Imprint",
+          privacy: "Privacy Policy",
+          credit: "A service provided by von Busch GmbH. Built with ♥ at"
+        }
+      },
       hero: {
         title: "ZTNA Scout",
         subtitle: "Navigate the Zero Trust landscape with data-driven vendor comparisons."
@@ -47,6 +61,20 @@ const resources = {
   },
   de: {
     translation: {
+      layout: {
+        header: {
+          tooltips: {
+            vonBusch: "von Busch GmbH - Security Architekten",
+            cloudflare: "Cloudflare Zero Trust Plattform",
+            ubiquiti: "Ubiquiti Netzwerk-Architektur"
+          }
+        },
+        footer: {
+          imprint: "Impressum",
+          privacy: "Datenschutz",
+          credit: "Ein Service der von Busch GmbH. Erstellt mit ♥ bei"
+        }
+      },
       hero: {
         title: "ZTNA Scout",
         subtitle: "Die datengestützte Entscheidungshilfe für Ihre Zero Trust Strategie."
@@ -90,6 +118,20 @@ const resources = {
   },
   fr: {
     translation: {
+      layout: {
+        header: {
+          tooltips: {
+            vonBusch: "von Busch GmbH - Architecte de sécurité",
+            cloudflare: "Plateforme Cloudflare Zero Trust",
+            ubiquiti: "Architecture r��seaux Ubiquiti"
+          }
+        },
+        footer: {
+          imprint: "Mentions Légales",
+          privacy: "Confidentialité",
+          credit: "Un service de von Busch GmbH. Développé avec ♥ chez"
+        }
+      },
       hero: {
         title: "ZTNA Scout",
         subtitle: "Comparez les solutions Zero Trust avec une approche basée sur les données."
@@ -104,7 +146,7 @@ const resources = {
           companyName: "Nom de l'entreprise",
           contactPerson: "Contact Principal",
           workEmail: "Adresse E-mail Professionnelle",
-          seats: "��chelle de déploiement (Sièges)",
+          seats: "Échelle de déploiement (Sièges)",
           vpnStatus: "Architecture Réseau Actuelle",
           consent: "Je demande la comparaison ZTNA et j'accepte d'être contacté par un expert en cybersécurité."
         },
