@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -32,11 +32,11 @@ export function ResultsPage() {
     queryFn: () => api<ComparisonSnapshot>(id === 'sample' ? '/api/sample-comparison' : `/api/comparison/${id}`),
     retry: 1
   });
-  const currencyFormatter = new Intl.NumberFormat(i18n.language, {
+  const currencyFormatter = useMemo(() => new Intl.NumberFormat(i18n.language, {
     style: 'currency',
     currency: 'EUR',
     maximumFractionDigits: 0
-  });
+  }), [i18n.language]);
   if (isLoading) return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -123,6 +123,7 @@ export function ResultsPage() {
                 {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">{t('results.matrix.best_fit')}</div>}
                 <CardHeader>
                   <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
+                  <p className="text-primary font-bold">{t('results.matrix.total_score')}: {v.scores?.totalScore ?? 0}</p>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="p-4 bg-muted/30 rounded-xl space-y-1">
@@ -240,7 +241,7 @@ export function ResultsPage() {
                   <div key={i} className="space-y-2">
                     <div className="flex justify-between text-sm font-semibold">
                       <span>{stat.label}</span>
-                      <span>{stat.val}/100</span>
+                      <span>{stat.val ?? 0}/100</span>
                     </div>
                     <Progress value={stat.val ?? 0} className="h-2" />
                   </div>
@@ -251,7 +252,7 @@ export function ResultsPage() {
               <div className="flex justify-between items-center bg-slate-50 p-6 rounded-2xl border">
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase">Total Score</p>
-                  <p className="text-4xl font-display font-bold text-primary">{selectedVendor?.scores?.totalScore}</p>
+                  <p className="text-4xl font-display font-bold text-primary">{selectedVendor?.scores?.totalScore ?? 0}</p>
                 </div>
                 <Badge variant="outline" className="h-10 px-4 text-lg font-bold">
                   Ranked #{sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1}
