@@ -1,7 +1,6 @@
 import * as React from "react"
 import * as RechartsPrimitive from "recharts"
 import { cn } from "@/lib/utils"
-// Format: { [key: string]: { label?: string, icon?: React.ComponentType, color?: string } }
 export type ChartConfig = {
   [k in string]: {
     label?: React.ReactNode
@@ -149,7 +148,7 @@ const ChartTooltipContent = React.forwardRef<
           {payload.map((item, index) => {
             const key = `${nameKey || item.name || item.dataKey || "value"}`
             const itemConfig = config[key as keyof typeof config]
-            const indicatorColor = color || item.payload.fill || item.color
+            const indicatorColor = color || item.payload?.fill || item.color
             return (
               <div
                 key={item.dataKey || index}
@@ -199,7 +198,7 @@ const ChartTooltipContent = React.forwardRef<
                           {item.value.toLocaleString()}
                         </span>
                       )}
-                    </>
+                    </div>
                   </>
                 )}
               </div>
