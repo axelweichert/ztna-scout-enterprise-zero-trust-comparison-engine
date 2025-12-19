@@ -1,0 +1,15 @@
+[
+  { "id": "cloudflare", "name": "Cloudflare", "website": "https://www.cloudflare.com" },
+  { "id": "zscaler", "name": "Zscaler", "website": "https://www.zscaler.com" },
+  { "id": "akamai", "name": "Akamai", "website": "https://www.akamai.com" },
+  { "id": "paloalto", "name": "Palo Alto Networks", "website": "https://www.paloaltonetworks.com" },
+  { "id": "netskope", "name": "Netskope", "website": "https://www.netskope.com" },
+  { "id": "fortinet", "name": "Fortinet", "website": "https://www.fortinet.com" },
+  { "id": "cisco", "name": "Cisco", "website": "https://www.cisco.com" },
+  { "id": "broadcom", "name": "Broadcom (Symantec)", "website": "https://www.broadcom.com" },
+  { "id": "forcepoint", "name": "Forcepoint", "website": "https://www.forcepoint.com" },
+  { "id": "iboss", "name": "iboss", "website": "https://www.iboss.com" },
+  { "id": "checkpoint", "name": "Check Point", "website": "https://www.checkpoint.com" },
+  { "id": "perimeter81", "name": "Perimeter 81 (Checkpoint)", "website": "https://www.perimeter81.com" },
+  { "id": "barracuda", "name": "Barracuda", "website": "https://www.barracuda.com" }
+]
