@@ -87,9 +87,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const optOutToken = crypto.randomUUID();
       const optOutEntity = new OptOutTokenEntity(c.env, optOutToken);
       await optOutEntity.save({ hash: optOutToken, leadId, createdAt: Date.now() });
-      console.log(`[DOI EMAIL] Link: /verify/${token}`);
-      console.log(`[OPT-OUT] Token: ${optOutToken}`);
-      return ok(c, { leadId, requiresVerification: true });
+      console.log(`[DOI EMAIL] (UTF-8) Link: /verify/${token}`);
+      console.log(`[OPT-OUT] (UTF-8) Token: ${optOutToken}`);
+      return c.json({ success: true, data: { leadId, requiresVerification: true } }, 200, { 'Content-Type': 'application/json; charset=utf-8' });
     } catch (e) {
       return bad(c, 'Submission failed');
     }

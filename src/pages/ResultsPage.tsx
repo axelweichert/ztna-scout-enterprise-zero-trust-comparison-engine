@@ -210,10 +210,11 @@ export function ResultsPage() {
         <div className="bg-slate-900 text-slate-100 rounded-3xl p-8 md:p-10 flex gap-6 md:gap-8 items-center border shadow-2xl">
           <Info className="h-10 w-10 text-primary shrink-0" />
           <div className="space-y-2">
-            <h4 className="text-xl font-bold">Methodology Note</h4>
+            <h4 className="text-xl font-bold">Methodology Note ({t('common.data_freshness')})</h4>
             <p className="text-sm text-slate-300 leading-relaxed italic">{t('results.disclaimer')}</p>
           </div>
         </div>
+        <p className="text-center text-[10px] text-muted-foreground mt-8 uppercase tracking-widest">{t('common.data_freshness')}</p>
       </main>
       <Footer />
       <Dialog open={!!selectedVendor} onOpenChange={() => setSelectedVendor(null)}>
