@@ -83,7 +83,14 @@ export function AdminPage() {
           <CardDescription>Enterprise Admin Portal</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)} className="h-12" />
+          <Input 
+            type="password" 
+            value={password} 
+            onChange={e => setPassword(e.target.value)} 
+            placeholder="••••••••" 
+            onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)} 
+            className="h-12" 
+          />
           <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Invalid credentials")} className="w-full btn-gradient h-12">Verify Authority</Button>
         </CardContent>
       </Card>
@@ -227,7 +234,13 @@ export function AdminPage() {
                       <Label className="text-[10px] uppercase font-bold text-muted-foreground">Admin Price Override (EUR/MO)</Label>
                       <div className="relative">
                         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground font-bold">€</span>
-                        <Input type="number" step="0.01" defaultValue={ov.basePricePerMonth} onBlur={(e) => updatePricing.mutate({ ...ov, basePricePerMonth: parseFloat(e.target.value) })} className="pl-8 h-12 font-bold text-lg" />
+                        <Input 
+                          type="number" 
+                          step="0.01" 
+                          defaultValue={ov.basePricePerMonth} 
+                          onBlur={(e) => updatePricing.mutate({ ...ov, basePricePerMonth: parseFloat(e.target.value) })} 
+                          className="pl-8 h-12 font-bold text-lg" 
+                        />
                       </div>
                     </div>
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-dashed border-slate-300">

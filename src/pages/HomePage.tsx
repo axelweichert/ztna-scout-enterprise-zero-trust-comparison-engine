@@ -27,9 +27,9 @@ const fadeIn: Variants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { 
-      delay: i * 0.1, 
-      duration: 0.6, 
+    transition: {
+      delay: i * 0.1,
+      duration: 0.6,
       ease: [0.22, 1, 0.36, 1] as any
     }
   })
@@ -116,11 +116,16 @@ export function HomePage() {
             </motion.div>
           </div>
         </section>
-        <section className="py-32 bg-slate-50/50 relative overflow-hidden">
+        {/* Methodology Section with Dark Mode accessibility refinements */}
+        <section className="py-32 bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-24">
-              <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight">{t('home.steps.title')}</h2>
-              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">{t('home.steps.subtitle')}</p>
+              <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight dark:text-slate-100">
+                {t('home.steps.title')}
+              </h2>
+              <p className="text-xl text-muted-foreground dark:text-slate-400 max-w-2xl mx-auto">
+                {t('home.steps.subtitle')}
+              </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {[1, 2, 3].map((s) => (
@@ -131,14 +136,18 @@ export function HomePage() {
                   viewport={{ once: true }}
                   transition={{ delay: s * 0.1 }}
                 >
-                  <Card className="border-none shadow-soft hover:shadow-2xl transition-all duration-500 hover:-translate-y-4 overflow-hidden bg-white h-full">
+                  <Card className="border-none dark:border-solid dark:border-slate-800 shadow-soft hover:shadow-2xl transition-all duration-500 hover:-translate-y-4 overflow-hidden bg-white dark:bg-slate-900 h-full">
                     <div className="h-1.5 bg-gradient-primary w-full" />
                     <CardContent className="pt-12 pb-14 px-10">
-                      <div className="w-16 h-16 rounded-2xl bg-primary/5 flex items-center justify-center text-primary font-bold text-2xl mb-8 shadow-sm">
+                      <div className="w-16 h-16 rounded-2xl bg-primary/5 dark:bg-primary/20 flex items-center justify-center text-primary font-bold text-2xl mb-8 shadow-sm">
                         {s}
                       </div>
-                      <h3 className="text-2xl font-bold mb-6 leading-tight">{t(`home.steps.step${s}.title`)}</h3>
-                      <p className="text-muted-foreground text-lg leading-relaxed">{t(`home.steps.step${s}.desc`)}</p>
+                      <h3 className="text-2xl font-bold mb-6 leading-tight dark:text-slate-100">
+                        {t(`home.steps.step${s}.title`)}
+                      </h3>
+                      <p className="text-muted-foreground dark:text-slate-400 text-lg leading-relaxed">
+                        {t(`home.steps.step${s}.desc`)}
+                      </p>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -146,6 +155,7 @@ export function HomePage() {
             </div>
           </div>
         </section>
+        {/* FAQ Section */}
         <section className="py-32">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -157,7 +167,7 @@ export function HomePage() {
               <div className="w-16 h-16 rounded-3xl bg-primary/10 flex items-center justify-center mb-4">
                 <HelpCircle className="w-8 h-8 text-primary" />
               </div>
-              <h2 className="text-4xl md:text-5xl font-display font-bold">{t('home.faq.title')}</h2>
+              <h2 className="text-4xl md:text-5xl font-display font-bold dark:text-slate-100">{t('home.faq.title')}</h2>
             </motion.div>
             <Accordion type="single" collapsible className="w-full space-y-6">
               {[1, 2, 3, 4].map((i) => (
@@ -168,11 +178,11 @@ export function HomePage() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.1 }}
                 >
-                  <AccordionItem value={`item-${i}`} className="border rounded-3xl px-8 bg-card shadow-sm hover:shadow-md transition-shadow">
-                    <AccordionTrigger className="text-left font-bold py-8 text-xl hover:no-underline">
+                  <AccordionItem value={`item-${i}`} className="border rounded-3xl px-8 bg-card dark:bg-slate-900/50 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+                    <AccordionTrigger className="text-left font-bold py-8 text-xl hover:no-underline dark:text-slate-200">
                       {t(`home.faq.q${i}`)}
                     </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground text-lg pb-8 leading-relaxed max-w-2xl">
+                    <AccordionContent className="text-muted-foreground dark:text-slate-400 text-lg pb-8 leading-relaxed max-w-2xl">
                       {t(`home.faq.a${i}`, { freshness: t('common.data_freshness') })}
                     </AccordionContent>
                   </AccordionItem>
