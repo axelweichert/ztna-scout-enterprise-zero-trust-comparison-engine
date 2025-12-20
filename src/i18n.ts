@@ -53,9 +53,25 @@ const resources = {
       },
       form: {
         steps: { company: "Entity", requirements: "Architecture", legal: "Compliance" },
-        labels: { companyName: "Entity Name", contactPerson: "Liaison Name", phone: "Phone Number", workEmail: "Corporate Email", seats: "Deployment Scale", vpnStatus: "Legacy State" },
+        labels: { 
+          companyName: "Entity Name", 
+          contactPerson: "Liaison Name", 
+          phone: "Phone Number", 
+          workEmail: "Corporate Email", 
+          seats: "Deployment Scale", 
+          vpnStatus: "Legacy State",
+          timing: "Migration Timeline"
+        },
         buttons: { continue: "Proceed", back: "Return", submit: "Verify & Generate", generating: "Processing Analysis..." },
-        options: { vpn_active: "Active Legacy VPN", vpn_replacing: "Ongoing Migration", vpn_none: "SDP / Cloud Native" },
+        options: { 
+          vpn_active: "Active Legacy VPN", 
+          vpn_replacing: "Ongoing Migration", 
+          vpn_none: "SDP / Cloud Native",
+          timing_immediate: "Immediate",
+          timing_3m: "Within 3 Months",
+          timing_6m: "Next 6 Months",
+          timing_planning: "Strategic Planning"
+        },
         legal: {
           disclaimer: "Your data is used exclusively for the generation of this analysis and professional follow-up by certified security architects at von Busch Digital (security@vonbusch.digital). No data is shared with third parties. You can object to contact at any time using the link in our verification emails."
         },
@@ -145,9 +161,25 @@ const resources = {
       },
       form: {
         steps: { company: "Unternehmen", requirements: "Infrastruktur", legal: "Compliance" },
-        labels: { companyName: "Firmenname", contactPerson: "Ansprechpartner", phone: "Telefonnummer", workEmail: "Geschäftliche E-Mail", seats: "Anzahl Benutzer", vpnStatus: "VPN Status" },
+        labels: { 
+          companyName: "Firmenname", 
+          contactPerson: "Ansprechpartner", 
+          phone: "Telefonnummer", 
+          workEmail: "Geschäftliche E-Mail", 
+          seats: "Anzahl Benutzer", 
+          vpnStatus: "VPN Status",
+          timing: "Zeitrahmen Migration"
+        },
         buttons: { continue: "Weiter", back: "Zurück", submit: "Bestätigen & Generieren", generating: "Analysiere..." },
-        options: { vpn_active: "Aktives Legacy VPN", vpn_replacing: "Migration läuft", vpn_none: "SDP / Cloud Native" },
+        options: { 
+          vpn_active: "Aktives Legacy VPN", 
+          vpn_replacing: "Migration läuft", 
+          vpn_none: "SDP / Cloud Native",
+          timing_immediate: "Sofort",
+          timing_3m: "Innerhalb 3 Monate",
+          timing_6m: "In 6 Monaten",
+          timing_planning: "Strategische Planung"
+        },
         legal: {
           disclaimer: "Ihre Daten werden ausschließlich zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital (security@vonbusch.digital) verwendet. Es erfolgt keine Weitergabe an Dritte. Sie können der Kontaktaufnahme jederzeit über den Link in unseren Bestätigungs-E-Mails widersprechen."
         },
@@ -204,7 +236,7 @@ const resources = {
         footer: {
           imprint: "Mentions Légales",
           privacy: "Confidentialité",
-          credit: "Conçu avec précision pour"
+          credit: "Conçu avec pr��cision pour"
         }
       },
       home: {
@@ -235,11 +267,27 @@ const resources = {
       },
       form: {
         steps: { company: "Entité", requirements: "Architecture", legal: "Conformité" },
-        labels: { companyName: "Nom de l'entreprise", contactPerson: "Nom du contact", phone: "Numéro de téléphone", workEmail: "Email professionnel", seats: "Nombre d'utilisateurs", vpnStatus: "État du VPN" },
+        labels: { 
+          companyName: "Nom de l'entreprise", 
+          contactPerson: "Nom du contact", 
+          phone: "Numéro de téléphone", 
+          workEmail: "Email professionnel", 
+          seats: "Nombre d'utilisateurs", 
+          vpnStatus: "État du VPN",
+          timing: "Délai de migration"
+        },
         buttons: { continue: "Continuer", back: "Retour", submit: "Vérifier & Générer", generating: "Analyse en cours..." },
-        options: { vpn_active: "VPN hérité actif", vpn_replacing: "Migration en cours", vpn_none: "Cloud Native" },
+        options: { 
+          vpn_active: "VPN hérité actif", 
+          vpn_replacing: "Migration en cours", 
+          vpn_none: "Cloud Native",
+          timing_immediate: "Immédiat",
+          timing_3m: "Sous 3 mois",
+          timing_6m: "Sous 6 mois",
+          timing_planning: "Planification"
+        },
         legal: {
-          disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes certifiés de von Busch Digital (security@vonbusch.digital). Aucune donnée n'est partagée. Vous pouvez vous opposer au contact via le lien dans nos emails."
+          disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes certifi��s de von Busch Digital (security@vonbusch.digital). Aucune donnée n'est partagée. Vous pouvez vous opposer au contact via le lien dans nos emails."
         },
         submitted: {
           title: "Vérification envoyée",
