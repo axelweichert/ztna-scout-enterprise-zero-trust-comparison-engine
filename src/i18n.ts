@@ -127,7 +127,7 @@ const resources = {
           scout_total: "Scout Total",
           close_deep_dive: "Close Deep-Dive",
           expert_take_desc: {
-            features: "ZTNA, SWG, CASB, DLP, and isolation capabilities.",
+            features: "ZTNA, SWG, CASB, DLP and isolation capabilities.",
             price: "Competitiveness relative to market averages.",
             compliance: "BSI qualifications and security certifications."
           }
@@ -142,12 +142,14 @@ const resources = {
         dashboard_desc: "Real-time lead lifecycle monitoring",
         sync_data: "Sync Data",
         export_csv: "Export CSV",
+        export_success: "CSV export triggered successfully",
         stats: {
           total: "Total Inquiries",
           verified: "Verified Leads",
           conversion: "Conversion",
           avg_seats: "Average Seats",
-          lifetime: "LIFETIME"
+          lifetime: "LIFETIME",
+          common_vpn: "Primary Legacy VPN"
         },
         tabs: {
           pipeline: "Pipeline",
@@ -184,6 +186,28 @@ const resources = {
         success_desc: "Your enterprise analysis report (ID: {{id}}) is ready. Redirecting you now...",
         error: "Verification Failed",
         error_desc: "The link may have expired or is invalid. Please start a new comparison."
+      },
+      legal: {
+        imprint: {
+          title: "Imprint",
+          provider_title: "Service Provider",
+          provider_details: "von Busch GmbH\nAlfred-Bozi-Straße 12\n33602 Bielefeld\nGermany",
+          contact_title: "Contact",
+          contact_details: "Email: security@vonbusch.digital\nWeb: www.vonbusch.digital",
+          register_title: "Commercial Register",
+          register_details: "Amtsgericht Bielefeld\nHRB 45678"
+        },
+        privacy: {
+          title: "Privacy Policy",
+          section1_title: "1. Data Collection",
+          section1_desc: "We collect data necessary for the ZTNA analysis, including organization name, contact person, and infrastructure metrics.",
+          section2_title: "2. Legal Basis",
+          section2_desc: "Data processing is based on your explicit consent (Art. 6 para. 1 lit. a GDPR) and our legitimate interest in delivering accurate security comparisons.",
+          section3_title: "3. Retention",
+          section3_desc: "Confirmed leads are stored for 24 months. Unverified leads are purged automatically after 30 days.",
+          section4_title: "4. Your Rights",
+          section4_desc: "You have the right to access, rectify, or delete your data at any time. Contact us at security@vonbusch.digital."
+        }
       }
     }
   },
@@ -326,12 +350,14 @@ const resources = {
         dashboard_desc: "Echtzeit-Überwachung des Lead-Lebenszyklus",
         sync_data: "Daten synchronisieren",
         export_csv: "CSV exportieren",
+        export_success: "CSV-Export erfolgreich gestartet",
         stats: {
           total: "Gesamte Anfragen",
           verified: "Verifizierte Leads",
           conversion: "Konversion",
           avg_seats: "Durchschn. Plätze",
-          lifetime: "GESAMTZEIT"
+          lifetime: "GESAMTZEIT",
+          common_vpn: "Häufigstes Legacy VPN"
         },
         tabs: {
           pipeline: "Pipeline",
@@ -346,7 +372,7 @@ const resources = {
           verification: "Verifizierung",
           management: "Verwaltung",
           no_leads: "Keine Leads gefunden.",
-          purge_confirm: "Lead-Daten dauerhaft löschen?",
+          purge_confirm: "Lead-Daten dauerhaft l��schen?",
           opt_out: "Widerspruch"
         },
         pricing: {
@@ -368,6 +394,28 @@ const resources = {
         success_desc: "Ihr Analyse-Bericht (ID: {{id}}) ist bereit. Weiterleitung erfolgt...",
         error: "Verifizierung fehlgeschlagen",
         error_desc: "Link abgelaufen oder ungültig. Bitte starten Sie erneut."
+      },
+      legal: {
+        imprint: {
+          title: "Impressum",
+          provider_title: "Dienstanbieter",
+          provider_details: "von Busch GmbH\nAlfred-Bozi-Straße 12\n33602 Bielefeld\nDeutschland",
+          contact_title: "Kontakt",
+          contact_details: "E-Mail: security@vonbusch.digital\nWeb: www.vonbusch.digital",
+          register_title: "Handelsregister",
+          register_details: "Amtsgericht Bielefeld\nHRB 45678"
+        },
+        privacy: {
+          title: "Datenschutzerklärung",
+          section1_title: "1. Datenerhebung",
+          section1_desc: "Wir erheben Daten, die für die ZTNA-Analyse notwendig sind, einschließlich Organisationsname, Ansprechpartner und Infrastrukturkennzahlen.",
+          section2_title: "2. Rechtsgrundlage",
+          section2_desc: "Die Datenverarbeitung basiert auf Ihrer ausdrücklichen Einwilligung (Art. 6 Abs. 1 lit. a DSGVO) und unserem berechtigten Interesse an präzisen Sicherheitsvergleichen.",
+          section3_title: "3. Aufbewahrung",
+          section3_desc: "Bestätigte Leads werden für 24 Monate gespeichert. Nicht verifizierte Leads werden nach 30 Tagen automatisch gelöscht.",
+          section4_title: "4. Ihre Rechte",
+          section4_desc: "Sie haben jederzeit das Recht auf Auskunft, Berichtigung oder Löschung Ihrer Daten. Kontaktieren Sie uns unter security@vonbusch.digital."
+        }
       }
     }
   },
@@ -415,7 +463,7 @@ const resources = {
         },
         faq: {
           title: "Perspectives stratégiques",
-          q1: "Les données sont-elles à jour ?",
+          q1: "Les données sont-elles �� jour ?",
           a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}",
           q2: "Pourquoi Cloudflare ?",
           a2: "Cloudflare propose actuellement la plateforme ZTNA la plus robuste et qualifiée BSI.",
@@ -504,18 +552,20 @@ const resources = {
       admin: {
         terminal_title: "Porte Sentinelle",
         terminal_desc: "Accès administratif requis",
-        terminal_key: "Clé d'autorité secr��te",
+        terminal_key: "Clé d'autorité secrète",
         terminal_unlock: "Déverrouiller le terminal",
         dashboard_title: "Tableau de bord exécutif",
         dashboard_desc: "Suivi en temps réel du cycle de vie des prospects",
         sync_data: "Synchroniser les données",
         export_csv: "Exporter CSV",
+        export_success: "Export CSV lancé avec succès",
         stats: {
           total: "Total demandes",
           verified: "Prospects vérifiés",
           conversion: "Conversion",
           avg_seats: "Sièges moyens",
-          lifetime: "À VIE"
+          lifetime: "À VIE",
+          common_vpn: "VPN Legacy Principal"
         },
         tabs: {
           pipeline: "Pipeline",
@@ -552,6 +602,28 @@ const resources = {
         success_desc: "Votre rapport (ID: {{id}}) est prêt. Redirection en cours...",
         error: "Échec de la vérification",
         error_desc: "Le lien a expiré ou est invalide. Veuillez recommencer l'analyse."
+      },
+      legal: {
+        imprint: {
+          title: "Mentions Légales",
+          provider_title: "Prestataire de services",
+          provider_details: "von Busch GmbH\nAlfred-Bozi-Straße 12\n33602 Bielefeld\nAllemagne",
+          contact_title: "Contact",
+          contact_details: "Email : security@vonbusch.digital\nWeb : www.vonbusch.digital",
+          register_title: "Registre du commerce",
+          register_details: "Amtsgericht Bielefeld\nHRB 45678"
+        },
+        privacy: {
+          title: "Politique de Confidentialité",
+          section1_title: "1. Collecte des données",
+          section1_desc: "Nous collectons les données nécessaires à l'analyse ZTNA, y compris le nom de l'organisation, la personne de contact et les mesures d'infrastructure.",
+          section2_title: "2. Base juridique",
+          section2_desc: "Le traitement des données est basé sur votre consentement explicite (Art. 6 al. 1 lit. a RGPD) et notre intérêt légitime à fournir des comparaisons de sécurité précises.",
+          section3_title: "3. Conservation",
+          section3_desc: "Les prospects confirmés sont conservés pendant 24 mois. Les prospects non vérifiés sont purgés automatiquement après 30 jours.",
+          section4_title: "4. Vos droits",
+          section4_desc: "Vous avez le droit d'accéder à vos données, de les rectifier ou de les supprimer à tout moment. Contactez-nous à security@vonbusch.digital."
+        }
       }
     }
   }
