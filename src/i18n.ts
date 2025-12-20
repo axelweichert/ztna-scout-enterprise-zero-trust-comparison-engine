@@ -20,7 +20,7 @@ const resources = {
         footer: {
           imprint: "Imprint",
           privacy: "Privacy Policy",
-          credit: "Engineered with precision for"
+          credit: "Built with ♥ at"
         }
       },
       home: {
@@ -124,6 +124,9 @@ const resources = {
           total_score: "Scout Score",
           analytical_breakdown: "Analytical Breakdown",
           market_rank: "Market Rank",
+          rank_1: "1st Place",
+          rank_2: "2nd Place",
+          rank_3: "3rd Place",
           scout_total: "Scout Total",
           close_deep_dive: "Close Deep-Dive",
           expert_take_desc: {
@@ -228,7 +231,7 @@ const resources = {
         footer: {
           imprint: "Impressum",
           privacy: "Datenschutz",
-          credit: "Entwickelt mit Präzision für"
+          credit: "Mit ♥ bei"
         }
       },
       home: {
@@ -236,7 +239,7 @@ const resources = {
           badge: "B2B Analyse Engine",
           title1: "Enterprise Security",
           title2: "Vergleich neu gedacht",
-          description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
+          description: "Schluss mit Sch��tzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen"
         },
@@ -332,6 +335,9 @@ const resources = {
           total_score: "Scout Score",
           analytical_breakdown: "Analytische Aufschlüsselung",
           market_rank: "Marktrang",
+          rank_1: "1. Platz",
+          rank_2: "2. Platz",
+          rank_3: "3. Platz",
           scout_total: "Scout Gesamt",
           close_deep_dive: "Analyse schließen",
           expert_take_desc: {
@@ -372,7 +378,7 @@ const resources = {
           verification: "Verifizierung",
           management: "Verwaltung",
           no_leads: "Keine Leads gefunden.",
-          purge_confirm: "Lead-Daten dauerhaft l��schen?",
+          purge_confirm: "Lead-Daten dauerhaft löschen?",
           opt_out: "Widerspruch"
         },
         pricing: {
@@ -428,7 +434,7 @@ const resources = {
       layout: {
         header: {
           tooltips: {
-            vonBusch: "Développé par von Busch Digital",
+            vonBusch: "Développ�� par von Busch Digital",
             cloudflare: "Propulsé par Cloudflare Infrastructure",
             ubiquiti: "Cadre d'audit de sécurité"
           }
@@ -436,7 +442,7 @@ const resources = {
         footer: {
           imprint: "Mentions Légales",
           privacy: "Confidentialité",
-          credit: "Conçu avec précision pour"
+          credit: "Développé avec ♥ chez"
         }
       },
       home: {
@@ -463,7 +469,7 @@ const resources = {
         },
         faq: {
           title: "Perspectives stratégiques",
-          q1: "Les données sont-elles �� jour ?",
+          q1: "Les données sont-elles à jour ?",
           a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}",
           q2: "Pourquoi Cloudflare ?",
           a2: "Cloudflare propose actuellement la plateforme ZTNA la plus robuste et qualifiée BSI.",
@@ -540,6 +546,9 @@ const resources = {
           total_score: "Score Scout",
           analytical_breakdown: "Analyse détaillée",
           market_rank: "Rang du marché",
+          rank_1: "1ère place",
+          rank_2: "2ème place",
+          rank_3: "3ème place",
           scout_total: "Total Scout",
           close_deep_dive: "Fermer l'analyse",
           expert_take_desc: {

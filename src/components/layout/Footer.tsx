@@ -10,17 +10,17 @@ export function Footer({ className }: { className?: string }) {
           <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-xs text-muted-foreground print:text-black print:text-[8pt]">
             <span className="font-medium">von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld</span>
             <div className="flex gap-4">
-              <a 
-                href="https://www.vonbusch.digital/impressum" 
-                target="_blank" 
+              <a
+                href="https://www.vonbusch.digital/impressum"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors underline-offset-4 hover:underline"
               >
                 {t('layout.footer.imprint')}
               </a>
-              <a 
-                href="https://www.vonbusch.digital/datenschutz" 
-                target="_blank" 
+              <a
+                href="https://www.vonbusch.digital/datenschutz"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="hover:text-foreground transition-colors underline-offset-4 hover:underline"
               >
@@ -28,13 +28,13 @@ export function Footer({ className }: { className?: string }) {
               </a>
             </div>
           </div>
-          <div className="text-xs text-muted-foreground print:text-black print:text-[8pt]">
+          <div className="text-xs text-muted-foreground print:text-black print:text-[8pt] flex items-center gap-1">
             {t('layout.footer.credit')}
-            <a 
-              href="https://www.cloudflare.com" 
-              target="_blank" 
+            <a
+              href="https://www.cloudflare.com"
+              target="_blank"
               rel="noopener noreferrer"
-              className="ml-1 text-primary hover:underline font-semibold"
+              className="text-primary hover:underline font-semibold"
             >
               Cloudflare
             </a>.

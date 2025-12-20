@@ -60,8 +60,8 @@ export function PrintResultsPage() {
         </section>
         <section className="mb-10">
           <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">{t('results.tco_title')}</h2>
-          <div className="h-[550px] w-full border p-4">
-            <ResponsiveContainer width="100%" height="100%">
+          <div className="w-full min-h-[550px] border p-4">
+            <ResponsiveContainer width="100%" height={550} debounce={100}>
               <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 80, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" hide />
@@ -93,15 +93,17 @@ export function PrintResultsPage() {
             <thead>
               <tr className="bg-black text-white">
                 <th className="p-2 text-left border">Vendor</th>
+                <th className="p-2 text-center border">{t('results.matrix.market_rank')}</th>
                 <th className="p-2 text-center border">{t('results.matrix.price_score')}</th>
                 <th className="p-2 text-center border">{t('results.matrix.feature_score')}</th>
                 <th className="p-2 text-center border font-bold">{t('results.matrix.total_score')}</th>
               </tr>
             </thead>
             <tbody>
-              {sortedResults.map((r) => (
+              {sortedResults.map((r, i) => (
                 <tr key={r.vendorId} className="border-b">
                   <td className="p-2 font-bold border">{r.vendorName}</td>
+                  <td className="p-2 text-center border">{t(`results.matrix.rank_${i + 1}`)}</td>
                   <td className="p-2 text-center border">{r.scores?.priceScore}</td>
                   <td className="p-2 text-center border">{r.scores?.featureScore}</td>
                   <td className="p-2 text-center border font-bold bg-gray-50">{r.scores?.totalScore}</td>

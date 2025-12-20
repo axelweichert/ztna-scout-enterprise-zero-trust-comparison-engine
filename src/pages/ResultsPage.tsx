@@ -151,7 +151,7 @@ export function ResultsPage() {
                       <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
                       <div className="flex items-center justify-between mt-2">
                         <p className="text-primary font-bold text-lg">{t('results.matrix.total_score')}: {v.scores?.totalScore}</p>
-                        <Badge variant="outline" className="text-[10px] uppercase">{i + 1}. Place</Badge>
+                        <Badge variant="outline" className="text-[10px] uppercase font-bold">{t(`results.matrix.rank_${i + 1}`)}</Badge>
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
@@ -211,8 +211,8 @@ export function ResultsPage() {
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-4 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
-            <div className="h-[550px] w-full">
-              <ResponsiveContainer width="100%" height="100%" aspect={16/9} minHeight={550}>
+            <div className="w-full min-h-[550px] relative">
+              <ResponsiveContainer width="100%" height={550} debounce={100}>
                 <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 60, top: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
