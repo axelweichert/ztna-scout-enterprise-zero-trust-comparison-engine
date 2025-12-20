@@ -16,7 +16,7 @@ import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { MailCheck, Loader2 } from 'lucide-react';
-import type { LeadFormData, Timing } from '@shared/types';
+import type { LeadFormData } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),
   contactName: z.string().min(2, "Required"),
@@ -24,6 +24,7 @@ const leadSchema = z.object({
   phone: z.string().min(6, "Invalid phone").regex(/^[0-9+\s\-().]+$/, "Invalid characters"),
   seats: z.number().min(1, "Minimum 1 seat"),
   vpnStatus: z.enum(['active', 'replacing', 'none'] as const),
+  timing: z.enum(['immediate', '3_months', '6_months', 'planning'] as const),
 });
 export function LeadFormPage() {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export function LeadFormPage() {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
-  const form = useForm<LeadFormData & { timing: Timing }>({
+  const form = useForm<LeadFormData>({
     resolver: zodResolver(leadSchema),
     defaultValues: {
       vpnStatus: 'active',
@@ -49,7 +50,7 @@ export function LeadFormPage() {
     { title: t('form.steps.requirements') },
     { title: t('form.steps.legal') }
   ];
-  const handleFormSubmit: SubmitHandler<LeadFormData & { timing: Timing }> = async (data) => {
+  const handleFormSubmit: SubmitHandler<LeadFormData> = async (data) => {
     if (!turnstileToken) {
       toast.error("Please complete the bot verification.");
       return;
@@ -158,7 +159,10 @@ export function LeadFormPage() {
                         </p>
                       </div>
                       <div className="flex justify-center py-4">
-                        <Turnstile sitekey="1x00000000000000000000AA" onVerify={(token) => setTurnstileToken(token)} />
+                        <Turnstile 
+                          sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"} 
+                          onVerify={(token) => setTurnstileToken(token)} 
+                        />
                       </div>
                       <div className="flex gap-4">
                         <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(1)} disabled={isProcessing}>{t('form.buttons.back')}</Button>

@@ -5,7 +5,8 @@ import { IndexedEntity, Entity } from "./core-utils";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, AdminStats, TimeSeriesData
+  VerificationToken, OptOutToken, AdminStats, TimeSeriesData,
+  EmailEvent
 } from "@shared/types";
 import { calculateTCO, calculateScores } from "../src/lib/calculator";
 import vendors from "../data/vendors.json";
@@ -18,7 +19,7 @@ class LeadEntity extends IndexedEntity<Lead> {
     id: "", companyName: "", contactName: "", email: "", phone: "",
     seats: 0, vpnStatus: 'none', budgetRange: "",
     timing: 'planning', consentGiven: false, createdAt: 0,
-    status: 'pending', contactAllowed: true
+    status: 'pending', contactAllowed: true, emailStatus: 'pending'
   };
 }
 class ComparisonEntity extends IndexedEntity<ComparisonSnapshot> {
@@ -42,8 +43,14 @@ class PricingOverrideEntity extends Entity<PricingOverride> {
     vendorId: "", basePricePerMonth: 0, isQuoteOnly: false, updatedAt: 0
   };
 }
+class EmailEventEntity extends IndexedEntity<EmailEvent> {
+  static readonly entityName = "email-event";
+  static readonly indexName = "email-events";
+  static readonly initialState: EmailEvent = {
+    id: "", leadId: "", recipient: "", status: 'failed', createdAt: 0
+  };
+}
 async function verifyTurnstile(token: string, secret: string) {
-  if (token === "testing") return true;
   if (!token) return false;
   const formData = new FormData();
   formData.append('secret', secret);
@@ -55,18 +62,45 @@ async function verifyTurnstile(token: string, secret: string) {
   const outcome = await res.json() as { success: boolean };
   return outcome.success;
 }
-export function userRoutes(app: Hono<{ Bindings: Env }>) {
-  app.use('/api/*', async (c, next) => {
-    await next();
-    const contentType = c.res.headers.get('Content-Type');
-    if (contentType && !contentType.includes('charset')) {
-      c.res.headers.set('Content-Type', `${contentType}; charset=utf-8`);
+async function sendVerificationEmail(env: any, lead: Lead, token: string, optOutToken: string) {
+  const baseUrl = env.PUBLIC_BASE_URL || 'https://ztna-scout.pages.dev';
+  const verifyUrl = `${baseUrl}/verify/${token}`;
+  const optOutUrl = `${baseUrl}/opt-out?token=${optOutToken}`;
+  const fromEmail = env.EMAIL_FROM || 'security@vonbusch.digital';
+  const subject = lead.vpnStatus === 'none' ? "ZTNA Scout: Your Security Analysis" : "ZTNA Scout: Verify your analysis request";
+  const body = `Hello ${lead.contactName},\n\nThank you for using ZTNA Scout. To ensure data integrity, please verify your request by clicking the link below:\n\n${verifyUrl}\n\nThis analysis is for ${lead.seats} seats at ${lead.companyName}.\n\nIf you wish to object to further contact from our security architects, please use this link: ${optOutUrl}\n\nBest regards,\nThe ZTNA Scout Team`;
+  try {
+    // Attempting via Resend if API key exists, otherwise logging
+    if (env.RESEND_API_KEY) {
+      const res = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          from: `ZTNA Scout <${fromEmail}>`,
+          to: lead.email,
+          subject,
+          text: body
+        })
+      });
+      if (!res.ok) throw new Error(await res.text());
+    } else {
+      console.warn('RESEND_API_KEY missing - Email not sent. Verify URL:', verifyUrl);
     }
-  });
+    return { success: true };
+  } catch (e) {
+    console.error('Email delivery failed:', e);
+    return { success: false, error: e instanceof Error ? e.message : String(e) };
+  }
+}
+export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: string, RESEND_API_KEY: string, PUBLIC_BASE_URL: string, EMAIL_FROM: string } }>) {
   app.post('/api/submit', async (c) => {
     try {
       const { turnstileToken, ...input } = await c.req.json();
-      const isHuman = await verifyTurnstile(turnstileToken, "1x0000000000000000000000000000000AA");
+      const secret = c.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+      const isHuman = await verifyTurnstile(turnstileToken, secret);
       if (!isHuman) return bad(c, 'Verification failed. Please try again.');
       const leadId = crypto.randomUUID();
       const ip = c.req.header('cf-connecting-ip') || 'unknown';
@@ -77,6 +111,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         status: 'pending',
         contactAllowed: true,
         consentGiven: true,
+        emailStatus: 'pending',
         timing: input.timing || 'immediate',
         consentRecord: {
           ipHash: btoa(ip).slice(0, 12),
@@ -87,14 +122,30 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         }
       };
       await LeadEntity.create(c.env, lead);
-      const token = crypto.randomUUID();
-      const tokenEntity = new VerificationTokenEntity(c.env, token);
-      await tokenEntity.save({ hash: token, leadId, expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) });
-      const optOutToken = crypto.randomUUID();
-      const optOutEntity = new OptOutTokenEntity(c.env, optOutToken);
-      await optOutEntity.save({ hash: optOutToken, leadId, createdAt: Date.now() });
+      const vToken = crypto.randomUUID();
+      const vTokenEntity = new VerificationTokenEntity(c.env, vToken);
+      await vTokenEntity.save({ hash: vToken, leadId, expiresAt: Date.now() + (7 * 24 * 60 * 60 * 1000) });
+      const oToken = crypto.randomUUID();
+      const oTokenEntity = new OptOutTokenEntity(c.env, oToken);
+      await oTokenEntity.save({ hash: oToken, leadId, createdAt: Date.now() });
+      // Trigger Email
+      const emailRes = await sendVerificationEmail(c.env, lead, vToken, oToken);
+      const emailStatus = emailRes.success ? 'sent' : 'failed';
+      await new LeadEntity(c.env, leadId).patch({ 
+        emailStatus, 
+        emailError: emailRes.error 
+      });
+      await EmailEventEntity.create(c.env, {
+        id: crypto.randomUUID(),
+        leadId,
+        recipient: lead.email,
+        status: emailStatus,
+        errorMessage: emailRes.error,
+        createdAt: Date.now()
+      });
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
+      console.error('Submission failed:', e);
       return bad(c, 'Submission failed');
     }
   });
@@ -109,24 +160,17 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return ok(c, { comparisonId: leadState.comparisonId });
     }
     if (tokenData.usedAt || tokenData.expiresAt < Date.now()) return bad(c, 'Token expired or used');
-    const allVendorResults = await Promise.all(vendors.map(async (v) => {
-        const overrideInst = new PricingOverrideEntity(c.env, v.id);
-        const override = await overrideInst.exists() ? await overrideInst.getState() : null;
+    const allVendorResults = vendors.map((v) => {
         const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
-        const currentPricing: PricingModel = {
-          ...basePricing,
-          basePricePerMonth: (override && override.basePricePerMonth > 0) ? override.basePricePerMonth : basePricing.basePricePerMonth,
-          isQuoteOnly: override ? override.isQuoteOnly : basePricing.isQuoteOnly
-        };
         const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
         return {
           id: v.id,
           name: v.name,
-          pricing: currentPricing,
+          pricing: basePricing,
           features: vendorFeatures,
-          tco: calculateTCO(leadState.seats, currentPricing)
+          tco: calculateTCO(leadState.seats, basePricing)
         };
-    }));
+    });
     const tcos = allVendorResults.map(r => r.tco);
     const results: ComparisonResult[] = allVendorResults.map(r => ({
       vendorId: r.id,
@@ -158,8 +202,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, { success: true });
   });
   app.get('/api/comparison/:id', async (c) => {
-    const id = c.req.param('id');
-    const comp = new ComparisonEntity(c.env, id);
+    const comp = new ComparisonEntity(c.env, c.req.param('id'));
     if (!await comp.exists()) return notFound(c);
     return ok(c, await comp.getState());
   });
@@ -168,8 +211,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
   });
   app.delete('/api/admin/leads/:id', async (c) => {
-    const id = c.req.param('id');
-    const deleted = await LeadEntity.delete(c.env, id);
+    const deleted = await LeadEntity.delete(c.env, c.req.param('id'));
     return ok(c, { success: deleted });
   });
   app.get('/api/admin/stats', async (c) => {
@@ -177,14 +219,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const leads = leadRes.items;
     const totalLeads = leads.length;
     const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
-    const pendingLeads = totalLeads - confirmedLeads;
     const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
     const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, curr) => acc + (curr.seats || 0), 0) / totalLeads) : 0;
-    // Simple vpn tally
-    const vpnTally: Record<string, number> = {};
-    leads.forEach(l => { vpnTally[l.vpnStatus] = (vpnTally[l.vpnStatus] || 0) + 1; });
-    const mostCommonVpn = Object.entries(vpnTally).sort((a, b) => b[1] - a[1])[0]?.[0] || 'none';
-    // Last 14 days daily leads
     const dailyLeads: TimeSeriesData[] = [];
     const now = new Date();
     for (let i = 13; i >= 0; i--) {
@@ -198,32 +234,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         confirmed: dayLeads.filter(l => l.status === 'confirmed').length
       });
     }
-    const stats: AdminStats = {
-      totalLeads,
-      pendingLeads,
-      confirmedLeads,
-      conversionRate,
-      avgSeats,
-      mostCommonVpn,
-      dailyLeads
-    };
-    return ok(c, stats);
-  });
-  app.get('/api/admin/leads/export', async (c) => {
-    const leadsRes = await LeadEntity.list(c.env, null, 1000);
-    const leads = leadsRes.items.sort((a, b) => b.createdAt - a.createdAt);
-    const header = "ID;Created;Company;Contact;Email;Phone;Seats;Status;ContactAllowed\n";
-    const rows = leads.map(l => {
-      const date = new Date(l.createdAt).toISOString();
-      return `${l.id};${date};${l.companyName};${l.contactName};${l.email};${l.phone};${l.seats};${l.status};${l.contactAllowed}`;
-    }).join("\n");
-    const csvContent = "\uFEFF" + header + rows;
-    return new Response(csvContent, {
-      headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': 'attachment; filename="ztna_scout_leads_export.csv"'
-      }
-    });
+    return ok(c, { totalLeads, pendingLeads: totalLeads - confirmedLeads, confirmedLeads, conversionRate, avgSeats, mostCommonVpn: 'none', dailyLeads });
   });
   app.post('/api/admin/pricing', async (c) => {
     const update = await c.req.json<PricingOverride>();
