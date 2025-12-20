@@ -71,7 +71,7 @@ export function LeadFormPage() {
   const nextStep = async () => {
     const fields = step === 0
       ? ['companyName', 'contactName', 'email', 'phone']
-      : ['seats', 'vpnStatus'];
+      : ['seats', 'vpnStatus', 'timing'];
     const isValid = await form.trigger(fields as any);
     if (isValid) setStep(s => s + 1);
   };
@@ -136,13 +136,24 @@ export function LeadFormPage() {
                         <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.seats')}</Label>
                         <Input {...form.register('seats', { valueAsNumber: true })} type="number" className="h-14 rounded-xl" />
                       </div>
-                      <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.vpnStatus')}</Label>
-                        <select {...form.register('vpnStatus')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
-                          <option value="active">{t('form.options.vpn_active')}</option>
-                          <option value="replacing">{t('form.options.vpn_replacing')}</option>
-                          <option value="none">{t('form.options.vpn_none')}</option>
-                        </select>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.vpnStatus')}</Label>
+                          <select {...form.register('vpnStatus')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
+                            <option value="active">{t('form.options.vpn_active')}</option>
+                            <option value="replacing">{t('form.options.vpn_replacing')}</option>
+                            <option value="none">{t('form.options.vpn_none')}</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.timing')}</Label>
+                          <select {...form.register('timing')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
+                            <option value="immediate">{t('form.options.timing_immediate')}</option>
+                            <option value="3_months">{t('form.options.timing_3m')}</option>
+                            <option value="6_months">{t('form.options.timing_6m')}</option>
+                            <option value="planning">{t('form.options.timing_planning')}</option>
+                          </select>
+                        </div>
                       </div>
                       <div className="flex gap-4 pt-4">
                         <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(0)}>{t('form.buttons.back')}</Button>
@@ -159,9 +170,9 @@ export function LeadFormPage() {
                         </p>
                       </div>
                       <div className="flex justify-center py-4">
-                        <Turnstile 
-                          sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"} 
-                          onVerify={(token) => setTurnstileToken(token)} 
+                        <Turnstile
+                          sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
+                          onVerify={(token) => setTurnstileToken(token)}
                         />
                       </div>
                       <div className="flex gap-4">

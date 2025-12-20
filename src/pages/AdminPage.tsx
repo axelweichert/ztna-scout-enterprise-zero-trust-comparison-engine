@@ -9,13 +9,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { toast } from 'sonner';
-import { Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, History, Phone, AlertCircle, Loader2, CheckCircle2, XCircle } from 'lucide-react';
-import type { Lead, PricingOverride, AdminStats } from '@shared/types';
+import { Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, History, Loader2, CheckCircle2, XCircle, RefreshCw, Users, Clock } from 'lucide-react';
+import type { Lead, AdminStats } from '@shared/types';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 export function AdminPage() {
@@ -24,12 +21,12 @@ export function AdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
   const [hideOptOuts, setHideOptOuts] = useState(false);
-  const { data: leads, isLoading: leadsLoading } = useQuery({
+  const { data: leads, isLoading: leadsLoading, isRefetching: leadsRefetching } = useQuery({
     queryKey: ['admin-leads'],
     queryFn: () => api<Lead[]>('/api/admin/leads'),
     enabled: isAuthenticated
   });
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => api<AdminStats>('/api/admin/stats'),
     enabled: isAuthenticated
@@ -38,9 +35,14 @@ export function AdminPage() {
     mutationFn: (id: string) => api(`/api/admin/leads/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-leads'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
       toast.success("Lead purged from secure storage");
     }
   });
+  const handleRefresh = () => {
+    queryClient.invalidateQueries({ queryKey: ['admin-leads'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+  };
   const filteredLeads = leads?.filter(l => !hideOptOuts || l.contactAllowed) || [];
   if (!isAuthenticated) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
@@ -57,7 +59,7 @@ export function AdminPage() {
             type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
-            placeholder="��•••••••"
+            placeholder="••••••••"
             onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
           />
           <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Invalid credentials")} className="w-full btn-gradient">Verify Authority</Button>
@@ -74,6 +76,10 @@ export function AdminPage() {
             <p className="text-muted-foreground italic">Lead lifecycle and market positioning analytics</p>
           </div>
           <div className="flex gap-3">
+            <Button variant="outline" className="h-12 border-2" onClick={handleRefresh} disabled={leadsRefetching}>
+              <RefreshCw className={cn("mr-2 w-4 h-4", leadsRefetching && "animate-spin")} />
+              Refresh
+            </Button>
             <Button variant="outline" className="h-12 border-2">
               <Download className="mr-2 w-4 h-4" /> Reports
             </Button>
@@ -83,8 +89,8 @@ export function AdminPage() {
           {[
             { label: 'Total Inquiries', val: stats?.totalLeads, icon: Mail, color: 'text-primary' },
             { label: 'Verified Leads', val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-green-600' },
-            { label: 'DOI Conversion', val: `${stats?.conversionRate}%`, icon: TrendingUp, color: 'text-blue-600' },
-            { label: 'Avg Scale', val: `${stats?.avgSeats} Seats`, icon: History, color: 'text-orange-600' }
+            { label: 'DOI Conversion', val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600' },
+            { label: 'Avg Scale', val: stats?.avgSeats !== undefined ? `${stats.avgSeats} Seats` : '...', icon: Users, color: 'text-orange-600' }
           ].map((item, i) => (
             <Card key={i} className="border-none shadow-soft group">
               <CardContent className="p-6">
@@ -92,7 +98,9 @@ export function AdminPage() {
                   <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{item.label}</span>
                   <item.icon className={cn("w-5 h-5", item.color)} />
                 </div>
-                <div className="text-3xl font-bold">{item.val ?? '...'}</div>
+                <div className="text-3xl font-bold">
+                  {statsLoading ? <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /> : (item.val ?? '0')}
+                </div>
               </CardContent>
             </Card>
           ))}
@@ -100,7 +108,7 @@ export function AdminPage() {
         <Tabs defaultValue="pipeline" className="space-y-8">
           <TabsList className="bg-white border p-1 rounded-xl h-12">
             <TabsTrigger value="pipeline" className="px-8">Pipeline Analytics</TabsTrigger>
-            <TabsTrigger value="pricing" className="px-8">Market Control</TabsTrigger>
+            <TabsTrigger value="settings" className="px-8">Privacy Rules</TabsTrigger>
           </TabsList>
           <TabsContent value="pipeline" className="animate-in fade-in duration-500">
             <Card className="shadow-lg border-none overflow-hidden rounded-2xl">
@@ -109,6 +117,7 @@ export function AdminPage() {
                   <TableRow>
                     <TableHead className="p-4 font-bold uppercase text-[10px]">Received</TableHead>
                     <TableHead className="font-bold uppercase text-[10px]">Entity</TableHead>
+                    <TableHead className="font-bold uppercase text-[10px]">Seats</TableHead>
                     <TableHead className="font-bold uppercase text-[10px]">Status</TableHead>
                     <TableHead className="font-bold uppercase text-[10px]">Email Status</TableHead>
                     <TableHead className="text-right font-bold uppercase text-[10px] pr-8">Actions</TableHead>
@@ -116,16 +125,24 @@ export function AdminPage() {
                 </TableHeader>
                 <TableBody>
                   {leadsLoading ? (
-                    <TableRow><TableCell colSpan={5} className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
+                    <TableRow><TableCell colSpan={6} className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
+                  ) : filteredLeads.length === 0 ? (
+                    <TableRow><TableCell colSpan={6} className="p-10 text-center text-muted-foreground">No leads in the pipeline.</TableCell></TableRow>
                   ) : filteredLeads.map(lead => (
                     <TableRow key={lead.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell className="text-[10px] text-muted-foreground font-mono pl-4">{format(lead.createdAt, 'MMM dd, HH:mm')}</TableCell>
                       <TableCell>
                         <div className="flex flex-col">
                           <span className="font-bold text-sm">{lead.companyName}</span>
-                          <span className="text-xs text-muted-foreground">{lead.email}</span>
+                          <div className="flex items-center gap-2 mt-1">
+                             <Badge variant="outline" className="text-[9px] h-4 py-0 flex items-center gap-1 border-muted text-muted-foreground">
+                               <Clock className="w-2.5 h-2.5" /> {lead.timing?.replace('_', ' ').toUpperCase() || 'N/A'}
+                             </Badge>
+                             {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0">OPT-OUT</Badge>}
+                          </div>
                         </div>
                       </TableCell>
+                      <TableCell className="font-bold text-sm">{lead.seats}</TableCell>
                       <TableCell>
                         <Badge variant={lead.status === 'confirmed' ? 'default' : 'outline'} className={cn(lead.status === 'confirmed' ? "bg-green-100 text-green-700 border-none" : "text-yellow-600 border-yellow-200")}>
                           {lead.status.toUpperCase()}
@@ -150,7 +167,7 @@ export function AdminPage() {
                               </div>
                             </TooltipTrigger>
                             {lead.emailError && (
-                              <TooltipContent className="bg-red-50 text-red-700 border-red-200 text-xs">
+                              <TooltipContent className="bg-red-50 text-red-700 border-red-200 text-xs max-w-xs">
                                 {lead.emailError}
                               </TooltipContent>
                             )}
@@ -161,7 +178,7 @@ export function AdminPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => { if(window.confirm("Purge lead?")) deleteLead.mutate(lead.id); }}
+                          onClick={() => { if(window.confirm("Purge lead data permanently?")) deleteLead.mutate(lead.id); }}
                           className="text-red-400 hover:text-red-600"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -172,6 +189,25 @@ export function AdminPage() {
                 </TableBody>
               </Table>
             </Card>
+          </TabsContent>
+          <TabsContent value="settings">
+             <Card className="shadow-lg border-none p-8">
+                <div className="flex items-center justify-between">
+                   <div className="space-y-1">
+                      <h3 className="text-lg font-bold">Privacy Controls</h3>
+                      <p className="text-sm text-muted-foreground">Toggle visibility of leads that have objected to further contact.</p>
+                   </div>
+                   <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">Hide Opt-Outs</span>
+                      <Button 
+                        variant={hideOptOuts ? "default" : "outline"} 
+                        onClick={() => setHideOptOuts(!hideOptOuts)}
+                      >
+                        {hideOptOuts ? "Enabled" : "Disabled"}
+                      </Button>
+                   </div>
+                </div>
+             </Card>
           </TabsContent>
         </Tabs>
       </div>
