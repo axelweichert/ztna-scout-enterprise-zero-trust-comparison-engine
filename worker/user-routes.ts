@@ -110,23 +110,25 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/submit', async (c) => {
     try {
-      const { turnstileToken, ...input } = await c.req.json();
+      const input = await c.req.json();
+      console.log('[API SUBMIT] Inbound Lead Request:', JSON.stringify(input));
+      const { turnstileToken, ...formData } = input;
       const env = c.env as any;
-      const secret = env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+      const secret = env.PUBLIC_TURNSTILE_SECRET_KEY || env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
       const isHuman = await verifyTurnstile(turnstileToken, secret);
       if (!isHuman) return bad(c, 'Verification failed. Please try again.');
       const leadId = crypto.randomUUID();
       const ip = c.req.header('cf-connecting-ip') || 'unknown';
       const lead: Lead = {
-        ...input,
+        ...formData,
         id: leadId,
         createdAt: Date.now(),
         status: 'pending',
         contactAllowed: true,
         consentGiven: true,
         emailStatus: 'pending',
-        timing: input.timing || 'immediate',
-        budgetRange: input.budgetRange || 'med',
+        timing: formData.timing || 'immediate',
+        budgetRange: formData.budgetRange || 'med',
         consentRecord: {
           ipHash: btoa(ip).slice(0, 12),
           userAgent: c.req.header('user-agent') || 'unknown',
@@ -300,5 +302,10 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await leadEntity.patch({ contactAllowed: false, optedOutAt: Date.now() });
     return ok(c, { success: true });
   });
-  app.get('/api/config', (c) => ok(c, { turnstileSiteKey: (c.env as any).TURNSTILE_SITE_KEY || "1x00000000000000000000AA" }));
+  app.get('/api/config', (c) => {
+    const env = c.env as any;
+    return ok(c, { 
+      turnstileSiteKey: env.PUBLIC_TURNSTILE_SITE_KEY || env.TURNSTILE_SITE_KEY || "1x00000000000000000000AA" 
+    });
+  });
 }
