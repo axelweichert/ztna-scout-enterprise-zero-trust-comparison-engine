@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, Variants } from 'framer-motion';
+import { motion, Variants, AnimatePresence } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -85,14 +85,11 @@ export function HomePage() {
                 {t('home.hero.cta_primary')}
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => navigate('/vergleich/sample')}
-                className="h-16 px-12 text-lg rounded-2xl border-2 hover:bg-slate-50 transition-colors gap-2"
-              >
-                <Sparkles className="w-5 h-5 text-primary" />
-                {t('home.hero.cta_secondary')}
+              <Button asChild size="lg" variant="outline" className="h-16 px-12 text-lg rounded-2xl border-2 hover:bg-slate-50 transition-colors gap-2 cursor-pointer">
+                <a href={`${window.location.origin}/vergleich/sample`}>
+                  <Sparkles className="w-5 h-5 text-primary" />
+                  {t('home.hero.cta_secondary')}
+                </a>
               </Button>
             </motion.div>
             <motion.div
@@ -103,10 +100,10 @@ export function HomePage() {
               className="mt-32 pt-16 border-t flex flex-wrap justify-center gap-12 md:gap-24"
             >
               {[
-                { icon: ShieldCheck, label: 'BSI Qualified' },
-                { icon: Lock, label: 'GDPR Enforced' },
-                { icon: FileText, label: 'PDF Export' },
-                { icon: Globe, label: 'Global SASE' }
+                { icon: ShieldCheck, label: t('home.trust.bsi') },
+                { icon: Lock, label: t('home.trust.gdpr') },
+                { icon: FileText, label: t('home.trust.pdf') },
+                { icon: Globe, label: t('home.trust.sase') }
               ].map((trust, idx) => (
                 <div key={idx} className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-opacity duration-300">
                   <trust.icon className="w-5 h-5 text-foreground" />

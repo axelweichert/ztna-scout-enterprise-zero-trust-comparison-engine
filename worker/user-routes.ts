@@ -52,18 +52,25 @@ class EmailEventEntity extends IndexedEntity<EmailEvent> {
 }
 async function verifyTurnstile(token: string, secret: string) {
   if (!token) return false;
-  const formData = new FormData();
-  formData.append('secret', secret);
-  formData.append('response', token);
-  const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-    method: 'POST',
-    body: formData
-  });
-  const outcome = await res.json() as { success: boolean };
-  return outcome.success;
+  try {
+    const formData = new FormData();
+    formData.append('secret', secret);
+    formData.append('response', token);
+    const res = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+      method: 'POST',
+      body: formData
+    });
+    const outcome = await res.json() as { success: boolean };
+    return outcome.success;
+  } catch (err) {
+    console.error('[WORKER ERROR] Turnstile fetch failed:', err);
+    return false;
+  }
 }
 async function sendVerificationEmail(env: any, lead: Lead, token: string, optOutToken: string) {
-  const baseUrl = env.PUBLIC_BASE_URL || 'https://ztna-scout.pages.dev';
+  let baseUrl = env.PUBLIC_BASE_URL || 'https://ztna-scout.pages.dev';
+  if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
+
   const verifyUrl = `${baseUrl}/verify/${token}`;
   const optOutUrl = `${baseUrl}/opt-out?token=${optOutToken}`;
   const fromEmail = env.EMAIL_FROM || 'security@vonbusch.digital';
@@ -71,6 +78,8 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
   const body = `Hello ${lead.contactName},\n\nThank you for using ZTNA Scout. To ensure data integrity, please verify your request by clicking the link below:\n\n${verifyUrl}\n\nThis analysis is for ${lead.seats} seats at ${lead.companyName}.\n\nIf you wish to object to further contact from our security architects, please use this link: ${optOutUrl}\n\nBest regards,\nThe ZTNA Scout Team`;
   try {
     if (env.RESEND_API_KEY) {
+      const resendUrl = 'https://api.resend.com/emails';
+      console.log(`[WORKER DIAGNOSTIC] Dispatching email via: ${resendUrl}`);
       const res = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
@@ -84,7 +93,7 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
           text: body
         })
       });
-      if (!res.ok) throw new Error(await res.text());
+      if (!res.ok) throw new Error(`Resend API returned ${res.status}: ${await res.text()}`);
     }
     return { success: true };
   } catch (e) {
@@ -311,6 +320,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/config', (c) => {
     const env = c.env as any;
+    if (!env.PUBLIC_TURNSTILE_SITE_KEY && !env.TURNSTILE_SITE_KEY) {
+      console.warn('[WORKER CONFIG] Using Turnstile test site key - Check environment variables');
+    }
     return ok(c, {
       turnstileSiteKey: env.PUBLIC_TURNSTILE_SITE_KEY || env.TURNSTILE_SITE_KEY || "1x00000000000000000000AA"
     });

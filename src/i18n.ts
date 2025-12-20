@@ -7,7 +7,7 @@ const resources = {
     translation: {
       common: {
         data_freshness: appConfig.data_freshness.en,
-        currency_symbol: "€"
+        currency_symbol: "��"
       },
       layout: {
         header: {
@@ -31,6 +31,12 @@ const resources = {
           description: "Stop guessing. Compare 13+ ZTNA providers with deterministic TCO projections and BSI compliance scoring.",
           cta_primary: "Start Free Analysis",
           cta_secondary: "Explore Live Sample"
+        },
+        trust: {
+          bsi: "BSI Qualified",
+          gdpr: "GDPR Enforced",
+          pdf: "PDF Export",
+          sase: "Global SASE"
         },
         steps: {
           title: "The ZTNA Scout Methodology",
@@ -72,7 +78,7 @@ const resources = {
           timing_3m: "Within 3 Months",
           timing_6m: "Next 6 Months",
           timing_planning: "Strategic Planning",
-          budget_low: "< ���10k / year",
+          budget_low: "< €10k / year",
           budget_med: "€10k - €50k / year",
           budget_high: "€50k - €100k / year",
           budget_enterprise: "€100k+ / year"
@@ -92,6 +98,10 @@ const resources = {
         tco_title: "12-Month Financial Projection",
         bsi_qualified: "BSI Qualified Provider",
         disclaimer: "Pricing estimates based on market list values. This report does not constitute a binding offer.",
+        badges: {
+          top_match: "Top Match",
+          best_fit: "Best Fit"
+        },
         matrix: {
           title: "Capability Matrix",
           capability: "Capability",
@@ -145,6 +155,12 @@ const resources = {
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen"
         },
+        trust: {
+          bsi: "BSI-qualifiziert",
+          gdpr: "DSGVO-konform",
+          pdf: "PDF-Export",
+          sase: "Global SASE"
+        },
         steps: {
           title: "Die ZTNA Scout Methodik",
           subtitle: "So erstellen wir präzise Analysen für Ihren Security Stack.",
@@ -170,7 +186,7 @@ const resources = {
           companyName: "Firmenname",
           contactPerson: "Ansprechpartner",
           phone: "Telefonnummer",
-          workEmail: "Geschäftliche E-Mail",
+          workEmail: "Gesch��ftliche E-Mail",
           seats: "Anzahl Benutzer",
           vpnStatus: "VPN Status",
           timing: "Zeitrahmen Migration",
@@ -205,6 +221,10 @@ const resources = {
         tco_title: "12-Monate TCO Projektion",
         bsi_qualified: "BSI-qualifizierter Anbieter",
         disclaimer: "Preisangaben basieren auf Markt-Listenpreisen. Kein verbindliches Angebot.",
+        badges: {
+          top_match: "Top Match",
+          best_fit: "Beste Wahl"
+        },
         matrix: {
           title: "Fähigkeiten-Matrix",
           capability: "Funktion",
@@ -240,7 +260,7 @@ const resources = {
           tooltips: {
             vonBusch: "Développé par von Busch Digital",
             cloudflare: "Propulsé par Cloudflare",
-            ubiquiti: "Cadre d'audit de sécurité"
+            ubiquiti: "Cadre d'audit de sécurit��"
           }
         },
         footer: {
@@ -257,6 +277,12 @@ const resources = {
           description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO déterministes et des scores de conformité BSI.",
           cta_primary: "Lancer l'analyse",
           cta_secondary: "Voir un exemple"
+        },
+        trust: {
+          bsi: "Qualifié BSI",
+          gdpr: "Conforme RGPD",
+          pdf: "Export PDF",
+          sase: "SASE Global"
         },
         steps: {
           title: "La méthodologie ZTNA Scout",
@@ -316,6 +342,10 @@ const resources = {
         tco_title: "Projection TCO sur 12 mois",
         bsi_qualified: "Fournisseur qualifié BSI",
         disclaimer: "Estimations basées sur les prix catalogue. Pas d'offre contractuelle.",
+        badges: {
+          top_match: "Meilleure correspondance",
+          best_fit: "Meilleur choix"
+        },
         matrix: {
           title: "Matrice des capacités",
           capability: "Fonctionnalité",
@@ -346,7 +376,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
-    fallbackLng: 'en',
+    fallbackLng: 'de',
     interpolation: { escapeValue: false }
   });
 export default i18n;

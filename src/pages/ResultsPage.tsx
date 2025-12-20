@@ -95,7 +95,7 @@ export function ResultsPage() {
       )}>
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-sm">Top Match:</span>
+            <span className="font-bold text-sm">{t('results.badges.top_match')}:</span>
             <Badge className="bg-primary text-[10px]">{sortedResults[0]?.vendorName}</Badge>
           </div>
           <Button size="sm" className="btn-gradient h-8" onClick={() => navigate(`/vergleich/${id}/print`)}>
@@ -131,7 +131,7 @@ export function ResultsPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {top3.map((v, i) => (
               <Card key={v.vendorId} className={cn("relative overflow-hidden border-2", i === 0 ? "border-primary shadow-xl" : "border-muted shadow-sm")}>
-                {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">{t('results.matrix.best_fit')}</div>}
+                {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">{t('results.badges.best_fit')}</div>}
                 <CardHeader>
                   <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
                   <p className="text-primary font-bold">{t('results.matrix.total_score')}: {v.scores?.totalScore ?? 0}</p>
