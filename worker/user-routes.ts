@@ -96,6 +96,8 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
 }
 export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: string, RESEND_API_KEY: string, PUBLIC_BASE_URL: string, EMAIL_FROM: string } }>) {
   app.post('/api/submit', async (c) => {
+    // Clone request early in case we need it for logging in catch block
+    const clonedReq = c.req.raw.clone();
     try {
       const { turnstileToken, ...input } = await c.req.json();
       const secret = c.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
@@ -143,7 +145,19 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
       });
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
-      console.error('Submission failed:', e);
+      const err = e as Error;
+      let requestBody = null;
+      try {
+        requestBody = await clonedReq.json();
+      } catch (parseErr) {
+        // Fallback if JSON parsing of the cloned request fails
+        requestBody = "Failed to parse body";
+      }
+      console.error('Submit failed', {
+        error: err?.message || String(e),
+        stack: err?.stack,
+        requestBody
+      });
       return bad(c, 'Submission failed');
     }
   });
@@ -252,7 +266,6 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
     const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
     const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
     const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, curr) => acc + (curr.seats || 0), 0) / totalLeads) : 0;
-    // Calculate most common VPN status
     const vpnCounts: Record<string, number> = {};
     leads.forEach(l => {
       vpnCounts[l.vpnStatus] = (vpnCounts[l.vpnStatus] || 0) + 1;
