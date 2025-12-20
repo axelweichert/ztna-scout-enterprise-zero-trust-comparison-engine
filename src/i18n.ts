@@ -93,14 +93,23 @@ const resources = {
       },
       results: {
         title: "Comparison Result",
+        sample_title: "Sample Security Analysis",
+        live_sample_mode: "LIVE SAMPLE MODE: Using demonstration data parameters.",
         subtitle: "Enterprise Analysis for {{seats}} Users",
         export_pdf: "Download Report",
         tco_title: "12-Month Financial Projection",
         bsi_qualified: "BSI Qualified Provider",
         disclaimer: "Pricing estimates based on market list values. This report does not constitute a binding offer.",
+        methodology_title: "Methodology & Transparency",
+        methodology_desc: "Scores are calculated using a weighted average of feature completeness (40%), price competitiveness (40%), and regulatory compliance (20%).",
+        expert_take_label: "Expert Take",
+        expert_take_0: "Exceptional balance of cost and compliance. Ideal for highly regulated enterprise environments.",
+        expert_take_1: "Premium feature set with advanced threat protection. Recommended for high-risk digital profiles.",
+        expert_take_2: "Scalable cloud architecture with rapid implementation paths and intuitive management.",
         badges: {
           top_match: "Top Match",
-          best_fit: "Best Fit"
+          best_fit: "Best Fit",
+          top_recommendations: "Top Recommendations"
         },
         matrix: {
           title: "Capability Matrix",
@@ -112,7 +121,55 @@ const resources = {
           feature_score: "Feature Richness (40%)",
           price_score: "Price Positioning (40%)",
           compliance_score: "Regulatory (20%)",
-          total_score: "Scout Score"
+          total_score: "Scout Score",
+          analytical_breakdown: "Analytical Breakdown",
+          market_rank: "Market Rank",
+          scout_total: "Scout Total",
+          close_deep_dive: "Close Deep-Dive",
+          expert_take_desc: {
+            features: "ZTNA, SWG, CASB, DLP, and isolation capabilities.",
+            price: "Competitiveness relative to market averages.",
+            compliance: "BSI qualifications and security certifications."
+          }
+        }
+      },
+      admin: {
+        terminal_title: "Sentinel Gate",
+        terminal_desc: "Administrative Access Required",
+        terminal_key: "Secret Authority Key",
+        terminal_unlock: "Unlock Terminal",
+        dashboard_title: "Executive Dashboard",
+        dashboard_desc: "Real-time lead lifecycle monitoring",
+        sync_data: "Sync Data",
+        export_csv: "Export CSV",
+        stats: {
+          total: "Total Inquiries",
+          verified: "Verified Leads",
+          conversion: "Conversion",
+          avg_seats: "Average Seats",
+          lifetime: "LIFETIME"
+        },
+        tabs: {
+          pipeline: "Pipeline",
+          pricing: "Pricing Overrides",
+          settings: "System Rules"
+        },
+        table: {
+          timestamp: "Timestamp",
+          org: "Organization",
+          stakeholder: "Stakeholder",
+          infra: "Infrastructure",
+          verification: "Verification",
+          management: "Management",
+          no_leads: "No leads matching your current criteria.",
+          purge_confirm: "Purge lead data permanently?",
+          opt_out: "Opt-Out"
+        },
+        pricing: {
+          market_rate: "Market Rate / User / Month",
+          quote_required: "Quote Required",
+          quote_desc: "Forces range display",
+          updated_success: "Pricing updated successfully"
         }
       },
       optOut: {
@@ -220,14 +277,23 @@ const resources = {
       },
       results: {
         title: "Analyse-Ergebnis",
+        sample_title: "Beispiel-Sicherheitsanalyse",
+        live_sample_mode: "LIVE-DEMO-MODUS: Verwendung von Demonstrationsdaten.",
         subtitle: "Enterprise-Vergleich für {{seats}} Benutzer",
         export_pdf: "Bericht herunterladen",
         tco_title: "12-Monate TCO Projektion",
         bsi_qualified: "BSI-qualifizierter Anbieter",
         disclaimer: "Preisangaben basieren auf Markt-Listenpreisen. Kein verbindliches Angebot.",
+        methodology_title: "Methodik & Transparenz",
+        methodology_desc: "Die Scores berechnen sich aus einem gewichteten Durchschnitt aus Funktionsumfang (40%), Preisgestaltung (40%) und Compliance (20%).",
+        expert_take_label: "Experten-Einschätzung",
+        expert_take_0: "Hervorragende Balance zwischen Kosten und Compliance. Ideal für hochregulierte Unternehmensumgebungen.",
+        expert_take_1: "Premium-Funktionsumfang mit fortgeschrittenem Bedrohungsschutz. Empfohlen für risikobehaftete digitale Profile.",
+        expert_take_2: "Skalierbare Cloud-Architektur mit schnellen Implementierungswegen und intuitiver Verwaltung.",
         badges: {
           top_match: "Top Match",
-          best_fit: "Beste Wahl"
+          best_fit: "Beste Wahl",
+          top_recommendations: "Top Empfehlungen"
         },
         matrix: {
           title: "Fähigkeiten-Matrix",
@@ -239,7 +305,55 @@ const resources = {
           feature_score: "Funktionsumfang (40%)",
           price_score: "Preis-Leistung (40%)",
           compliance_score: "Compliance (20%)",
-          total_score: "Scout Score"
+          total_score: "Scout Score",
+          analytical_breakdown: "Analytische Aufschlüsselung",
+          market_rank: "Marktrang",
+          scout_total: "Scout Gesamt",
+          close_deep_dive: "Analyse schließen",
+          expert_take_desc: {
+            features: "ZTNA, SWG, CASB, DLP und Isolationsfunktionen.",
+            price: "Wettbewerbsfähigkeit im Vergleich zum Marktdurchschnitt.",
+            compliance: "BSI-Qualifizierungen und Sicherheitszertifikate."
+          }
+        }
+      },
+      admin: {
+        terminal_title: "Sentinel Tor",
+        terminal_desc: "Administrativer Zugang erforderlich",
+        terminal_key: "Geheimer Autorisierungsschlüssel",
+        terminal_unlock: "Terminal entsperren",
+        dashboard_title: "Vorstands-Dashboard",
+        dashboard_desc: "Echtzeit-Überwachung des Lead-Lebenszyklus",
+        sync_data: "Daten synchronisieren",
+        export_csv: "CSV exportieren",
+        stats: {
+          total: "Gesamte Anfragen",
+          verified: "Verifizierte Leads",
+          conversion: "Konversion",
+          avg_seats: "Durchschn. Plätze",
+          lifetime: "GESAMTZEIT"
+        },
+        tabs: {
+          pipeline: "Pipeline",
+          pricing: "Preis-Anpassungen",
+          settings: "Systemregeln"
+        },
+        table: {
+          timestamp: "Zeitstempel",
+          org: "Organisation",
+          stakeholder: "Ansprechpartner",
+          infra: "Infrastruktur",
+          verification: "Verifizierung",
+          management: "Verwaltung",
+          no_leads: "Keine Leads gefunden.",
+          purge_confirm: "Lead-Daten dauerhaft löschen?",
+          opt_out: "Widerspruch"
+        },
+        pricing: {
+          market_rate: "Marktrate / Benutzer / Monat",
+          quote_required: "Angebot erforderlich",
+          quote_desc: "Erzwingt Bereichsanzeige",
+          updated_success: "Preise erfolgreich aktualisiert"
         }
       },
       optOut: {
@@ -267,7 +381,7 @@ const resources = {
         header: {
           tooltips: {
             vonBusch: "Développé par von Busch Digital",
-            cloudflare: "Propulsé par Cloudflare",
+            cloudflare: "Propulsé par Cloudflare Infrastructure",
             ubiquiti: "Cadre d'audit de sécurité"
           }
         },
@@ -347,14 +461,23 @@ const resources = {
       },
       results: {
         title: "Résultat de l'analyse",
+        sample_title: "Analyse de sécurité type",
+        live_sample_mode: "MODE DEMO LIVE : Utilisation de données de démonstration.",
         subtitle: "Comparaison pour {{seats}} utilisateurs",
         export_pdf: "Télécharger le rapport",
         tco_title: "Projection TCO sur 12 mois",
         bsi_qualified: "Fournisseur qualifié BSI",
         disclaimer: "Estimations basées sur les prix catalogue. Ce rapport ne constitue pas une offre contractuelle.",
+        methodology_title: "Méthodologie & Transparence",
+        methodology_desc: "Les scores sont calculés à l'aide d'une moyenne pondérée de l'exhaustivité des fonctionnalités (40%), de la compétitivité des prix (40%) et de la conformité réglementaire (20%).",
+        expert_take_label: "L'avis de l'expert",
+        expert_take_0: "Équilibre exceptionnel entre coût et conformité. Idéal pour les environnements d'entreprise hautement réglementés.",
+        expert_take_1: "Ensemble de fonctionnalités premium avec protection avancée contre les menaces. Recommandé pour les profils numériques à haut risque.",
+        expert_take_2: "Architecture cloud évolutive avec des parcours de mise en œuvre rapides et une gestion intuitive.",
         badges: {
           top_match: "Meilleure correspondance",
-          best_fit: "Meilleur choix"
+          best_fit: "Meilleur choix",
+          top_recommendations: "Top Recommandations"
         },
         matrix: {
           title: "Matrice des capacités",
@@ -366,7 +489,55 @@ const resources = {
           feature_score: "Richesse fonctionnelle (40%)",
           price_score: "Positionnement prix (40%)",
           compliance_score: "Conformité (20%)",
-          total_score: "Score Scout"
+          total_score: "Score Scout",
+          analytical_breakdown: "Analyse détaillée",
+          market_rank: "Rang du marché",
+          scout_total: "Total Scout",
+          close_deep_dive: "Fermer l'analyse",
+          expert_take_desc: {
+            features: "Capacités ZTNA, SWG, CASB, DLP et isolation.",
+            price: "Compétitivité par rapport aux moyennes du marché.",
+            compliance: "Qualifications BSI et certifications de sécurité."
+          }
+        }
+      },
+      admin: {
+        terminal_title: "Porte Sentinelle",
+        terminal_desc: "Accès administratif requis",
+        terminal_key: "Clé d'autorité secr��te",
+        terminal_unlock: "Déverrouiller le terminal",
+        dashboard_title: "Tableau de bord exécutif",
+        dashboard_desc: "Suivi en temps réel du cycle de vie des prospects",
+        sync_data: "Synchroniser les données",
+        export_csv: "Exporter CSV",
+        stats: {
+          total: "Total demandes",
+          verified: "Prospects vérifiés",
+          conversion: "Conversion",
+          avg_seats: "Sièges moyens",
+          lifetime: "À VIE"
+        },
+        tabs: {
+          pipeline: "Pipeline",
+          pricing: "Ajustements de prix",
+          settings: "Règles du système"
+        },
+        table: {
+          timestamp: "Horodatage",
+          org: "Organisation",
+          stakeholder: "Intervenant",
+          infra: "Infrastructure",
+          verification: "Vérification",
+          management: "Gestion",
+          no_leads: "Aucun prospect trouvé.",
+          purge_confirm: "Supprimer définitivement les données du prospect ?",
+          opt_out: "Opposition"
+        },
+        pricing: {
+          market_rate: "Prix du marché / utilisateur / mois",
+          quote_required: "Devis requis",
+          quote_desc: "Force l'affichage de la plage",
+          updated_success: "Prix mis à jour avec succès"
         }
       },
       optOut: {

@@ -87,7 +87,7 @@ export function ResultsPage() {
         <div className="bg-primary/10 border-b border-primary/20 py-3 text-center print:hidden">
           <p className="text-sm font-bold text-primary flex items-center justify-center gap-2">
             <AlertTriangle className="w-4 h-4" />
-            LIVE SAMPLE MODE: Using demonstration data parameters.
+            {t('results.live_sample_mode')}
           </p>
         </div>
       )}
@@ -113,7 +113,7 @@ export function ResultsPage() {
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {format(snapshot.createdAt, 'PPP')}</span>
             </div>
             <h1 className="text-display tracking-tight leading-none">
-              {snapshot.isSample ? "Sample Security Analysis" : t('results.title')}
+              {snapshot.isSample ? t('results.sample_title') : t('results.title')}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
               {t('results.subtitle', { seats: snapshot.inputs?.seats })}
@@ -132,7 +132,7 @@ export function ResultsPage() {
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold flex items-center gap-3">
             <Sparkles className="text-primary w-8 h-8" />
-            Top Recommendations
+            {t('results.badges.top_recommendations')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {top3.map((v, i) => (
@@ -147,11 +147,9 @@ export function ResultsPage() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="p-4 bg-muted/30 rounded-xl space-y-1 border border-muted/50">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Expert Take</p>
+                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.expert_take_label')}</p>
                     <p className="text-sm leading-relaxed italic text-foreground/80">
-                      {i === 0 ? "Exceptional balance of cost and compliance. Ideal for highly regulated enterprise environments." :
-                       i === 1 ? "Premium feature set with advanced threat protection. Recommended for high-risk digital profiles." :
-                       "Scalable cloud architecture with rapid implementation paths and intuitive management."}
+                      {t(`results.expert_take_${i}`)}
                     </p>
                   </div>
                   <Button variant="secondary" className="w-full h-11 font-bold" onClick={() => setSelectedVendor(v)}>{t('results.matrix.deep_dive')}</Button>
@@ -202,8 +200,8 @@ export function ResultsPage() {
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-4 md:p-10 shadow-2xl border-none bg-slate-50/50 rounded-3xl overflow-hidden">
-            <div className="h-[550px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
+            <div className="h-[550px] min-h-[550px] w-full">
+              <ResponsiveContainer width="100%" height="100%" minHeight={550}>
                 <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 60, top: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
@@ -245,9 +243,9 @@ export function ResultsPage() {
             <Info className="h-8 w-8 text-white" />
           </div>
           <div className="space-y-3 relative">
-            <h4 className="text-2xl font-bold">Methodology & Transparency</h4>
+            <h4 className="text-2xl font-bold">{t('results.methodology_title')}</h4>
             <p className="text-base text-slate-300 leading-relaxed italic max-w-4xl">
-              {t('results.disclaimer')} Scores are calculated using a weighted average of feature completeness (40%), price competitiveness (40%), and regulatory compliance (20%).
+              {t('results.disclaimer')} {t('results.methodology_desc')}
             </p>
             <p className="text-xs text-slate-500 font-mono tracking-widest uppercase">{t('common.data_freshness')}</p>
           </div>
@@ -260,15 +258,15 @@ export function ResultsPage() {
             <div className="absolute bottom-0 right-0 opacity-10 -mr-10 -mb-10"><ShieldCheck size={200} /></div>
             <DialogHeader>
               <DialogTitle className="text-3xl font-display font-bold leading-tight">{selectedVendor?.vendorName} Scorecard</DialogTitle>
-              <p className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">Analytical Breakdown</p>
+              <p className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</p>
             </DialogHeader>
           </div>
           <div className="p-10 space-y-10">
             <div className="space-y-8">
               {[
-                { label: t('results.matrix.feature_score') || 'Feature Richness (40%)', val: selectedVendor?.scores?.featureScore ?? 0, desc: 'ZTNA, SWG, CASB, DLP, and isolation capabilities.' },
-                { label: t('results.matrix.price_score') || 'Price Positioning (40%)', val: selectedVendor?.scores?.priceScore ?? 0, desc: 'Competitiveness relative to market averages.' },
-                { label: t('results.matrix.compliance_score') || 'Regulatory (20%)', val: selectedVendor?.scores?.complianceScore ?? 0, desc: 'BSI qualifications and security certifications.' }
+                { label: t('results.matrix.feature_score'), val: selectedVendor?.scores?.featureScore ?? 0, desc: t('results.matrix.expert_take_desc.features') },
+                { label: t('results.matrix.price_score'), val: selectedVendor?.scores?.priceScore ?? 0, desc: t('results.matrix.expert_take_desc.price') },
+                { label: t('results.matrix.compliance_score'), val: selectedVendor?.scores?.complianceScore ?? 0, desc: t('results.matrix.expert_take_desc.compliance') }
               ].map((stat, i) => (
                 <div key={i} className="space-y-3">
                   <div className="flex justify-between items-end">
@@ -285,18 +283,18 @@ export function ResultsPage() {
             <div className="pt-8 border-t">
               <div className="flex justify-between items-center bg-slate-50 p-8 rounded-3xl border border-slate-100">
                 <div>
-                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">Scout Total</p>
+                  <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">{t('results.matrix.scout_total')}</p>
                   <p className="text-5xl font-display font-bold text-primary">{selectedVendor?.scores?.totalScore}</p>
                 </div>
                 <div className="text-right">
-                   <p className="text-xs font-bold text-muted-foreground uppercase mb-2">Market Rank</p>
+                   <p className="text-xs font-bold text-muted-foreground uppercase mb-2">{t('results.matrix.market_rank')}</p>
                    <Badge variant="outline" className="h-10 px-6 text-xl font-bold bg-white border-2">
                     #{sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1}
                    </Badge>
                 </div>
               </div>
             </div>
-            <Button className="w-full btn-gradient py-8 text-xl rounded-2xl shadow-xl hover:scale-[1.02] transition-transform" onClick={() => setSelectedVendor(null)}>Close Deep-Dive</Button>
+            <Button className="w-full btn-gradient py-8 text-xl rounded-2xl shadow-xl hover:scale-[1.02] transition-transform" onClick={() => setSelectedVendor(null)}>{t('results.matrix.close_deep_dive')}</Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { api } from '@/lib/api-client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
 import {
   Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp,
-  Loader2, CheckCircle2, XCircle, RefreshCw, Users, Clock,
+  Loader2, CheckCircle2, RefreshCw, Users, Clock,
   Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle
 } from 'lucide-react';
 import type { Lead, AdminStats, PricingOverride } from '@shared/types';
@@ -50,7 +51,7 @@ export function AdminPage() {
     }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-pricing'] });
-      toast.success("Pricing updated successfully");
+      toast.success(t('admin.pricing.updated_success'));
     }
   });
   const deleteLead = useMutation({
@@ -74,8 +75,8 @@ export function AdminPage() {
     if (!leads) return [];
     return leads
       .filter(l => !hideOptOuts || l.contactAllowed)
-      .filter(l => 
-        l.companyName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      .filter(l =>
+        l.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
         l.contactName.toLowerCase().includes(searchTerm.toLowerCase())
       );
@@ -87,12 +88,12 @@ export function AdminPage() {
           <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
             <Shield className="text-white w-10 h-10" />
           </div>
-          <CardTitle className="text-3xl font-display font-bold">Sentinel Gate</CardTitle>
-          <CardDescription className="text-base">Administrative Access Required</CardDescription>
+          <CardTitle className="text-3xl font-display font-bold">{t('admin.terminal_title')}</CardTitle>
+          <CardDescription className="text-base">{t('admin.terminal_desc')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Secret Authority Key</Label>
+            <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">{t('admin.terminal_key')}</Label>
             <Input
               type="password"
               value={password}
@@ -103,7 +104,7 @@ export function AdminPage() {
               onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
             />
           </div>
-          <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Verification failed")} className="w-full h-14 btn-gradient text-lg rounded-xl">Unlock Terminal</Button>
+          <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Verification failed")} className="w-full h-14 btn-gradient text-lg rounded-xl">{t('admin.terminal_unlock')}</Button>
         </CardContent>
       </Card>
     </div>
@@ -113,28 +114,28 @@ export function AdminPage() {
       <div className="space-y-12 max-w-7xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-1">
-            <h1 className="text-4xl font-display font-bold tracking-tight">Executive Dashboard</h1>
+            <h1 className="text-4xl font-display font-bold tracking-tight">{t('admin.dashboard_title')}</h1>
             <p className="text-muted-foreground italic flex items-center gap-2">
-              <Clock className="w-3.5 h-3.5" /> 
-              Real-time lead lifecycle monitoring
+              <Clock className="w-3.5 h-3.5" />
+              {t('admin.dashboard_desc')}
             </p>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" className="h-12 border-2 rounded-xl" onClick={handleRefresh} disabled={leadsRefetching}>
               <RefreshCw className={cn("mr-2 w-4 h-4", leadsRefetching && "animate-spin")} />
-              Sync Data
+              {t('admin.sync_data')}
             </Button>
             <Button className="h-12 btn-gradient px-6 rounded-xl shadow-lg">
-              <Download className="mr-2 w-4 h-4" /> Export CSV
+              <Download className="mr-2 w-4 h-4" /> {t('admin.export_csv')}
             </Button>
           </div>
         </header>
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
-            { label: 'Total Inquiries', val: stats?.totalLeads, icon: Mail, color: 'text-primary', bg: 'bg-primary/5' },
-            { label: 'Verified Leads', val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: 'Conversion', val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: 'Average Seats', val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : '...', icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' }
+            { label: t('admin.stats.total'), val: stats?.totalLeads, icon: Mail, color: 'text-primary', bg: 'bg-primary/5' },
+            { label: t('admin.stats.verified'), val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: t('admin.stats.conversion'), val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: t('admin.stats.avg_seats'), val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : '...', icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' }
           ].map((item, i) => (
             <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300">
               <CardContent className="p-6">
@@ -142,7 +143,7 @@ export function AdminPage() {
                   <div className={cn("p-2.5 rounded-xl", item.bg)}>
                     <item.icon className={cn("w-5 h-5", item.color)} />
                   </div>
-                  <Badge variant="ghost" className="text-[10px] font-bold text-muted-foreground tracking-tighter">LIFETIME</Badge>
+                  <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground tracking-tighter uppercase">{t('admin.stats.lifetime')}</Badge>
                 </div>
                 <div className="space-y-1">
                   <div className="text-3xl font-bold tracking-tight">
@@ -157,14 +158,14 @@ export function AdminPage() {
         <Tabs defaultValue="pipeline" className="space-y-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <TabsList className="bg-white border p-1.5 rounded-2xl h-14 w-full md:w-auto shadow-sm">
-              <TabsTrigger value="pipeline" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">Pipeline</TabsTrigger>
-              <TabsTrigger value="pricing" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">Pricing Overrides</TabsTrigger>
-              <TabsTrigger value="settings" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">System Rules</TabsTrigger>
+              <TabsTrigger value="pipeline" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.pipeline')}</TabsTrigger>
+              <TabsTrigger value="pricing" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.pricing')}</TabsTrigger>
+              <TabsTrigger value="settings" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.settings')}</TabsTrigger>
             </TabsList>
             <div className="relative w-full md:w-72 group">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-              <Input 
-                placeholder="Search leads..." 
+              <Input
+                placeholder="Search leads..."
                 className="pl-10 h-14 bg-white border-2 rounded-2xl shadow-sm focus:ring-primary/20"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -177,12 +178,12 @@ export function AdminPage() {
                 <Table>
                   <TableHeader className="bg-slate-50/80 border-b">
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="p-5 font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Timestamp</TableHead>
-                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Organization</TableHead>
-                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Stakeholder</TableHead>
-                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Infrastructure</TableHead>
-                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground text-center">Verification</TableHead>
-                      <TableHead className="text-right font-bold uppercase text-[10px] tracking-widest text-muted-foreground pr-8">Management</TableHead>
+                      <TableHead className="p-5 font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.timestamp')}</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.org')}</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.stakeholder')}</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.infra')}</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground text-center">{t('admin.table.verification')}</TableHead>
+                      <TableHead className="text-right font-bold uppercase text-[10px] tracking-widest text-muted-foreground pr-8">{t('admin.table.management')}</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -193,7 +194,7 @@ export function AdminPage() {
                         <TableCell colSpan={6} className="p-20 text-center">
                           <div className="flex flex-col items-center gap-2">
                              <AlertCircle className="w-10 h-10 text-muted-foreground/30" />
-                             <p className="text-muted-foreground font-medium">No leads matching your current criteria.</p>
+                             <p className="text-muted-foreground font-medium">{t('admin.table.no_leads')}</p>
                           </div>
                         </TableCell>
                       </TableRow>
@@ -211,7 +212,7 @@ export function AdminPage() {
                             </span>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200">ID: {lead.id.slice(0, 8)}</Badge>
-                              {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0 uppercase">Opt-Out</Badge>}
+                              {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0 uppercase">{t('admin.table.opt_out')}</Badge>}
                             </div>
                           </div>
                         </TableCell>
@@ -245,7 +246,7 @@ export function AdminPage() {
                         </TableCell>
                         <TableCell className="text-center">
                           <div className="flex flex-col items-center gap-1.5">
-                            <Badge className={cn("px-2.5 py-0.5 text-[10px] uppercase font-bold border-none", 
+                            <Badge className={cn("px-2.5 py-0.5 text-[10px] uppercase font-bold border-none",
                               lead.status === 'confirmed' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
                               {lead.status}
                             </Badge>
@@ -256,18 +257,20 @@ export function AdminPage() {
                         </TableCell>
                         <TableCell className="text-right pr-6">
                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {lead.comparisonId && (
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  asChild
+                                  className="h-9 w-9 text-blue-500"
+                                >
+                                  <Link to={`/vergleich/${lead.comparisonId}`} target="_blank"><ExternalLink className="w-4 h-4" /></Link>
+                                </Button>
+                              )}
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                asChild
-                                className="h-9 w-9 text-blue-500"
-                              >
-                                <Link to={`/vergleich/${lead.comparisonId}`} target="_blank"><ExternalLink className="w-4 h-4" /></Link>
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => { if(window.confirm("Purge lead data permanently?")) deleteLead.mutate(lead.id); }}
+                                onClick={() => { if(window.confirm(t('admin.table.purge_confirm'))) deleteLead.mutate(lead.id); }}
                                 className="h-9 w-9 text-red-400 hover:text-red-600 hover:bg-red-50"
                               >
                                 <Trash2 className="w-4 h-4" />
@@ -295,7 +298,7 @@ export function AdminPage() {
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Market Rate / User / Month</Label>
+                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">{t('admin.pricing.market_rate')}</Label>
                       <div className="relative group">
                         <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 border-r pr-3 border-slate-200">
                           <Euro className="w-3.5 h-3.5 text-primary" />
@@ -316,8 +319,8 @@ export function AdminPage() {
                     </div>
                     <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
                       <div className="space-y-0.5">
-                        <Label className="text-sm font-bold">Quote Required</Label>
-                        <p className="text-[10px] text-muted-foreground uppercase font-mono">Forces range display</p>
+                        <Label className="text-sm font-bold">{t('admin.pricing.quote_required')}</Label>
+                        <p className="text-[10px] text-muted-foreground uppercase font-mono">{t('admin.pricing.quote_desc')}</p>
                       </div>
                       <Switch
                         checked={p.isQuoteOnly}
@@ -347,7 +350,7 @@ export function AdminPage() {
                       </div>
                       <div className="flex items-center gap-3 shrink-0">
                          <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{hideOptOuts ? "Active" : "Disabled"}</span>
-                         <Switch 
+                         <Switch
                            checked={hideOptOuts}
                            onCheckedChange={setHideOptOuts}
                          />
