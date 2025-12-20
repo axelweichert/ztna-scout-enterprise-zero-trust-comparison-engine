@@ -10,9 +10,15 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
-import { Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, History, Loader2, CheckCircle2, XCircle, RefreshCw, Users, Clock } from 'lucide-react';
-import type { Lead, AdminStats } from '@shared/types';
+import { 
+  Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, 
+  Loader2, CheckCircle2, XCircle, RefreshCw, Users, Clock, 
+  Settings2, Euro, Save
+} from 'lucide-react';
+import type { Lead, AdminStats, PricingOverride } from '@shared/types';
 import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 export function AdminPage() {
@@ -31,6 +37,21 @@ export function AdminPage() {
     queryFn: () => api<AdminStats>('/api/admin/stats'),
     enabled: isAuthenticated
   });
+  const { data: pricingData, isLoading: pricingLoading } = useQuery({
+    queryKey: ['admin-pricing'],
+    queryFn: () => api<PricingOverride[]>('/api/admin/pricing'),
+    enabled: isAuthenticated
+  });
+  const updatePricing = useMutation({
+    mutationFn: (data: PricingOverride) => api('/api/admin/pricing', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin-pricing'] });
+      toast.success("Pricing updated successfully");
+    }
+  });
   const deleteLead = useMutation({
     mutationFn: (id: string) => api(`/api/admin/leads/${id}`, { method: 'DELETE' }),
     onSuccess: () => {
@@ -42,6 +63,7 @@ export function AdminPage() {
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['admin-leads'] });
     queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-pricing'] });
   };
   const filteredLeads = leads?.filter(l => !hideOptOuts || l.contactAllowed) || [];
   if (!isAuthenticated) return (
@@ -108,6 +130,7 @@ export function AdminPage() {
         <Tabs defaultValue="pipeline" className="space-y-8">
           <TabsList className="bg-white border p-1 rounded-xl h-12">
             <TabsTrigger value="pipeline" className="px-8">Pipeline Analytics</TabsTrigger>
+            <TabsTrigger value="pricing" className="px-8">Pricing Overrides</TabsTrigger>
             <TabsTrigger value="settings" className="px-8">Privacy Rules</TabsTrigger>
           </TabsList>
           <TabsContent value="pipeline" className="animate-in fade-in duration-500">
@@ -190,6 +213,52 @@ export function AdminPage() {
               </Table>
             </Card>
           </TabsContent>
+          <TabsContent value="pricing" className="animate-in fade-in duration-500">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {pricingLoading ? (
+                <div className="col-span-full py-20 text-center"><Loader2 className="animate-spin mx-auto text-primary w-10 h-10" /></div>
+              ) : pricingData?.map((p) => (
+                <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden">
+                  <CardHeader className="bg-slate-50 border-b py-4">
+                    <CardTitle className="text-lg flex justify-between items-center">
+                      {p.vendorId.charAt(0).toUpperCase() + p.vendorId.slice(1)}
+                      {p.updatedAt > 0 && <span className="text-[10px] font-normal text-muted-foreground">Updated: {format(p.updatedAt, 'MMM dd')}</span>}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6 space-y-6">
+                    <div className="space-y-2">
+                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Base Price / Month (EUR)</Label>
+                      <div className="relative">
+                        <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input 
+                          type="number" 
+                          defaultValue={p.basePricePerMonth} 
+                          className="pl-9"
+                          step="0.01"
+                          onBlur={(e) => {
+                            const val = parseFloat(e.target.value);
+                            if (val !== p.basePricePerMonth) {
+                              updatePricing.mutate({ ...p, basePricePerMonth: val });
+                            }
+                          }}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label className="text-sm font-semibold">Quote Only</Label>
+                        <p className="text-[10px] text-muted-foreground">Show as estimate range</p>
+                      </div>
+                      <Switch 
+                        defaultChecked={p.isQuoteOnly} 
+                        onCheckedChange={(checked) => updatePricing.mutate({ ...p, isQuoteOnly: checked })}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </TabsContent>
           <TabsContent value="settings">
              <Card className="shadow-lg border-none p-8">
                 <div className="flex items-center justify-between">
@@ -199,8 +268,8 @@ export function AdminPage() {
                    </div>
                    <div className="flex items-center gap-3">
                       <span className="text-sm font-medium">Hide Opt-Outs</span>
-                      <Button 
-                        variant={hideOptOuts ? "default" : "outline"} 
+                      <Button
+                        variant={hideOptOuts ? "default" : "outline"}
                         onClick={() => setHideOptOuts(!hideOptOuts)}
                       >
                         {hideOptOuts ? "Enabled" : "Disabled"}

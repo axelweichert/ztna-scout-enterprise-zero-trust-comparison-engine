@@ -85,8 +85,6 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
         })
       });
       if (!res.ok) throw new Error(await res.text());
-    } else {
-      console.warn('RESEND_API_KEY missing - Email not sent. Verify URL:', verifyUrl);
     }
     return { success: true };
   } catch (e) {
@@ -94,12 +92,27 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
     return { success: false, error: e instanceof Error ? e.message : String(e) };
   }
 }
-export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: string, RESEND_API_KEY: string, PUBLIC_BASE_URL: string, EMAIL_FROM: string } }>) {
+async function getMergedPricing(env: Env, vendorId: string): Promise<PricingModel> {
+  const base = pricing.find(p => p.vendorId === vendorId) || { vendorId, basePricePerMonth: 25, isQuoteOnly: true, installationFee: 4000 };
+  const overrideInst = new PricingOverrideEntity(env, vendorId);
+  if (await overrideInst.exists()) {
+    const override = await overrideInst.getState();
+    if (override.basePricePerMonth > 0) {
+      return {
+        ...base,
+        basePricePerMonth: override.basePricePerMonth,
+        isQuoteOnly: override.isQuoteOnly
+      };
+    }
+  }
+  return base;
+}
+export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/submit', async (c) => {
-    const clonedReq = c.req.raw.clone();
     try {
       const { turnstileToken, ...input } = await c.req.json();
-      const secret = c.env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+      const env = c.env as any;
+      const secret = env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
       const isHuman = await verifyTurnstile(turnstileToken, secret);
       if (!isHuman) return bad(c, 'Verification failed. Please try again.');
       const leadId = crypto.randomUUID();
@@ -152,20 +165,20 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
   app.get('/api/sample-comparison', async (c) => {
     const sampleSeats = 250;
     const sampleVpnStatus = 'active';
-    const allVendorResults = vendors.map((v) => {
-      const basePricing = pricing.find(p => p.vendorId === v.id) || { vendorId: v.id, basePricePerMonth: 25, isQuoteOnly: true, installationFee: 4000 };
+    const allVendorResults = await Promise.all(vendors.map(async (v) => {
+      const mergedPricing = await getMergedPricing(c.env, v.id);
       const vendorFeatures = features.find(f => f.vendorId === v.id) || { vendorId: v.id, hasZTNA: true, hasSWG: false, hasCASB: false, hasDLP: false, hasFWaaS: false, hasRBI: false, isBSIQualified: false };
       return {
         id: v.id,
         name: v.name,
-        pricing: basePricing,
+        pricing: mergedPricing,
         features: vendorFeatures,
-        tco: calculateTCO(sampleSeats, basePricing)
+        tco: calculateTCO(sampleSeats, mergedPricing)
       };
-    });
+    }));
     const tcos = allVendorResults.map(r => r.tco);
-    const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
-    const minTco = tcos.length > 0 ? Math.min(...tcos) : 1;
+    const maxTco = Math.max(...tcos, 1);
+    const minTco = Math.min(...tcos, 1);
     const results: ComparisonResult[] = allVendorResults.map(r => ({
       vendorId: r.id,
       vendorName: r.name,
@@ -194,20 +207,20 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
       return ok(c, { comparisonId: leadState.comparisonId });
     }
     if (tokenData.usedAt || tokenData.expiresAt < Date.now()) return bad(c, 'Token expired or used');
-    const allVendorResults = vendors.map((v) => {
-        const basePricing = pricing.find(p => p.vendorId === v.id) || { vendorId: v.id, basePricePerMonth: 25, isQuoteOnly: true, installationFee: 4000 };
+    const allVendorResults = await Promise.all(vendors.map(async (v) => {
+        const mergedPricing = await getMergedPricing(c.env, v.id);
         const vendorFeatures = features.find(f => f.vendorId === v.id) || { vendorId: v.id, hasZTNA: true, hasSWG: false, hasCASB: false, hasDLP: false, hasFWaaS: false, hasRBI: false, isBSIQualified: false };
         return {
           id: v.id,
           name: v.name,
-          pricing: basePricing,
+          pricing: mergedPricing,
           features: vendorFeatures,
-          tco: calculateTCO(leadState.seats, basePricing)
+          tco: calculateTCO(leadState.seats, mergedPricing)
         };
-    });
+    }));
     const tcos = allVendorResults.map(r => r.tco);
-    const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
-    const minTco = tcos.length > 0 ? Math.min(...tcos) : 1;
+    const maxTco = Math.max(...tcos, 1);
+    const minTco = Math.min(...tcos, 1);
     const results: ComparisonResult[] = allVendorResults.map(r => ({
       vendorId: r.id,
       vendorName: r.name,
@@ -228,20 +241,6 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
     await tokenEntity.patch({ usedAt: Date.now() });
     return ok(c, { comparisonId: snapshotId });
   });
-  app.post('/api/opt-out', async (c) => {
-    const { token } = await c.req.json();
-    const optOutEntity = new OptOutTokenEntity(c.env, token);
-    if (!await optOutEntity.exists()) return bad(c, 'Invalid token');
-    const tokenData = await optOutEntity.getState();
-    const leadEntity = new LeadEntity(c.env, tokenData.leadId);
-    await leadEntity.patch({ contactAllowed: false, optedOutAt: Date.now() });
-    return ok(c, { success: true });
-  });
-  app.get('/api/comparison/:id', async (c) => {
-    const comp = new ComparisonEntity(c.env, c.req.param('id'));
-    if (!await comp.exists()) return notFound(c);
-    return ok(c, await comp.getState());
-  });
   app.get('/api/admin/leads', async (c) => {
     const leads = await LeadEntity.list(c.env, null, 1000);
     return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
@@ -257,11 +256,6 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
     const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
     const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
     const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, curr) => acc + (curr.seats || 0), 0) / totalLeads) : 0;
-    const vpnCounts: Record<string, number> = {};
-    leads.forEach(l => {
-      vpnCounts[l.vpnStatus] = (vpnCounts[l.vpnStatus] || 0) + 1;
-    });
-    const mostCommonVpn = Object.entries(vpnCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'none';
     const dailyLeads: TimeSeriesData[] = [];
     const now = new Date();
     for (let i = 13; i >= 0; i--) {
@@ -275,7 +269,7 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
         confirmed: dayLeads.filter(l => l.status === 'confirmed').length
       });
     }
-    return ok(c, { totalLeads, pendingLeads: totalLeads - confirmedLeads, confirmedLeads, conversionRate, avgSeats, mostCommonVpn, dailyLeads });
+    return ok(c, { totalLeads, pendingLeads: totalLeads - confirmedLeads, confirmedLeads, conversionRate, avgSeats, dailyLeads });
   });
   app.post('/api/admin/pricing', async (c) => {
     const update = await c.req.json<PricingOverride>();
@@ -292,4 +286,19 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
     }));
     return ok(c, data);
   });
+  app.get('/api/comparison/:id', async (c) => {
+    const comp = new ComparisonEntity(c.env, c.req.param('id'));
+    if (!await comp.exists()) return notFound(c);
+    return ok(c, await comp.getState());
+  });
+  app.post('/api/opt-out', async (c) => {
+    const { token } = await c.req.json();
+    const optOutEntity = new OptOutTokenEntity(c.env, token);
+    if (!await optOutEntity.exists()) return bad(c, 'Invalid token');
+    const tokenData = await optOutEntity.getState();
+    const leadEntity = new LeadEntity(c.env, tokenData.leadId);
+    await leadEntity.patch({ contactAllowed: false, optedOutAt: Date.now() });
+    return ok(c, { success: true });
+  });
+  app.get('/api/config', (c) => ok(c, { turnstileSiteKey: (c.env as any).TURNSTILE_SITE_KEY || "1x00000000000000000000AA" }));
 }
