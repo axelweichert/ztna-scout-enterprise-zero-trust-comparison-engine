@@ -1,7 +1,7 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { motion, Variants, AnimatePresence } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
@@ -86,10 +86,10 @@ export function HomePage() {
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
               <Button asChild size="lg" variant="outline" className="h-16 px-12 text-lg rounded-2xl border-2 hover:bg-slate-50 transition-colors gap-2 cursor-pointer">
-                <a href={`${window.location.origin}/vergleich/sample`}>
+                <Link to="/vergleich/sample">
                   <Sparkles className="w-5 h-5 text-primary" />
                   {t('home.hero.cta_secondary')}
-                </a>
+                </Link>
               </Button>
             </motion.div>
             <motion.div
@@ -113,7 +113,7 @@ export function HomePage() {
             </motion.div>
           </div>
         </section>
-        {/* Methodology Section with Dark Mode accessibility refinements */}
+        {/* Methodology Section */}
         <section className="py-32 bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-24">

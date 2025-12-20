@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api-client';
 import type { ComparisonSnapshot, ComparisonResult } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -106,14 +106,14 @@ export function ResultsPage() {
           </Button>
         </div>
       </div>
-      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 md:py-16">
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8 md:py-16">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20 text-pretty">
           <div className="space-y-4">
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground uppercase tracking-widest">
               <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> RID: {snapshot.id.slice(0, 8)}</span>
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {format(snapshot.createdAt, 'PPP')}</span>
             </div>
-            <h1 className="text-display tracking-tight leading-none">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight leading-none">
               {snapshot.isSample ? t('results.sample_title') : t('results.title')}
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl">
@@ -149,12 +149,20 @@ export function ResultsPage() {
                     {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">{t('results.badges.best_fit')}</div>}
                     <CardHeader>
                       <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
-                      <div className="flex items-center justify-between mt-2">
-                        <p className="text-primary font-bold text-lg">{t('results.matrix.total_score')}: {v.scores?.totalScore}</p>
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
                         <Badge variant="outline" className="text-[10px] uppercase font-bold">{t(`results.matrix.rank_${i + 1}`)}</Badge>
+                        {v.features.isBSIQualified && (
+                          <Badge className="bg-emerald-100 text-emerald-700 text-[9px] border-none uppercase flex items-center gap-1">
+                            <ShieldCheck className="w-3 h-3" /> {t('results.bsi_qualified')}
+                          </Badge>
+                        )}
                       </div>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      <div className="flex justify-between items-center p-3 bg-primary/5 rounded-lg border border-primary/10">
+                         <span className="text-xs font-bold text-muted-foreground uppercase">{t('results.matrix.total_score')}</span>
+                         <span className="text-xl font-bold text-primary">{v.scores?.totalScore}</span>
+                      </div>
                       <div className="p-4 bg-muted/30 rounded-xl space-y-1 border border-muted/50">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.expert_take_label')}</p>
                         <p className="text-sm leading-relaxed italic text-foreground/80">
@@ -213,14 +221,14 @@ export function ResultsPage() {
           <Card className="p-4 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
             <div className="w-full min-h-[550px] relative">
               <ResponsiveContainer width="100%" height={550} debounce={100}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 60, top: 20 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 100, right: 40, top: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={140}
-                    tick={{ fontSize: 11, fontWeight: 700, fill: 'hsl(var(--foreground))' }}
+                    width={100}
+                    tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--foreground))' }}
                   />
                   <Tooltip
                     cursor={{ fill: 'hsl(var(--primary)/0.03)' }}
@@ -269,7 +277,7 @@ export function ResultsPage() {
             <div className="absolute bottom-0 right-0 opacity-10 -mr-10 -mb-10"><ShieldCheck size={200} /></div>
             <DialogHeader>
               <DialogTitle className="text-3xl font-display font-bold leading-tight">{selectedVendor?.vendorName} Scorecard</DialogTitle>
-              <p className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</p>
+              <CardDescription className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</CardDescription>
             </DialogHeader>
           </div>
           <div className="p-6 sm:p-10 space-y-10">

@@ -128,7 +128,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const input = await c.req.json();
       const { turnstileToken, ...formData } = input;
       const env = c.env as any;
-      const secret = env.PUBLIC_TURNSTILE_SECRET_KEY || env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
+      // Strict precedence: environment-specific secret first
+      const secret = env.TURNSTILE_SECRET_KEY || env.PUBLIC_TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
       const isHuman = await verifyTurnstile(turnstileToken, secret);
       if (!isHuman) return bad(c, 'Bot verification failed. Please refresh and try again.');
       const leadId = crypto.randomUUID();
@@ -220,6 +221,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const leadEntity = new LeadEntity(c.env, tokenData.leadId);
     if (!await leadEntity.exists()) return notFound(c, 'Associated lead data not found.');
     const leadState = await leadEntity.getState();
+    // Idempotency: if already confirmed, just return the existing comparison
     if (leadState.status === 'confirmed' && leadState.comparisonId) {
       return ok(c, { comparisonId: leadState.comparisonId });
     }
@@ -271,6 +273,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       if (state.comparisonId) {
         await ComparisonEntity.delete(c.env, state.comparisonId);
       }
+      // Cleanup associated tokens if known (usually token storage would be indexed by leadId for full cleanup)
     }
     const deleted = await LeadEntity.delete(c.env, id);
     return ok(c, { success: deleted });
@@ -280,7 +283,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const leads = leadRes.items;
     const totalLeads = leads.length;
     const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
-    // Frequency map for VPN status
     const vpnMap: Record<string, number> = {};
     leads.forEach(l => {
       vpnMap[l.vpnStatus] = (vpnMap[l.vpnStatus] || 0) + 1;
@@ -342,7 +344,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/config', (c) => {
     const env = c.env as any;
     return ok(c, {
-      turnstileSiteKey: env.PUBLIC_TURNSTILE_SITE_KEY || env.TURNSTILE_SITE_KEY || "1x00000000000000000000AA"
+      turnstileSiteKey: env.TURNSTILE_SITE_KEY || env.PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"
     });
   });
 }
