@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -16,7 +16,7 @@ import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { MailCheck, Loader2 } from 'lucide-react';
-import type { LeadFormData } from '@shared/types';
+import type { LeadFormData, AppConfig } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),
   contactName: z.string().min(2, "Required"),
@@ -32,6 +32,7 @@ export function LeadFormPage() {
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const form = useForm<LeadFormData>({
@@ -47,6 +48,19 @@ export function LeadFormPage() {
       budgetRange: 'med'
     }
   });
+  useEffect(() => {
+    const fetchConfig = async () => {
+      try {
+        const config = await api<AppConfig>('/api/config');
+        setTurnstileSiteKey(config.turnstileSiteKey);
+      } catch (error) {
+        console.error('Failed to fetch config:', error);
+        // Fallback to demo key if config fetch fails
+        setTurnstileSiteKey("1x00000000000000000000AA");
+      }
+    };
+    fetchConfig();
+  }, []);
   const steps = [
     { title: t('form.steps.company') },
     { title: t('form.steps.requirements') },
@@ -183,14 +197,20 @@ export function LeadFormPage() {
                         </p>
                       </div>
                       <div className="flex justify-center py-4">
-                        <Turnstile
-                          sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA"}
-                          onVerify={(token) => setTurnstileToken(token)}
-                        />
+                        {turnstileSiteKey ? (
+                          <Turnstile
+                            sitekey={turnstileSiteKey}
+                            onVerify={(token) => setTurnstileToken(token)}
+                          />
+                        ) : (
+                          <div className="h-[65px] flex items-center justify-center">
+                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                          </div>
+                        )}
                       </div>
                       <div className="flex gap-4">
                         <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(1)} disabled={isProcessing}>{t('form.buttons.back')}</Button>
-                        <Button type="submit" className="flex-1 btn-gradient py-7 shadow-xl" disabled={isProcessing}>
+                        <Button type="submit" className="flex-1 btn-gradient py-7 shadow-xl" disabled={isProcessing || !turnstileSiteKey}>
                           {isProcessing ? (
                             <>
                               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
