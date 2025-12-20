@@ -3,26 +3,19 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
-// Template Demo Types
-export interface User {
-  id: string;
-  name: string;
-}
-export interface Chat {
-  id: string;
-  title: string;
-}
-export interface ChatMessage {
-  id: string;
-  chatId: string;
-  userId: string;
-  text: string;
-  ts: number;
-}
 // ZTNA Scout Types
 export type VpnStatus = 'active' | 'replacing' | 'none';
 export type Timing = 'immediate' | '3_months' | '6_months' | 'planning';
 export type LeadStatus = 'pending' | 'confirmed' | 'deleted';
+export type EmailStatus = 'pending' | 'sent' | 'failed';
+export interface EmailEvent {
+  id: string;
+  leadId: string;
+  recipient: string;
+  status: 'sent' | 'failed';
+  errorMessage?: string;
+  createdAt: number;
+}
 export interface TimeSeriesData {
   date: string;
   pending: number;
@@ -51,6 +44,8 @@ export interface Lead {
   confirmedAt?: number;
   contactAllowed: boolean;
   optedOutAt?: number;
+  emailStatus?: EmailStatus;
+  emailError?: string;
   consentRecord?: ConsentRecord;
   comparisonId?: string;
 }
@@ -61,6 +56,7 @@ export interface LeadFormData {
   phone: string;
   seats: number;
   vpnStatus: VpnStatus;
+  timing: Timing;
 }
 export interface VerificationToken {
   hash: string;
@@ -133,3 +129,7 @@ export interface AdminStats {
   mostCommonVpn: string;
   dailyLeads: TimeSeriesData[];
 }
+// Template Demo Types (Keeping for compatibility with core-utils examples if needed)
+export interface User { id: string; name: string; }
+export interface Chat { id: string; title: string; }
+export interface ChatMessage { id: string; chatId: string; userId: string; text: string; ts: number; }
