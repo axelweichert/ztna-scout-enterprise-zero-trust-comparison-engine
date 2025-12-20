@@ -36,7 +36,7 @@ export interface Lead {
   phone: string;
   seats: number;
   vpnStatus: VpnStatus;
-  budgetRange?: string;
+  budgetRange: string;
   timing: Timing;
   consentGiven: boolean;
   createdAt: number;
@@ -57,6 +57,7 @@ export interface LeadFormData {
   seats: number;
   vpnStatus: VpnStatus;
   timing: Timing;
+  budgetRange: string;
 }
 export interface VerificationToken {
   hash: string;
@@ -116,6 +117,7 @@ export interface ComparisonSnapshot {
   inputs: {
     seats: number;
     vpnStatus: VpnStatus;
+    budgetRange?: string;
   };
   createdAt: number;
   isSample?: boolean;
@@ -129,7 +131,7 @@ export interface AdminStats {
   mostCommonVpn: string;
   dailyLeads: TimeSeriesData[];
 }
-// Template Demo Types (Keeping for compatibility with core-utils examples if needed)
+// Template Demo Types
 export interface User { id: string; name: string; }
 export interface Chat { id: string; title: string; }
 export interface ChatMessage { id: string; chatId: string; userId: string; text: string; ts: number; }
