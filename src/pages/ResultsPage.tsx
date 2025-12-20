@@ -7,7 +7,7 @@ import type { ComparisonSnapshot, ComparisonResult } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter } from 'lucide-react';
+import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -32,7 +32,7 @@ export function ResultsPage() {
     queryFn: () => api<ComparisonSnapshot>(id === 'sample' ? '/api/sample-comparison' : `/api/comparison/${id}`),
     retry: 1
   });
-  const currencyFormatter = useMemo(() => new Intl.NumberFormat(i18n.language, {
+  const currencyFormatter = useMemo(() => new Intl.NumberFormat(i18n.language || 'en-DE', {
     style: 'currency',
     currency: 'EUR',
     maximumFractionDigits: 0
@@ -81,6 +81,14 @@ export function ResultsPage() {
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
+      {snapshot.isSample && (
+        <div className="bg-primary/10 border-b border-primary/20 py-3 text-center print:hidden">
+          <p className="text-sm font-bold text-primary flex items-center justify-center gap-2">
+            <AlertTriangle className="w-4 h-4" />
+            LIVE SAMPLE MODE: This report uses demonstration data.
+          </p>
+        </div>
+      )}
       <div className={cn(
         "fixed top-16 left-0 right-0 z-40 bg-background/90 backdrop-blur-md border-b transition-transform duration-300 print:hidden",
         scrolled ? "translate-y-0" : "-translate-y-full"
@@ -234,16 +242,16 @@ export function ResultsPage() {
               <h4 className="text-sm font-bold uppercase tracking-widest text-muted-foreground">Weighted Analysis</h4>
               <div className="space-y-4">
                 {[
-                  { label: 'Feature Richness (40%)', val: selectedVendor?.scores?.featureScore },
-                  { label: 'Price Competitiveness (40%)', val: selectedVendor?.scores?.priceScore },
-                  { label: 'Regulatory Compliance (20%)', val: selectedVendor?.scores?.complianceScore }
+                  { label: 'Feature Richness (40%)', val: selectedVendor?.scores?.featureScore ?? 0 },
+                  { label: 'Price Competitiveness (40%)', val: selectedVendor?.scores?.priceScore ?? 0 },
+                  { label: 'Regulatory Compliance (20%)', val: selectedVendor?.scores?.complianceScore ?? 0 }
                 ].map((stat, i) => (
                   <div key={i} className="space-y-2">
                     <div className="flex justify-between text-sm font-semibold">
                       <span>{stat.label}</span>
-                      <span>{stat.val ?? 0}/100</span>
+                      <span>{stat.val}/100</span>
                     </div>
-                    <Progress value={stat.val ?? 0} className="h-2" />
+                    <Progress value={stat.val} className="h-2" />
                   </div>
                 ))}
               </div>
