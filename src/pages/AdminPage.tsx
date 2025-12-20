@@ -13,10 +13,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { toast } from 'sonner';
-import { 
-  Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp, 
-  Loader2, CheckCircle2, XCircle, RefreshCw, Users, Clock, 
-  Settings2, Euro, Save
+import {
+  Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp,
+  Loader2, CheckCircle2, XCircle, RefreshCw, Users, Clock,
+  Settings2, Euro, Phone, ExternalLink, Copy
 } from 'lucide-react';
 import type { Lead, AdminStats, PricingOverride } from '@shared/types';
 import { format } from 'date-fns';
@@ -64,6 +64,10 @@ export function AdminPage() {
     queryClient.invalidateQueries({ queryKey: ['admin-leads'] });
     queryClient.invalidateQueries({ queryKey: ['admin-stats'] });
     queryClient.invalidateQueries({ queryKey: ['admin-pricing'] });
+  };
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast.success("Copied to clipboard");
   };
   const filteredLeads = leads?.filter(l => !hideOptOuts || l.contactAllowed) || [];
   if (!isAuthenticated) return (
@@ -139,10 +143,10 @@ export function AdminPage() {
                 <TableHeader className="bg-slate-50 border-b">
                   <TableRow>
                     <TableHead className="p-4 font-bold uppercase text-[10px]">Received</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">Entity</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">Seats</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">Status</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">Email Status</TableHead>
+                    <TableHead className="font-bold uppercase text-[10px]">Entity & Requirements</TableHead>
+                    <TableHead className="font-bold uppercase text-[10px]">Contact Person</TableHead>
+                    <TableHead className="font-bold uppercase text-[10px]">Scale</TableHead>
+                    <TableHead className="font-bold uppercase text-[10px]">DOI Verification</TableHead>
                     <TableHead className="text-right font-bold uppercase text-[10px] pr-8">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -155,54 +159,76 @@ export function AdminPage() {
                     <TableRow key={lead.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell className="text-[10px] text-muted-foreground font-mono pl-4">{format(lead.createdAt, 'MMM dd, HH:mm')}</TableCell>
                       <TableCell>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <div className="flex flex-col cursor-help">
+                                <span className="font-bold text-sm flex items-center gap-1.5">
+                                  {lead.companyName}
+                                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                </span>
+                                <div className="flex items-center gap-2 mt-1">
+                                   <Badge variant="outline" className="text-[9px] h-4 py-0 flex items-center gap-1 border-muted text-muted-foreground uppercase">
+                                     {lead.timing?.replace('_', ' ') || 'N/A'}
+                                   </Badge>
+                                   {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0">OPT-OUT</Badge>}
+                                </div>
+                              </div>
+                            </TooltipTrigger>
+                            <TooltipContent className="p-4 bg-slate-900 text-white border-none rounded-xl space-y-2">
+                              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Requirement Snapshot</p>
+                              <div className="grid grid-cols-2 gap-4 text-xs">
+                                <div><p className="text-slate-400">VPN Status:</p><p className="font-bold">{lead.vpnStatus.toUpperCase()}</p></div>
+                                <div><p className="text-slate-400">Budget:</p><p className="font-bold">{lead.budgetRange.toUpperCase()}</p></div>
+                                <div><p className="text-slate-400">Timeline:</p><p className="font-bold">{lead.timing.toUpperCase()}</p></div>
+                                <div><p className="text-slate-400">Seats:</p><p className="font-bold">{lead.seats}</p></div>
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                      <TableCell>
                         <div className="flex flex-col">
-                          <span className="font-bold text-sm">{lead.companyName}</span>
-                          <div className="flex items-center gap-2 mt-1">
-                             <Badge variant="outline" className="text-[9px] h-4 py-0 flex items-center gap-1 border-muted text-muted-foreground">
-                               <Clock className="w-2.5 h-2.5" /> {lead.timing?.replace('_', ' ').toUpperCase() || 'N/A'}
-                             </Badge>
-                             {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0">OPT-OUT</Badge>}
+                          <span className="font-medium text-sm">{lead.contactName}</span>
+                          <div className="flex items-center gap-3 mt-1.5">
+                            <a href={`mailto:${lead.email}`} className="text-primary hover:text-primary/80 transition-colors">
+                              <Mail className="w-4 h-4" />
+                            </a>
+                            <a href={`tel:${lead.phone}`} className="text-muted-foreground hover:text-foreground transition-colors">
+                              <Phone className="w-3.5 h-3.5" />
+                            </a>
+                            <button onClick={() => copyToClipboard(lead.email)} className="text-muted-foreground hover:text-foreground">
+                              <Copy className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="font-bold text-sm">{lead.seats}</TableCell>
                       <TableCell>
-                        <Badge variant={lead.status === 'confirmed' ? 'default' : 'outline'} className={cn(lead.status === 'confirmed' ? "bg-green-100 text-green-700 border-none" : "text-yellow-600 border-yellow-200")}>
-                          {lead.status.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex items-center gap-2 cursor-help">
-                                {lead.emailStatus === 'sent' ? (
-                                  <Badge variant="outline" className="border-green-200 text-green-700 bg-green-50 gap-1">
-                                    <CheckCircle2 className="w-3 h-3" /> SENT
-                                  </Badge>
-                                ) : lead.emailStatus === 'failed' ? (
-                                  <Badge variant="outline" className="border-red-200 text-red-700 bg-red-50 gap-1">
-                                    <XCircle className="w-3 h-3" /> FAILED
-                                  </Badge>
-                                ) : (
-                                  <Badge variant="outline" className="text-muted-foreground">PENDING</Badge>
-                                )}
-                              </div>
-                            </TooltipTrigger>
-                            {lead.emailError && (
-                              <TooltipContent className="bg-red-50 text-red-700 border-red-200 text-xs max-w-xs">
-                                {lead.emailError}
-                              </TooltipContent>
-                            )}
-                          </Tooltip>
-                        </TooltipProvider>
+                        <div className="flex items-center gap-2">
+                          <Badge variant={lead.status === 'confirmed' ? 'default' : 'outline'} className={cn(lead.status === 'confirmed' ? "bg-green-100 text-green-700 border-none" : "text-yellow-600 border-yellow-200")}>
+                            {lead.status.toUpperCase()}
+                          </Badge>
+                          {lead.emailStatus === 'failed' && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger>
+                                  <XCircle className="w-4 h-4 text-red-500" />
+                                </TooltipTrigger>
+                                <TooltipContent className="bg-red-50 text-red-700 border-red-200">
+                                  {lead.emailError || "Email delivery failed"}
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
                       </TableCell>
                       <TableCell className="text-right pr-6">
                         <Button
                           variant="ghost"
                           size="icon"
-                          onClick={() => { if(window.confirm("Purge lead data permanently?")) deleteLead.mutate(lead.id); }}
-                          className="text-red-400 hover:text-red-600"
+                          onClick={() => { if(window.confirm("Purge lead data and comparison snapshot permanently?")) deleteLead.mutate(lead.id); }}
+                          className="text-red-400 hover:text-red-600 transition-colors"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -230,9 +256,9 @@ export function AdminPage() {
                       <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Base Price / Month (EUR)</Label>
                       <div className="relative">
                         <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                        <Input 
-                          type="number" 
-                          defaultValue={p.basePricePerMonth} 
+                        <Input
+                          type="number"
+                          defaultValue={p.basePricePerMonth}
                           className="pl-9"
                           step="0.01"
                           onBlur={(e) => {
@@ -249,8 +275,8 @@ export function AdminPage() {
                         <Label className="text-sm font-semibold">Quote Only</Label>
                         <p className="text-[10px] text-muted-foreground">Show as estimate range</p>
                       </div>
-                      <Switch 
-                        defaultChecked={p.isQuoteOnly} 
+                      <Switch
+                        defaultChecked={p.isQuoteOnly}
                         onCheckedChange={(checked) => updatePricing.mutate({ ...p, isQuoteOnly: checked })}
                       />
                     </div>

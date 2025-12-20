@@ -195,10 +195,15 @@ export function ResultsPage() {
           <Card className="p-6 md:p-10 shadow-2xl border-primary/5 bg-slate-50/30">
             <div className="h-[500px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData} layout="vertical" margin={{ left: 100, right: 60 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 60 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
-                  <YAxis dataKey="name" type="category" width={140} tick={{ fontSize: 12, fontWeight: 700, fill: 'hsl(var(--foreground))' }} />
+                  <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    width={160} 
+                    tick={{ fontSize: 12, fontWeight: 700, fill: 'hsl(var(--foreground))', textAnchor: 'end' }} 
+                  />
                   <Tooltip
                     cursor={{ fill: 'hsl(var(--primary)/0.05)' }}
                     content={({ active, payload }) => {
