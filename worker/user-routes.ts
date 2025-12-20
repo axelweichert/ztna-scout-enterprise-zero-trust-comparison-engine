@@ -111,7 +111,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/submit', async (c) => {
     try {
       const input = await c.req.json();
-      console.log('[API SUBMIT] Inbound Lead Request:', JSON.stringify(input));
       const { turnstileToken, ...formData } = input;
       const env = c.env as any;
       const secret = env.PUBLIC_TURNSTILE_SECRET_KEY || env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
@@ -248,7 +247,15 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
   });
   app.delete('/api/admin/leads/:id', async (c) => {
-    const deleted = await LeadEntity.delete(c.env, c.req.param('id'));
+    const id = c.req.param('id');
+    const leadInst = new LeadEntity(c.env, id);
+    if (await leadInst.exists()) {
+      const state = await leadInst.getState();
+      if (state.comparisonId) {
+        await ComparisonEntity.delete(c.env, state.comparisonId);
+      }
+    }
+    const deleted = await LeadEntity.delete(c.env, id);
     return ok(c, { success: deleted });
   });
   app.get('/api/admin/stats', async (c) => {
@@ -304,8 +311,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/config', (c) => {
     const env = c.env as any;
-    return ok(c, { 
-      turnstileSiteKey: env.PUBLIC_TURNSTILE_SITE_KEY || env.TURNSTILE_SITE_KEY || "1x00000000000000000000AA" 
+    return ok(c, {
+      turnstileSiteKey: env.PUBLIC_TURNSTILE_SITE_KEY || env.TURNSTILE_SITE_KEY || "1x00000000000000000000AA"
     });
   });
 }

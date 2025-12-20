@@ -19,7 +19,7 @@ export function PrintResultsPage() {
     if (snapshot) {
       const timer = setTimeout(() => {
         window.print();
-      }, 1000);
+      }, 1500);
       return () => clearTimeout(timer);
     }
   }, [snapshot]);
@@ -60,17 +60,27 @@ export function PrintResultsPage() {
         </section>
         <section className="mb-10">
           <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">Total Cost Analysis (Year 1)</h2>
-          <div className="h-[400px] w-full border p-4">
+          <div className="h-[450px] w-full border p-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" margin={{ left: 80, right: 60 }}>
+              <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 80, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" width={80} tick={{ fontSize: 10, fontWeight: 'bold' }} />
-                <Bar dataKey="tco" barSize={20}>
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  width={140} 
+                  tick={{ fontSize: 10, fontWeight: 'bold', fill: '#000' }} 
+                />
+                <Bar dataKey="tco" barSize={24}>
                   {chartData.map((entry, index) => (
                     <Cell key={index} fill={entry.id === 'cloudflare' ? '#000' : '#666'} />
                   ))}
-                  <LabelList dataKey="tco" position="right" formatter={(v: number) => `€${v.toLocaleString()}`} style={{ fontSize: 10, fontWeight: 'bold' }} />
+                  <LabelList 
+                    dataKey="tco" 
+                    position="right" 
+                    formatter={(v: number) => `€${v.toLocaleString()}`} 
+                    style={{ fontSize: 10, fontWeight: 'bold' }} 
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
