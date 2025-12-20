@@ -17,7 +17,7 @@ class LeadEntity extends IndexedEntity<Lead> {
   static readonly indexName = "leads";
   static readonly initialState: Lead = {
     id: "", companyName: "", contactName: "", email: "", phone: "",
-    seats: 0, vpnStatus: 'none', budgetRange: "",
+    seats: 0, vpnStatus: 'none', budgetRange: "med",
     timing: 'planning', consentGiven: false, createdAt: 0,
     status: 'pending', contactAllowed: true, emailStatus: 'pending'
   };
@@ -96,7 +96,6 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
 }
 export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: string, RESEND_API_KEY: string, PUBLIC_BASE_URL: string, EMAIL_FROM: string } }>) {
   app.post('/api/submit', async (c) => {
-    // Clone request early in case we need it for logging in catch block
     const clonedReq = c.req.raw.clone();
     try {
       const { turnstileToken, ...input } = await c.req.json();
@@ -114,6 +113,7 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
         consentGiven: true,
         emailStatus: 'pending',
         timing: input.timing || 'immediate',
+        budgetRange: input.budgetRange || 'med',
         consentRecord: {
           ipHash: btoa(ip).slice(0, 12),
           userAgent: c.req.header('user-agent') || 'unknown',
@@ -145,19 +145,7 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
       });
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
-      const err = e as Error;
-      let requestBody = null;
-      try {
-        requestBody = await clonedReq.json();
-      } catch (parseErr) {
-        // Fallback if JSON parsing of the cloned request fails
-        requestBody = "Failed to parse body";
-      }
-      console.error('Submit failed', {
-        error: err?.message || String(e),
-        stack: err?.stack,
-        requestBody
-      });
+      console.error('Submit failed', e);
       return bad(c, 'Submission failed');
     }
   });
@@ -165,29 +153,31 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
     const sampleSeats = 250;
     const sampleVpnStatus = 'active';
     const allVendorResults = vendors.map((v) => {
-      const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
-      const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
+      const basePricing = pricing.find(p => p.vendorId === v.id) || { vendorId: v.id, basePricePerMonth: 25, isQuoteOnly: true, installationFee: 4000 };
+      const vendorFeatures = features.find(f => f.vendorId === v.id) || { vendorId: v.id, hasZTNA: true, hasSWG: false, hasCASB: false, hasDLP: false, hasFWaaS: false, hasRBI: false, isBSIQualified: false };
       return {
         id: v.id,
         name: v.name,
         pricing: basePricing,
         features: vendorFeatures,
-        tco: calculateTCO(sampleSeats, basePricing || { basePricePerMonth: 20, isQuoteOnly: true, installationFee: 4000 })
+        tco: calculateTCO(sampleSeats, basePricing)
       };
     });
     const tcos = allVendorResults.map(r => r.tco);
+    const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
+    const minTco = tcos.length > 0 ? Math.min(...tcos) : 1;
     const results: ComparisonResult[] = allVendorResults.map(r => ({
       vendorId: r.id,
       vendorName: r.name,
       tcoYear1: r.tco,
-      scores: calculateScores(r.features, r.tco, Math.max(...tcos), Math.min(...tcos)),
+      scores: calculateScores(r.features, r.tco, maxTco, minTco),
       features: r.features
     }));
     const snapshot: ComparisonSnapshot = {
       id: 'sample',
       leadId: 'demo-lead',
       results,
-      inputs: { seats: sampleSeats, vpnStatus: sampleVpnStatus },
+      inputs: { seats: sampleSeats, vpnStatus: sampleVpnStatus, budgetRange: 'med' },
       createdAt: Date.now(),
       isSample: true
     };
@@ -205,9 +195,8 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
     }
     if (tokenData.usedAt || tokenData.expiresAt < Date.now()) return bad(c, 'Token expired or used');
     const allVendorResults = vendors.map((v) => {
-        const basePricing = pricing.find(p => p.vendorId === v.id) as PricingModel;
-        const vendorFeatures = features.find(f => f.vendorId === v.id) as FeatureMatrix;
-        if (!basePricing || !vendorFeatures) return null;
+        const basePricing = pricing.find(p => p.vendorId === v.id) || { vendorId: v.id, basePricePerMonth: 25, isQuoteOnly: true, installationFee: 4000 };
+        const vendorFeatures = features.find(f => f.vendorId === v.id) || { vendorId: v.id, hasZTNA: true, hasSWG: false, hasCASB: false, hasDLP: false, hasFWaaS: false, hasRBI: false, isBSIQualified: false };
         return {
           id: v.id,
           name: v.name,
@@ -215,13 +204,15 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
           features: vendorFeatures,
           tco: calculateTCO(leadState.seats, basePricing)
         };
-    }).filter(Boolean) as any[];
+    });
     const tcos = allVendorResults.map(r => r.tco);
+    const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
+    const minTco = tcos.length > 0 ? Math.min(...tcos) : 1;
     const results: ComparisonResult[] = allVendorResults.map(r => ({
       vendorId: r.id,
       vendorName: r.name,
       tcoYear1: r.tco,
-      scores: calculateScores(r.features, r.tco, Math.max(...tcos), Math.min(...tcos)),
+      scores: calculateScores(r.features, r.tco, maxTco, minTco),
       features: r.features
     }));
     const snapshotId = crypto.randomUUID();
@@ -229,7 +220,7 @@ export function userRoutes(app: Hono<{ Bindings: Env & { TURNSTILE_SECRET_KEY: s
       id: snapshotId,
       leadId: leadState.id,
       results,
-      inputs: { seats: leadState.seats, vpnStatus: leadState.vpnStatus },
+      inputs: { seats: leadState.seats, vpnStatus: leadState.vpnStatus, budgetRange: leadState.budgetRange },
       createdAt: Date.now()
     };
     await ComparisonEntity.create(c.env, snapshot);

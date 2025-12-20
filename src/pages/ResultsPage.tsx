@@ -109,7 +109,10 @@ export function ResultsPage() {
             <h1 className="text-display tracking-tight leading-none">
               {snapshot.isSample ? "Sample Security Analysis" : t('results.title')}
             </h1>
-            <p className="text-xl text-muted-foreground">{t('results.subtitle', { seats: snapshot.inputs?.seats })}</p>
+            <p className="text-xl text-muted-foreground">
+              {t('results.subtitle', { seats: snapshot.inputs?.seats })}
+              {snapshot.inputs?.budgetRange && ` • ${t(`form.options.budget_${snapshot.inputs.budgetRange}`)}`}
+            </p>
           </div>
           <div className="flex gap-4">
             <Button variant="ghost" asChild className="hidden sm:flex h-14 px-8 border">

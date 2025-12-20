@@ -25,6 +25,7 @@ const leadSchema = z.object({
   seats: z.number().min(1, "Minimum 1 seat"),
   vpnStatus: z.enum(['active', 'replacing', 'none'] as const),
   timing: z.enum(['immediate', '3_months', '6_months', 'planning'] as const),
+  budgetRange: z.string().min(1, "Required"),
 });
 export function LeadFormPage() {
   const { t } = useTranslation();
@@ -42,7 +43,8 @@ export function LeadFormPage() {
       contactName: "",
       email: "",
       phone: "",
-      timing: 'immediate'
+      timing: 'immediate',
+      budgetRange: 'med'
     }
   });
   const steps = [
@@ -71,7 +73,7 @@ export function LeadFormPage() {
   const nextStep = async () => {
     const fields = step === 0
       ? ['companyName', 'contactName', 'email', 'phone']
-      : ['seats', 'vpnStatus', 'timing'];
+      : ['seats', 'vpnStatus', 'timing', 'budgetRange'];
     const isValid = await form.trigger(fields as any);
     if (isValid) setStep(s => s + 1);
   };
@@ -132,9 +134,20 @@ export function LeadFormPage() {
                   )}
                   {step === 1 && (
                     <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-                      <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.seats')}</Label>
-                        <Input {...form.register('seats', { valueAsNumber: true })} type="number" className="h-14 rounded-xl" />
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.seats')}</Label>
+                          <Input {...form.register('seats', { valueAsNumber: true })} type="number" className="h-14 rounded-xl" />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.budgetRange')}</Label>
+                          <select {...form.register('budgetRange')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
+                            <option value="low">{t('form.options.budget_low')}</option>
+                            <option value="med">{t('form.options.budget_med')}</option>
+                            <option value="high">{t('form.options.budget_high')}</option>
+                            <option value="enterprise">{t('form.options.budget_enterprise')}</option>
+                          </select>
+                        </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
