@@ -13,7 +13,7 @@ export function PrintResultsPage() {
   const { t } = useTranslation();
   const { data: snapshot, isLoading } = useQuery({
     queryKey: ['comparison', id],
-    queryFn: () => api<ComparisonSnapshot>(`/api/comparison/${id}`),
+    queryFn: () => api<ComparisonSnapshot>(id === 'sample' ? '/api/sample-comparison' : `/api/comparison/${id}`),
   });
   useEffect(() => {
     if (snapshot) {
@@ -59,43 +59,43 @@ export function PrintResultsPage() {
           </div>
         </section>
         <section className="mb-10">
-          <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">Total Cost Analysis (Year 1)</h2>
-          <div className="h-[450px] w-full border p-4">
+          <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">{t('results.tco_title')}</h2>
+          <div className="h-[550px] w-full border p-4">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 80, top: 10, bottom: 10 }}>
+              <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 80, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" hide />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  width={140} 
-                  tick={{ fontSize: 10, fontWeight: 'bold', fill: '#000' }} 
+                <YAxis
+                  dataKey="name"
+                  type="category"
+                  width={160}
+                  tick={{ fontSize: 9, fontWeight: 'bold', fill: '#000' }}
                 />
                 <Bar dataKey="tco" barSize={24}>
                   {chartData.map((entry, index) => (
                     <Cell key={index} fill={entry.id === 'cloudflare' ? '#000' : '#666'} />
                   ))}
-                  <LabelList 
-                    dataKey="tco" 
-                    position="right" 
-                    formatter={(v: number) => `€${v.toLocaleString()}`} 
-                    style={{ fontSize: 10, fontWeight: 'bold' }} 
+                  <LabelList
+                    dataKey="tco"
+                    position="right"
+                    formatter={(v: number) => `€${v.toLocaleString()}`}
+                    style={{ fontSize: 9, fontWeight: 'bold' }}
                   />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <p className="text-[10px] text-gray-500 mt-2 italic">* TCO includes license estimates and a standardized €4,000 implementation fee.</p>
+          <p className="text-[10px] text-gray-500 mt-2 italic">* {t('results.disclaimer')}</p>
         </section>
         <section>
-          <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">Detailed Scoring Matrix</h2>
+          <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">{t('results.matrix.title')}</h2>
           <table className="w-full text-[10px] border-collapse">
             <thead>
               <tr className="bg-black text-white">
                 <th className="p-2 text-left border">Vendor</th>
-                <th className="p-2 text-center border">Price Score</th>
-                <th className="p-2 text-center border">Feature Score</th>
-                <th className="p-2 text-center border font-bold">Total Score</th>
+                <th className="p-2 text-center border">{t('results.matrix.price_score')}</th>
+                <th className="p-2 text-center border">{t('results.matrix.feature_score')}</th>
+                <th className="p-2 text-center border font-bold">{t('results.matrix.total_score')}</th>
               </tr>
             </thead>
             <tbody>
