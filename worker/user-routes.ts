@@ -280,6 +280,19 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const leads = leadRes.items;
     const totalLeads = leads.length;
     const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
+    // Frequency map for VPN status
+    const vpnMap: Record<string, number> = {};
+    leads.forEach(l => {
+      vpnMap[l.vpnStatus] = (vpnMap[l.vpnStatus] || 0) + 1;
+    });
+    let mostCommonVpn = 'none';
+    let maxCount = 0;
+    Object.entries(vpnMap).forEach(([status, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        mostCommonVpn = status;
+      }
+    });
     const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
     const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, curr) => acc + (curr.seats || 0), 0) / totalLeads) : 0;
     const dailyLeads: TimeSeriesData[] = [];
@@ -295,7 +308,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         confirmed: dayLeads.filter(l => l.status === 'confirmed').length
       });
     }
-    return ok(c, { totalLeads, pendingLeads: totalLeads - confirmedLeads, confirmedLeads, conversionRate, avgSeats, dailyLeads });
+    return ok(c, { totalLeads, pendingLeads: totalLeads - confirmedLeads, confirmedLeads, conversionRate, avgSeats, mostCommonVpn, dailyLeads });
   });
   app.post('/api/admin/pricing', async (c) => {
     const update = await c.req.json<PricingOverride>();

@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import {
   Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp,
   Loader2, CheckCircle2, RefreshCw, Users, Clock,
-  Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle
+  Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle, Zap
 } from 'lucide-react';
 import type { Lead, AdminStats, PricingOverride } from '@shared/types';
 import { format } from 'date-fns';
@@ -81,8 +81,39 @@ export function AdminPage() {
         l.contactName.toLowerCase().includes(searchTerm.toLowerCase())
       );
   }, [leads, hideOptOuts, searchTerm]);
+  const handleExportCSV = () => {
+    if (!filteredLeads.length) {
+      toast.error("No data to export");
+      return;
+    }
+    const headers = ["ID", "Company", "Contact", "Email", "Phone", "Seats", "VPN", "Timing", "Status", "CreatedAt"];
+    const rows = filteredLeads.map(l => [
+      l.id,
+      l.companyName,
+      l.contactName,
+      l.email,
+      l.phone,
+      l.seats,
+      l.vpnStatus,
+      l.timing,
+      l.status,
+      new Date(l.createdAt).toISOString()
+    ]);
+    const csvContent = [headers, ...rows]
+      .map(e => e.join(";"))
+      .join("\n");
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `ztna-scout-leads-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    toast.success(t('admin.export_success'));
+  };
   if (!isAuthenticated) return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50">
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
       <Card className="max-w-md w-full p-8 shadow-2xl border-none rounded-3xl">
         <CardHeader className="text-center pb-8">
           <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
@@ -110,7 +141,7 @@ export function AdminPage() {
     </div>
   );
   return (
-    <AppLayout container className="bg-slate-50/50 min-h-screen" contentClassName="py-12">
+    <AppLayout container className="bg-slate-50/50 dark:bg-slate-950/50 min-h-screen" contentClassName="py-12">
       <div className="space-y-12 max-w-7xl mx-auto">
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-1">
@@ -125,19 +156,20 @@ export function AdminPage() {
               <RefreshCw className={cn("mr-2 w-4 h-4", leadsRefetching && "animate-spin")} />
               {t('admin.sync_data')}
             </Button>
-            <Button className="h-12 btn-gradient px-6 rounded-xl shadow-lg">
+            <Button onClick={handleExportCSV} className="h-12 btn-gradient px-6 rounded-xl shadow-lg">
               <Download className="mr-2 w-4 h-4" /> {t('admin.export_csv')}
             </Button>
           </div>
         </header>
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <section className="grid grid-cols-1 md:grid-cols-5 gap-6">
           {[
             { label: t('admin.stats.total'), val: stats?.totalLeads, icon: Mail, color: 'text-primary', bg: 'bg-primary/5' },
             { label: t('admin.stats.verified'), val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { label: t('admin.stats.conversion'), val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: t('admin.stats.avg_seats'), val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : '...', icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' }
+            { label: t('admin.stats.avg_seats'), val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : '...', icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' },
+            { label: t('admin.stats.common_vpn'), val: stats?.mostCommonVpn ? stats.mostCommonVpn.toUpperCase() : '...', icon: Zap, color: 'text-indigo-600', bg: 'bg-indigo-50' }
           ].map((item, i) => (
-            <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300">
+            <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className={cn("p-2.5 rounded-xl", item.bg)}>
@@ -157,7 +189,7 @@ export function AdminPage() {
         </section>
         <Tabs defaultValue="pipeline" className="space-y-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <TabsList className="bg-white border p-1.5 rounded-2xl h-14 w-full md:w-auto shadow-sm">
+            <TabsList className="bg-white dark:bg-slate-900 border p-1.5 rounded-2xl h-14 w-full md:w-auto shadow-sm">
               <TabsTrigger value="pipeline" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.pipeline')}</TabsTrigger>
               <TabsTrigger value="pricing" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.pricing')}</TabsTrigger>
               <TabsTrigger value="settings" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.settings')}</TabsTrigger>
@@ -166,17 +198,17 @@ export function AdminPage() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input
                 placeholder="Search leads..."
-                className="pl-10 h-14 bg-white border-2 rounded-2xl shadow-sm focus:ring-primary/20"
+                className="pl-10 h-14 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm focus:ring-primary/20"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
           </div>
           <TabsContent value="pipeline" className="animate-in fade-in duration-500">
-            <Card className="shadow-2xl border-none overflow-hidden rounded-3xl bg-white">
+            <Card className="shadow-2xl border-none overflow-hidden rounded-3xl bg-white dark:bg-slate-900">
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50/80 border-b">
+                  <TableHeader className="bg-slate-50/80 dark:bg-slate-800/80 border-b">
                     <TableRow className="hover:bg-transparent">
                       <TableHead className="p-5 font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.timestamp')}</TableHead>
                       <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.org')}</TableHead>
@@ -199,7 +231,7 @@ export function AdminPage() {
                         </TableCell>
                       </TableRow>
                     ) : filteredLeads.map(lead => (
-                      <TableRow key={lead.id} className="hover:bg-slate-50/50 transition-colors group">
+                      <TableRow key={lead.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
                         <TableCell className="text-[10px] text-muted-foreground font-mono pl-5">
                           {format(lead.createdAt, 'MMM dd')}<br/>
                           <span className="opacity-50">{format(lead.createdAt, 'HH:mm:ss')}</span>
@@ -211,7 +243,7 @@ export function AdminPage() {
                               {lead.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
                             </span>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200">ID: {lead.id.slice(0, 8)}</Badge>
+                              <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200 dark:border-slate-700">ID: {lead.id.slice(0, 8)}</Badge>
                               {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0 uppercase">{t('admin.table.opt_out')}</Badge>}
                             </div>
                           </div>
@@ -239,7 +271,7 @@ export function AdminPage() {
                               <span className="text-xs font-bold">{lead.seats} Seats</span>
                               <span className="text-[10px] text-muted-foreground">• {lead.vpnStatus.toUpperCase()} VPN</span>
                             </div>
-                            <Badge variant="secondary" className="text-[9px] w-fit font-bold uppercase tracking-tighter bg-slate-100 text-slate-600">
+                            <Badge variant="secondary" className="text-[9px] w-fit font-bold uppercase tracking-tighter bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                               {lead.timing.replace('_', ' ')}
                             </Badge>
                           </div>
@@ -289,8 +321,8 @@ export function AdminPage() {
               {pricingLoading ? (
                 <div className="col-span-full py-20 text-center"><Loader2 className="animate-spin mx-auto text-primary w-12 h-12" /></div>
               ) : pricingData?.map((p) => (
-                <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden rounded-2xl bg-white hover:shadow-lg transition-all duration-300">
-                  <CardHeader className="bg-slate-50/80 border-b py-4 px-6">
+                <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden rounded-2xl bg-white dark:bg-slate-900 hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="bg-slate-50/80 dark:bg-slate-800/80 border-b py-4 px-6">
                     <CardTitle className="text-lg flex justify-between items-center">
                       <span className="font-bold tracking-tight">{p.vendorId.charAt(0).toUpperCase() + p.vendorId.slice(1)}</span>
                       {p.updatedAt > 0 && <span className="text-[10px] font-mono text-muted-foreground">{format(p.updatedAt, 'MMM dd, HH:mm')}</span>}
@@ -300,7 +332,7 @@ export function AdminPage() {
                     <div className="space-y-2">
                       <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">{t('admin.pricing.market_rate')}</Label>
                       <div className="relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 border-r pr-3 border-slate-200">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 border-r pr-3 border-slate-200 dark:border-slate-700">
                           <Euro className="w-3.5 h-3.5 text-primary" />
                         </div>
                         <Input
@@ -317,7 +349,7 @@ export function AdminPage() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
+                    <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-bold">{t('admin.pricing.quote_required')}</Label>
                         <p className="text-[10px] text-muted-foreground uppercase font-mono">{t('admin.pricing.quote_desc')}</p>
@@ -333,16 +365,16 @@ export function AdminPage() {
             </div>
           </TabsContent>
           <TabsContent value="settings">
-             <Card className="shadow-2xl border-none p-10 rounded-3xl bg-white">
+             <Card className="shadow-2xl border-none p-10 rounded-3xl bg-white dark:bg-slate-900">
                 <div className="max-w-2xl space-y-10">
                    <div className="space-y-3">
                       <div className="flex items-center gap-3">
-                         <div className="p-2 bg-slate-900 rounded-lg"><Settings2 className="w-5 h-5 text-white" /></div>
+                         <div className="p-2 bg-slate-900 dark:bg-slate-100 rounded-lg"><Settings2 className="w-5 h-5 text-white dark:text-slate-900" /></div>
                          <h3 className="text-2xl font-bold font-display">Privacy & Visibility Controls</h3>
                       </div>
                       <p className="text-muted-foreground leading-relaxed">Adjust how sensitive lead data is processed and displayed within this administrative interface.</p>
                    </div>
-                   <div className="h-px bg-slate-100" />
+                   <div className="h-px bg-slate-100 dark:bg-slate-800" />
                    <div className="flex items-center justify-between gap-8">
                       <div className="space-y-1">
                          <h4 className="font-bold text-lg">Lead Pipeline Filtering</h4>
@@ -356,11 +388,11 @@ export function AdminPage() {
                          />
                       </div>
                    </div>
-                   <div className="bg-amber-50 border border-amber-100 p-6 rounded-2xl flex gap-4">
+                   <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-100 dark:border-amber-900/30 p-6 rounded-2xl flex gap-4">
                       <AlertCircle className="w-6 h-6 text-amber-600 shrink-0" />
                       <div className="space-y-1">
-                         <p className="text-sm font-bold text-amber-900">GDPR Compliance Note</p>
-                         <p className="text-xs text-amber-800 leading-relaxed">Opted-out leads should be processed for data deletion within 30 days unless a specific business justification exists. Use the trash icon in the pipeline to purge records permanently.</p>
+                         <p className="text-sm font-bold text-amber-900 dark:text-amber-400">GDPR Compliance Note</p>
+                         <p className="text-xs text-amber-800 dark:text-amber-500 leading-relaxed">Opted-out leads should be processed for data deletion within 30 days unless a specific business justification exists. Use the trash icon in the pipeline to purge records permanently.</p>
                       </div>
                    </div>
                 </div>

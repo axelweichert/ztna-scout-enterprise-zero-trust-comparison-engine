@@ -8,46 +8,60 @@ interface LegalPageProps {
 export function LegalPage({ type }: LegalPageProps) {
   const { t } = useTranslation();
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-white dark:bg-slate-950">
       <Header />
       <main className="flex-1 max-w-4xl mx-auto px-4 py-20 w-full">
-        <article className="prose prose-slate max-w-none">
-          <h1 className="text-4xl font-display font-bold mb-12 capitalize">
-            {type === 'imprint' ? 'Impressum' : 'Privacy Policy'}
+        <article className="prose prose-slate dark:prose-invert max-w-none">
+          <h1 className="text-4xl font-display font-bold mb-12">
+            {type === 'imprint' ? t('legal.imprint.title') : t('legal.privacy.title')}
           </h1>
-          <div className="space-y-8 text-foreground/80 leading-relaxed">
+          <div className="space-y-12 text-foreground/80 leading-relaxed">
             {type === 'imprint' ? (
-              <div className="space-y-6">
+              <div className="space-y-10">
                 <section>
-                  <h2 className="text-xl font-bold text-foreground">Service Provider</h2>
-                  <p>von Busch GmbH<br />Alfred-Bozi-Straße 12<br />33602 Bielefeld<br />Germany</p>
+                  <h2 className="text-xl font-bold text-foreground border-b pb-2 mb-4">
+                    {t('legal.imprint.provider_title')}
+                  </h2>
+                  <p className="whitespace-pre-line">{t('legal.imprint.provider_details')}</p>
                 </section>
                 <section>
-                  <h2 className="text-xl font-bold text-foreground">Contact</h2>
-                  <p>Email: security@vonbusch.digital<br />Web: www.vonbusch.digital</p>
+                  <h2 className="text-xl font-bold text-foreground border-b pb-2 mb-4">
+                    {t('legal.imprint.contact_title')}
+                  </h2>
+                  <p className="whitespace-pre-line">{t('legal.imprint.contact_details')}</p>
                 </section>
                 <section>
-                  <h2 className="text-xl font-bold text-foreground">Commercial Register</h2>
-                  <p>Amtsgericht Bielefeld<br />HRB 45678</p>
+                  <h2 className="text-xl font-bold text-foreground border-b pb-2 mb-4">
+                    {t('legal.imprint.register_title')}
+                  </h2>
+                  <p className="whitespace-pre-line">{t('legal.imprint.register_details')}</p>
                 </section>
               </div>
             ) : (
-              <div className="space-y-6">
+              <div className="space-y-10">
                 <section>
-                  <h2 className="text-xl font-bold text-foreground">1. Data Collection</h2>
-                  <p>We collect data necessary for the ZTNA analysis, including organization name, contact person, and infrastructure metrics.</p>
+                  <h2 className="text-xl font-bold text-foreground border-b pb-2 mb-4">
+                    {t('legal.privacy.section1_title')}
+                  </h2>
+                  <p>{t('legal.privacy.section1_desc')}</p>
                 </section>
                 <section>
-                  <h2 className="text-xl font-bold text-foreground">2. Legal Basis</h2>
-                  <p>Data processing is based on your explicit consent (Art. 6 para. 1 lit. a GDPR) and our legitimate interest in delivering accurate security comparisons.</p>
+                  <h2 className="text-xl font-bold text-foreground border-b pb-2 mb-4">
+                    {t('legal.privacy.section2_title')}
+                  </h2>
+                  <p>{t('legal.privacy.section2_desc')}</p>
                 </section>
                 <section>
-                  <h2 className="text-xl font-bold text-foreground">3. Retention</h2>
-                  <p>Confirmed leads are stored for 24 months. Unverified leads are purged automatically after 30 days.</p>
+                  <h2 className="text-xl font-bold text-foreground border-b pb-2 mb-4">
+                    {t('legal.privacy.section3_title')}
+                  </h2>
+                  <p>{t('legal.privacy.section3_desc')}</p>
                 </section>
                 <section>
-                  <h2 className="text-xl font-bold text-foreground">4. Your Rights</h2>
-                  <p>You have the right to access, rectify, or delete your data at any time. Contact us at security@vonbusch.digital.</p>
+                  <h2 className="text-xl font-bold text-foreground border-b pb-2 mb-4">
+                    {t('legal.privacy.section4_title')}
+                  </h2>
+                  <p>{t('legal.privacy.section4_desc')}</p>
                 </section>
               </div>
             )}

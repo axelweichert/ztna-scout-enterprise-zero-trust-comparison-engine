@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
+import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api-client';
 import type { ComparisonSnapshot, ComparisonResult } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
@@ -135,27 +136,37 @@ export function ResultsPage() {
             {t('results.badges.top_recommendations')}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {top3.map((v, i) => (
-              <Card key={v.vendorId} className={cn("relative overflow-hidden border-2 transition-all duration-300", i === 0 ? "border-primary shadow-2xl scale-105 z-10" : "border-muted shadow-sm hover:shadow-md")}>
-                {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">{t('results.badges.best_fit')}</div>}
-                <CardHeader>
-                  <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
-                  <div className="flex items-center justify-between mt-2">
-                    <p className="text-primary font-bold text-lg">{t('results.matrix.total_score')}: {v.scores?.totalScore}</p>
-                    <Badge variant="outline" className="text-[10px] uppercase">{i + 1}. Place</Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="p-4 bg-muted/30 rounded-xl space-y-1 border border-muted/50">
-                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.expert_take_label')}</p>
-                    <p className="text-sm leading-relaxed italic text-foreground/80">
-                      {t(`results.expert_take_${i}`)}
-                    </p>
-                  </div>
-                  <Button variant="secondary" className="w-full h-11 font-bold" onClick={() => setSelectedVendor(v)}>{t('results.matrix.deep_dive')}</Button>
-                </CardContent>
-              </Card>
-            ))}
+            <AnimatePresence>
+              {top3.map((v, i) => (
+                <motion.div
+                  key={v.vendorId}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1, duration: 0.4 }}
+                >
+                  <Card className={cn("relative h-full overflow-hidden border-2 transition-all duration-300", i === 0 ? "border-primary shadow-2xl scale-105 z-10" : "border-muted shadow-sm hover:shadow-md")}>
+                    {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-3 py-1 rounded-bl-lg uppercase">{t('results.badges.best_fit')}</div>}
+                    <CardHeader>
+                      <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
+                      <div className="flex items-center justify-between mt-2">
+                        <p className="text-primary font-bold text-lg">{t('results.matrix.total_score')}: {v.scores?.totalScore}</p>
+                        <Badge variant="outline" className="text-[10px] uppercase">{i + 1}. Place</Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                      <div className="p-4 bg-muted/30 rounded-xl space-y-1 border border-muted/50">
+                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.expert_take_label')}</p>
+                        <p className="text-sm leading-relaxed italic text-foreground/80">
+                          {t(`results.expert_take_${i}`)}
+                        </p>
+                      </div>
+                      <Button variant="secondary" className="w-full h-11 font-bold" onClick={() => setSelectedVendor(v)}>{t('results.matrix.deep_dive')}</Button>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         </section>
         <section className="space-y-8 mb-20">
@@ -166,13 +177,13 @@ export function ResultsPage() {
               {hideSimilar ? t('results.matrix.show_all') : t('results.matrix.diff_only')}
             </Button>
           </div>
-          <div className="overflow-x-auto rounded-2xl border bg-white shadow-xl">
+          <div className="overflow-x-auto rounded-2xl border bg-white dark:bg-slate-950 shadow-xl">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-slate-50 border-b">
+                <tr className="bg-slate-50 dark:bg-slate-900 border-b">
                   <th className="p-6 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">{t('results.matrix.capability')}</th>
                   {top3.map(v => (
-                    <th key={v.vendorId} className="p-6 text-center border-l bg-white/50">
+                    <th key={v.vendorId} className="p-6 text-center border-l bg-white/50 dark:bg-slate-900/50">
                       <p className="font-bold text-lg whitespace-nowrap">{v.vendorName}</p>
                     </th>
                   ))}
@@ -180,14 +191,14 @@ export function ResultsPage() {
               </thead>
               <tbody>
                 {filteredFeatures.map(({ key, label }) => (
-                  <tr key={key} className="border-b last:border-0 hover:bg-slate-50/50 transition-colors group">
+                  <tr key={key} className="border-b last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group">
                     <td className="p-6 font-semibold text-foreground/80 text-sm">{label}</td>
                     {top3.map(v => (
-                      <td key={v.vendorId} className="p-6 text-center border-l bg-white/30">
+                      <td key={v.vendorId} className="p-6 text-center border-l bg-white/30 dark:bg-slate-900/30">
                         {(v.features as any)?.[key] ? (
-                          <div className="bg-green-100 text-green-700 p-2 rounded-full inline-flex"><Check className="h-4 w-4" /></div>
+                          <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-2 rounded-full inline-flex"><Check className="h-4 w-4" /></div>
                         ) : (
-                          <div className="bg-red-50 text-red-300 p-2 rounded-full inline-flex"><X className="h-4 w-4" /></div>
+                          <div className="bg-red-50 dark:bg-red-900/20 text-red-300 dark:text-red-800 p-2 rounded-full inline-flex"><X className="h-4 w-4" /></div>
                         )}
                       </td>
                     ))}
@@ -199,9 +210,9 @@ export function ResultsPage() {
         </section>
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
-          <Card className="p-4 md:p-10 shadow-2xl border-none bg-slate-50/50 rounded-3xl overflow-hidden">
-            <div className="h-[550px] min-h-[550px] w-full">
-              <ResponsiveContainer width="100%" height="100%" minHeight={550}>
+          <Card className="p-4 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
+            <div className="h-[550px] w-full">
+              <ResponsiveContainer width="100%" height="100%" aspect={16/9} minHeight={550}>
                 <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 60, top: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
@@ -216,10 +227,10 @@ export function ResultsPage() {
                     content={({ active, payload }) => {
                       if (active && payload && payload.length) {
                         return (
-                          <div className="bg-white p-4 shadow-2xl border-none rounded-2xl min-w-[200px]">
+                          <div className="bg-white dark:bg-slate-900 p-4 shadow-2xl border-none rounded-2xl min-w-[200px]">
                             <p className="font-bold text-sm mb-2 text-muted-foreground uppercase tracking-tighter">{payload[0].payload.name}</p>
                             <p className="text-primary font-bold text-2xl">{currencyFormatter.format(payload[0].value as number)}</p>
-                            <div className="h-px bg-slate-100 my-3" />
+                            <div className="h-px bg-slate-100 dark:bg-slate-800 my-3" />
                             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none">12-Month Est. TCO</p>
                           </div>
                         );
@@ -229,7 +240,7 @@ export function ResultsPage() {
                   />
                   <Bar dataKey="tco" radius={[0, 10, 10, 0]} barSize={32}>
                     {chartData.map((entry, index) => (
-                      <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : '#1E293B'} />
+                      <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : 'hsl(var(--primary))'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -237,7 +248,7 @@ export function ResultsPage() {
             </div>
           </Card>
         </section>
-        <div className="bg-slate-900 text-slate-100 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center border shadow-2xl relative overflow-hidden">
+        <div className="bg-slate-900 dark:bg-slate-950 text-slate-100 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center border shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -mr-32 -mt-32" />
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-lg">
             <Info className="h-8 w-8 text-white" />
@@ -261,7 +272,7 @@ export function ResultsPage() {
               <p className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</p>
             </DialogHeader>
           </div>
-          <div className="p-10 space-y-10">
+          <div className="p-6 sm:p-10 space-y-10">
             <div className="space-y-8">
               {[
                 { label: t('results.matrix.feature_score'), val: selectedVendor?.scores?.featureScore ?? 0, desc: t('results.matrix.expert_take_desc.features') },
@@ -276,19 +287,19 @@ export function ResultsPage() {
                     </div>
                     <span className="font-mono font-bold text-lg">{stat.val}/100</span>
                   </div>
-                  <Progress value={stat.val} className="h-2.5 bg-slate-100" />
+                  <Progress value={stat.val} className="h-2.5 bg-slate-100 dark:bg-slate-800" />
                 </div>
               ))}
             </div>
-            <div className="pt-8 border-t">
-              <div className="flex justify-between items-center bg-slate-50 p-8 rounded-3xl border border-slate-100">
+            <div className="pt-6 border-t dark:border-slate-800">
+              <div className="flex justify-between items-center bg-slate-50 dark:bg-slate-900/50 p-6 sm:p-8 rounded-3xl border border-slate-100 dark:border-slate-800">
                 <div>
                   <p className="text-xs font-bold text-muted-foreground uppercase tracking-[0.2em] mb-1">{t('results.matrix.scout_total')}</p>
                   <p className="text-5xl font-display font-bold text-primary">{selectedVendor?.scores?.totalScore}</p>
                 </div>
                 <div className="text-right">
                    <p className="text-xs font-bold text-muted-foreground uppercase mb-2">{t('results.matrix.market_rank')}</p>
-                   <Badge variant="outline" className="h-10 px-6 text-xl font-bold bg-white border-2">
+                   <Badge variant="outline" className="h-10 px-6 text-xl font-bold bg-white dark:bg-slate-900 border-2">
                     #{sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1}
                    </Badge>
                 </div>
