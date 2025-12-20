@@ -4,15 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port ${PORT:-3000}",
-    "build": "vite build && npm run build:worker",
-    "build:worker": "npx esbuild worker/index.ts --bundle --format=esm --platform=neutral --target=es2022 --external:cloudflare:workers --outfile=dist/ztna_scout_xzqd7i_t0wnczmfjnhmin/index.js",
-    "lint": "eslint --cache -f json --quiet .",
-    "preview": "npm run build && vite preview --host 0.0.0.0 --port ${PORT:-4173}",
-    "deploy": "npm run build && wrangler deploy",
-    "cf-typegen": "wrangler types",
-    "prepare": "node .bootstrap.cjs || true"
-  },
+  "dev": "vite --host 0.0.0.0 --port ${PORT:-3000}",
+  "build": "vite build && npm run build:worker",
+  "build:worker": "npx esbuild worker/index.ts --bundle --format=esm --platform=neutral --target=es2022 --external:cloudflare:workers --outfile=dist/ztna_scout_xzqd7i_t0wnczmfjnhmin/index.js",
+  "prepare": "node .bootstrap.cjs || true",
+  "lint": "eslint --cache -f json --quiet .",
+  "preview": "npm run build && vite preview --host 0.0.0.0 --port ${PORT:-4173}",
+  "deploy": "npm run build && wrangler deploy",
+  "cf-typegen": "wrangler types"
+},
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
