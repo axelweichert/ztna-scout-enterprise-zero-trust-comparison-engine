@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api } from '@/lib/api-client';
@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import {
   Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp,
   Loader2, CheckCircle2, XCircle, RefreshCw, Users, Clock,
-  Settings2, Euro, Phone, ExternalLink, Copy
+  Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle
 } from 'lucide-react';
 import type { Lead, AdminStats, PricingOverride } from '@shared/types';
 import { format } from 'date-fns';
@@ -26,6 +26,7 @@ export function AdminPage() {
   const queryClient = useQueryClient();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [password, setPassword] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [hideOptOuts, setHideOptOuts] = useState(false);
   const { data: leads, isLoading: leadsLoading, isRefetching: leadsRefetching } = useQuery({
     queryKey: ['admin-leads'],
@@ -69,26 +70,40 @@ export function AdminPage() {
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard");
   };
-  const filteredLeads = leads?.filter(l => !hideOptOuts || l.contactAllowed) || [];
+  const filteredLeads = useMemo(() => {
+    if (!leads) return [];
+    return leads
+      .filter(l => !hideOptOuts || l.contactAllowed)
+      .filter(l => 
+        l.companyName.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        l.contactName.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  }, [leads, hideOptOuts, searchTerm]);
   if (!isAuthenticated) return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
-      <Card className="max-w-md w-full p-8 shadow-2xl border-none">
+      <Card className="max-w-md w-full p-8 shadow-2xl border-none rounded-3xl">
         <CardHeader className="text-center pb-8">
-          <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
-            <Shield className="text-white w-8 h-8" />
+          <div className="w-20 h-20 bg-primary rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl">
+            <Shield className="text-white w-10 h-10" />
           </div>
-          <CardTitle className="text-2xl font-display">Sentinel Access</CardTitle>
-          <CardDescription>Enterprise Admin Portal</CardDescription>
+          <CardTitle className="text-3xl font-display font-bold">Sentinel Gate</CardTitle>
+          <CardDescription className="text-base">Administrative Access Required</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <Input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            placeholder="••••••••"
-            onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
-          />
-          <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Invalid credentials")} className="w-full btn-gradient">Verify Authority</Button>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Secret Authority Key</Label>
+            <Input
+              type="password"
+              value={password}
+              autoFocus
+              className="h-14 text-center text-xl tracking-[0.5em] rounded-xl"
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
+              onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
+            />
+          </div>
+          <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Verification failed")} className="w-full h-14 btn-gradient text-lg rounded-xl">Unlock Terminal</Button>
         </CardContent>
       </Card>
     </div>
@@ -99,167 +114,196 @@ export function AdminPage() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
           <div className="space-y-1">
             <h1 className="text-4xl font-display font-bold tracking-tight">Executive Dashboard</h1>
-            <p className="text-muted-foreground italic">Lead lifecycle and market positioning analytics</p>
+            <p className="text-muted-foreground italic flex items-center gap-2">
+              <Clock className="w-3.5 h-3.5" /> 
+              Real-time lead lifecycle monitoring
+            </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="h-12 border-2" onClick={handleRefresh} disabled={leadsRefetching}>
+            <Button variant="outline" className="h-12 border-2 rounded-xl" onClick={handleRefresh} disabled={leadsRefetching}>
               <RefreshCw className={cn("mr-2 w-4 h-4", leadsRefetching && "animate-spin")} />
-              Refresh
+              Sync Data
             </Button>
-            <Button variant="outline" className="h-12 border-2">
-              <Download className="mr-2 w-4 h-4" /> Reports
+            <Button className="h-12 btn-gradient px-6 rounded-xl shadow-lg">
+              <Download className="mr-2 w-4 h-4" /> Export CSV
             </Button>
           </div>
         </header>
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
-            { label: 'Total Inquiries', val: stats?.totalLeads, icon: Mail, color: 'text-primary' },
-            { label: 'Verified Leads', val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-green-600' },
-            { label: 'DOI Conversion', val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600' },
-            { label: 'Avg Scale', val: stats?.avgSeats !== undefined ? `${stats.avgSeats} Seats` : '...', icon: Users, color: 'text-orange-600' }
+            { label: 'Total Inquiries', val: stats?.totalLeads, icon: Mail, color: 'text-primary', bg: 'bg-primary/5' },
+            { label: 'Verified Leads', val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { label: 'Conversion', val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: 'Average Seats', val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : '...', icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' }
           ].map((item, i) => (
-            <Card key={i} className="border-none shadow-soft group">
+            <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{item.label}</span>
-                  <item.icon className={cn("w-5 h-5", item.color)} />
+                  <div className={cn("p-2.5 rounded-xl", item.bg)}>
+                    <item.icon className={cn("w-5 h-5", item.color)} />
+                  </div>
+                  <Badge variant="ghost" className="text-[10px] font-bold text-muted-foreground tracking-tighter">LIFETIME</Badge>
                 </div>
-                <div className="text-3xl font-bold">
-                  {statsLoading ? <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /> : (item.val ?? '0')}
+                <div className="space-y-1">
+                  <div className="text-3xl font-bold tracking-tight">
+                    {statsLoading ? <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /> : (item.val ?? '0')}
+                  </div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.label}</p>
                 </div>
               </CardContent>
             </Card>
           ))}
         </section>
         <Tabs defaultValue="pipeline" className="space-y-8">
-          <TabsList className="bg-white border p-1 rounded-xl h-12">
-            <TabsTrigger value="pipeline" className="px-8">Pipeline Analytics</TabsTrigger>
-            <TabsTrigger value="pricing" className="px-8">Pricing Overrides</TabsTrigger>
-            <TabsTrigger value="settings" className="px-8">Privacy Rules</TabsTrigger>
-          </TabsList>
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+            <TabsList className="bg-white border p-1.5 rounded-2xl h-14 w-full md:w-auto shadow-sm">
+              <TabsTrigger value="pipeline" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">Pipeline</TabsTrigger>
+              <TabsTrigger value="pricing" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">Pricing Overrides</TabsTrigger>
+              <TabsTrigger value="settings" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">System Rules</TabsTrigger>
+            </TabsList>
+            <div className="relative w-full md:w-72 group">
+              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input 
+                placeholder="Search leads..." 
+                className="pl-10 h-14 bg-white border-2 rounded-2xl shadow-sm focus:ring-primary/20"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+          </div>
           <TabsContent value="pipeline" className="animate-in fade-in duration-500">
-            <Card className="shadow-lg border-none overflow-hidden rounded-2xl">
-              <Table>
-                <TableHeader className="bg-slate-50 border-b">
-                  <TableRow>
-                    <TableHead className="p-4 font-bold uppercase text-[10px]">Received</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">Entity & Requirements</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">Contact Person</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">Scale</TableHead>
-                    <TableHead className="font-bold uppercase text-[10px]">DOI Verification</TableHead>
-                    <TableHead className="text-right font-bold uppercase text-[10px] pr-8">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {leadsLoading ? (
-                    <TableRow><TableCell colSpan={6} className="p-10 text-center"><Loader2 className="animate-spin mx-auto text-primary" /></TableCell></TableRow>
-                  ) : filteredLeads.length === 0 ? (
-                    <TableRow><TableCell colSpan={6} className="p-10 text-center text-muted-foreground">No leads in the pipeline.</TableCell></TableRow>
-                  ) : filteredLeads.map(lead => (
-                    <TableRow key={lead.id} className="hover:bg-slate-50/50 transition-colors">
-                      <TableCell className="text-[10px] text-muted-foreground font-mono pl-4">{format(lead.createdAt, 'MMM dd, HH:mm')}</TableCell>
-                      <TableCell>
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <div className="flex flex-col cursor-help">
-                                <span className="font-bold text-sm flex items-center gap-1.5">
-                                  {lead.companyName}
-                                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
-                                </span>
-                                <div className="flex items-center gap-2 mt-1">
-                                   <Badge variant="outline" className="text-[9px] h-4 py-0 flex items-center gap-1 border-muted text-muted-foreground uppercase">
-                                     {lead.timing?.replace('_', ' ') || 'N/A'}
-                                   </Badge>
-                                   {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0">OPT-OUT</Badge>}
-                                </div>
-                              </div>
-                            </TooltipTrigger>
-                            <TooltipContent className="p-4 bg-slate-900 text-white border-none rounded-xl space-y-2">
-                              <p className="text-[10px] font-bold uppercase tracking-widest text-primary">Requirement Snapshot</p>
-                              <div className="grid grid-cols-2 gap-4 text-xs">
-                                <div><p className="text-slate-400">VPN Status:</p><p className="font-bold">{lead.vpnStatus.toUpperCase()}</p></div>
-                                <div><p className="text-slate-400">Budget:</p><p className="font-bold">{lead.budgetRange.toUpperCase()}</p></div>
-                                <div><p className="text-slate-400">Timeline:</p><p className="font-bold">{lead.timing.toUpperCase()}</p></div>
-                                <div><p className="text-slate-400">Seats:</p><p className="font-bold">{lead.seats}</p></div>
-                              </div>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium text-sm">{lead.contactName}</span>
-                          <div className="flex items-center gap-3 mt-1.5">
-                            <a href={`mailto:${lead.email}`} className="text-primary hover:text-primary/80 transition-colors">
-                              <Mail className="w-4 h-4" />
-                            </a>
-                            <a href={`tel:${lead.phone}`} className="text-muted-foreground hover:text-foreground transition-colors">
-                              <Phone className="w-3.5 h-3.5" />
-                            </a>
-                            <button onClick={() => copyToClipboard(lead.email)} className="text-muted-foreground hover:text-foreground">
-                              <Copy className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-bold text-sm">{lead.seats}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Badge variant={lead.status === 'confirmed' ? 'default' : 'outline'} className={cn(lead.status === 'confirmed' ? "bg-green-100 text-green-700 border-none" : "text-yellow-600 border-yellow-200")}>
-                            {lead.status.toUpperCase()}
-                          </Badge>
-                          {lead.emailStatus === 'failed' && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger>
-                                  <XCircle className="w-4 h-4 text-red-500" />
-                                </TooltipTrigger>
-                                <TooltipContent className="bg-red-50 text-red-700 border-red-200">
-                                  {lead.emailError || "Email delivery failed"}
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right pr-6">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => { if(window.confirm("Purge lead data and comparison snapshot permanently?")) deleteLead.mutate(lead.id); }}
-                          className="text-red-400 hover:text-red-600 transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
+            <Card className="shadow-2xl border-none overflow-hidden rounded-3xl bg-white">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-slate-50/80 border-b">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="p-5 font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Timestamp</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Organization</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Stakeholder</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">Infrastructure</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground text-center">Verification</TableHead>
+                      <TableHead className="text-right font-bold uppercase text-[10px] tracking-widest text-muted-foreground pr-8">Management</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {leadsLoading ? (
+                      <TableRow><TableCell colSpan={6} className="p-20 text-center"><Loader2 className="animate-spin mx-auto text-primary w-10 h-10" /></TableCell></TableRow>
+                    ) : filteredLeads.length === 0 ? (
+                      <TableRow>
+                        <TableCell colSpan={6} className="p-20 text-center">
+                          <div className="flex flex-col items-center gap-2">
+                             <AlertCircle className="w-10 h-10 text-muted-foreground/30" />
+                             <p className="text-muted-foreground font-medium">No leads matching your current criteria.</p>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ) : filteredLeads.map(lead => (
+                      <TableRow key={lead.id} className="hover:bg-slate-50/50 transition-colors group">
+                        <TableCell className="text-[10px] text-muted-foreground font-mono pl-5">
+                          {format(lead.createdAt, 'MMM dd')}<br/>
+                          <span className="opacity-50">{format(lead.createdAt, 'HH:mm:ss')}</span>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-base leading-none mb-1.5 flex items-center gap-2">
+                              {lead.companyName}
+                              {lead.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                            </span>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200">ID: {lead.id.slice(0, 8)}</Badge>
+                              {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0 uppercase">Opt-Out</Badge>}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span className="font-semibold text-sm">{lead.contactName}</span>
+                            <div className="flex items-center gap-3 mt-1.5">
+                              <TooltipProvider>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <a href={`mailto:${lead.email}`} className="text-primary hover:scale-110 transition-transform"><Mail className="w-4 h-4" /></a>
+                                  </TooltipTrigger>
+                                  <TooltipContent>{lead.email}</TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                              <a href={`tel:${lead.phone}`} className="text-muted-foreground hover:text-foreground"><Phone className="w-3.5 h-3.5" /></a>
+                              <button onClick={() => copyToClipboard(lead.email)} className="text-muted-foreground hover:text-foreground"><Copy className="w-3.5 h-3.5" /></button>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex flex-col gap-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs font-bold">{lead.seats} Seats</span>
+                              <span className="text-[10px] text-muted-foreground">• {lead.vpnStatus.toUpperCase()} VPN</span>
+                            </div>
+                            <Badge variant="secondary" className="text-[9px] w-fit font-bold uppercase tracking-tighter bg-slate-100 text-slate-600">
+                              {lead.timing.replace('_', ' ')}
+                            </Badge>
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex flex-col items-center gap-1.5">
+                            <Badge className={cn("px-2.5 py-0.5 text-[10px] uppercase font-bold border-none", 
+                              lead.status === 'confirmed' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
+                              {lead.status}
+                            </Badge>
+                            {lead.emailStatus === 'failed' && (
+                              <Badge variant="destructive" className="text-[9px] h-4">Email Failed</Badge>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right pr-6">
+                           <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                asChild
+                                className="h-9 w-9 text-blue-500"
+                              >
+                                <Link to={`/vergleich/${lead.comparisonId}`} target="_blank"><ExternalLink className="w-4 h-4" /></Link>
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => { if(window.confirm("Purge lead data permanently?")) deleteLead.mutate(lead.id); }}
+                                className="h-9 w-9 text-red-400 hover:text-red-600 hover:bg-red-50"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                           </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </Card>
           </TabsContent>
           <TabsContent value="pricing" className="animate-in fade-in duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {pricingLoading ? (
-                <div className="col-span-full py-20 text-center"><Loader2 className="animate-spin mx-auto text-primary w-10 h-10" /></div>
+                <div className="col-span-full py-20 text-center"><Loader2 className="animate-spin mx-auto text-primary w-12 h-12" /></div>
               ) : pricingData?.map((p) => (
-                <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden">
-                  <CardHeader className="bg-slate-50 border-b py-4">
+                <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden rounded-2xl bg-white hover:shadow-lg transition-all duration-300">
+                  <CardHeader className="bg-slate-50/80 border-b py-4 px-6">
                     <CardTitle className="text-lg flex justify-between items-center">
-                      {p.vendorId.charAt(0).toUpperCase() + p.vendorId.slice(1)}
-                      {p.updatedAt > 0 && <span className="text-[10px] font-normal text-muted-foreground">Updated: {format(p.updatedAt, 'MMM dd')}</span>}
+                      <span className="font-bold tracking-tight">{p.vendorId.charAt(0).toUpperCase() + p.vendorId.slice(1)}</span>
+                      {p.updatedAt > 0 && <span className="text-[10px] font-mono text-muted-foreground">{format(p.updatedAt, 'MMM dd, HH:mm')}</span>}
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="p-6 space-y-6">
                     <div className="space-y-2">
-                      <Label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Base Price / Month (EUR)</Label>
-                      <div className="relative">
-                        <Euro className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground ml-1">Market Rate / User / Month</Label>
+                      <div className="relative group">
+                        <div className="absolute left-4 top-1/2 -translate-y-1/2 flex items-center gap-1.5 border-r pr-3 border-slate-200">
+                          <Euro className="w-3.5 h-3.5 text-primary" />
+                        </div>
                         <Input
                           type="number"
                           defaultValue={p.basePricePerMonth}
-                          className="pl-9"
+                          className="pl-16 h-12 text-lg font-bold rounded-xl border-2 focus:ring-primary/20"
                           step="0.01"
                           onBlur={(e) => {
                             const val = parseFloat(e.target.value);
@@ -270,13 +314,13 @@ export function AdminPage() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-dashed border-slate-200">
                       <div className="space-y-0.5">
-                        <Label className="text-sm font-semibold">Quote Only</Label>
-                        <p className="text-[10px] text-muted-foreground">Show as estimate range</p>
+                        <Label className="text-sm font-bold">Quote Required</Label>
+                        <p className="text-[10px] text-muted-foreground uppercase font-mono">Forces range display</p>
                       </div>
                       <Switch
-                        defaultChecked={p.isQuoteOnly}
+                        checked={p.isQuoteOnly}
                         onCheckedChange={(checked) => updatePricing.mutate({ ...p, isQuoteOnly: checked })}
                       />
                     </div>
@@ -286,20 +330,35 @@ export function AdminPage() {
             </div>
           </TabsContent>
           <TabsContent value="settings">
-             <Card className="shadow-lg border-none p-8">
-                <div className="flex items-center justify-between">
-                   <div className="space-y-1">
-                      <h3 className="text-lg font-bold">Privacy Controls</h3>
-                      <p className="text-sm text-muted-foreground">Toggle visibility of leads that have objected to further contact.</p>
+             <Card className="shadow-2xl border-none p-10 rounded-3xl bg-white">
+                <div className="max-w-2xl space-y-10">
+                   <div className="space-y-3">
+                      <div className="flex items-center gap-3">
+                         <div className="p-2 bg-slate-900 rounded-lg"><Settings2 className="w-5 h-5 text-white" /></div>
+                         <h3 className="text-2xl font-bold font-display">Privacy & Visibility Controls</h3>
+                      </div>
+                      <p className="text-muted-foreground leading-relaxed">Adjust how sensitive lead data is processed and displayed within this administrative interface.</p>
                    </div>
-                   <div className="flex items-center gap-3">
-                      <span className="text-sm font-medium">Hide Opt-Outs</span>
-                      <Button
-                        variant={hideOptOuts ? "default" : "outline"}
-                        onClick={() => setHideOptOuts(!hideOptOuts)}
-                      >
-                        {hideOptOuts ? "Enabled" : "Disabled"}
-                      </Button>
+                   <div className="h-px bg-slate-100" />
+                   <div className="flex items-center justify-between gap-8">
+                      <div className="space-y-1">
+                         <h4 className="font-bold text-lg">Lead Pipeline Filtering</h4>
+                         <p className="text-sm text-muted-foreground">Automatically hide inquiries from the main pipeline if the user has formally objected to professional follow-up (Opt-Out).</p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                         <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{hideOptOuts ? "Active" : "Disabled"}</span>
+                         <Switch 
+                           checked={hideOptOuts}
+                           onCheckedChange={setHideOptOuts}
+                         />
+                      </div>
+                   </div>
+                   <div className="bg-amber-50 border border-amber-100 p-6 rounded-2xl flex gap-4">
+                      <AlertCircle className="w-6 h-6 text-amber-600 shrink-0" />
+                      <div className="space-y-1">
+                         <p className="text-sm font-bold text-amber-900">GDPR Compliance Note</p>
+                         <p className="text-xs text-amber-800 leading-relaxed">Opted-out leads should be processed for data deletion within 30 days unless a specific business justification exists. Use the trash icon in the pipeline to purge records permanently.</p>
+                      </div>
                    </div>
                 </div>
              </Card>
