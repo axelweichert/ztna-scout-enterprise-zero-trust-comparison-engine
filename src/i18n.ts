@@ -7,7 +7,7 @@ const resources = {
     translation: {
       common: {
         data_freshness: appConfig.data_freshness.en,
-        currency_symbol: "��"
+        currency_symbol: "€"
       },
       layout: {
         header: {
@@ -108,7 +108,11 @@ const resources = {
           show_all: "Show All Rows",
           diff_only: "Highlight Differences",
           best_fit: "Best Fit",
-          deep_dive: "Analysis Deep-Dive"
+          deep_dive: "Analysis Deep-Dive",
+          feature_score: "Feature Richness (40%)",
+          price_score: "Price Positioning (40%)",
+          compliance_score: "Regulatory (20%)",
+          total_score: "Scout Score"
         }
       },
       optOut: {
@@ -186,7 +190,7 @@ const resources = {
           companyName: "Firmenname",
           contactPerson: "Ansprechpartner",
           phone: "Telefonnummer",
-          workEmail: "Gesch��ftliche E-Mail",
+          workEmail: "Geschäftliche E-Mail",
           seats: "Anzahl Benutzer",
           vpnStatus: "VPN Status",
           timing: "Zeitrahmen Migration",
@@ -231,7 +235,11 @@ const resources = {
           show_all: "Alle Zeilen",
           diff_only: "Unterschiede hervorheben",
           best_fit: "Beste Wahl",
-          deep_dive: "Analyse-Details"
+          deep_dive: "Analyse-Details",
+          feature_score: "Funktionsumfang (40%)",
+          price_score: "Preis-Leistung (40%)",
+          compliance_score: "Compliance (20%)",
+          total_score: "Scout Score"
         }
       },
       optOut: {
@@ -260,7 +268,7 @@ const resources = {
           tooltips: {
             vonBusch: "Développé par von Busch Digital",
             cloudflare: "Propulsé par Cloudflare",
-            ubiquiti: "Cadre d'audit de sécurit��"
+            ubiquiti: "Cadre d'audit de sécurité"
           }
         },
         footer: {
@@ -297,8 +305,10 @@ const resources = {
           a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}",
           q2: "Pourquoi Cloudflare ?",
           a2: "Cloudflare propose actuellement la plateforme ZTNA la plus robuste et qualifiée BSI.",
-          q4: "Mes données sont-elles en sécurité ?",
-          a4: "Nous sommes strictement conformes au RGPD. Données stockées sur infrastructure Cloudflare chiffrée."
+          q3: "Les prix sont-ils définitifs ?",
+          a3: "Il s'agit d'estimations basées sur les prix catalogue. Des remises enterprise sont possibles.",
+          q4: "Données protégées ?",
+          a4: "Nous sommes strictement conformes au RGPD. Les données sont chiffrées sur Cloudflare."
         }
       },
       form: {
@@ -328,7 +338,7 @@ const resources = {
           budget_enterprise: "€100k+ / an"
         },
         legal: {
-          disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes certifiés de von Busch Digital (security@vonbusch.digital). Aucune donnée n'est partagée. Vous pouvez vous opposer au contact via le lien dans nos emails."
+          disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes de von Busch Digital (security@vonbusch.digital). Aucune donnée n'est partagée. Vous pouvez vous opposer au suivi via l'email de vérification."
         },
         submitted: {
           title: "Vérification envoyée",
@@ -341,7 +351,7 @@ const resources = {
         export_pdf: "Télécharger le rapport",
         tco_title: "Projection TCO sur 12 mois",
         bsi_qualified: "Fournisseur qualifié BSI",
-        disclaimer: "Estimations basées sur les prix catalogue. Pas d'offre contractuelle.",
+        disclaimer: "Estimations basées sur les prix catalogue. Ce rapport ne constitue pas une offre contractuelle.",
         badges: {
           top_match: "Meilleure correspondance",
           best_fit: "Meilleur choix"
@@ -352,21 +362,25 @@ const resources = {
           show_all: "Toutes les lignes",
           diff_only: "Afficher les différences",
           best_fit: "Meilleur choix",
-          deep_dive: "Détails de l'analyse"
+          deep_dive: "Détails de l'analyse",
+          feature_score: "Richesse fonctionnelle (40%)",
+          price_score: "Positionnement prix (40%)",
+          compliance_score: "Conformité (20%)",
+          total_score: "Score Scout"
         }
       },
       optOut: {
         title: "Opposition au contact",
-        success: "Votre préférence a été mise à jour. Aucun autre suivi ne sera effectué.",
-        error: "Lien invalide ou expiré.",
+        success: "Votre préférence a été mise à jour. Aucun autre suivi ne sera effectué pour cette demande.",
+        error: "Lien invalide ou expiré. Contactez le support pour modifier vos préférences.",
         back: "Retour au site"
       },
       verify: {
         loading: "Vérification...",
         success: "Identité vérifiée!",
-        success_desc: "Votre rapport (ID: {{id}}) est prêt. Redirection...",
+        success_desc: "Votre rapport (ID: {{id}}) est prêt. Redirection en cours...",
         error: "Échec de la vérification",
-        error_desc: "Lien expiré ou invalide."
+        error_desc: "Le lien a expiré ou est invalide. Veuillez recommencer l'analyse."
       }
     }
   }

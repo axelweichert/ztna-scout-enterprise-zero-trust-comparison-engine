@@ -63,42 +63,45 @@ async function verifyTurnstile(token: string, secret: string) {
     const outcome = await res.json() as { success: boolean };
     return outcome.success;
   } catch (err) {
-    console.error('[WORKER ERROR] Turnstile fetch failed:', err);
+    console.error('[TURNSTILE] verification request failed:', err);
     return false;
   }
 }
 async function sendVerificationEmail(env: any, lead: Lead, token: string, optOutToken: string) {
   let baseUrl = env.PUBLIC_BASE_URL || 'https://ztna-scout.pages.dev';
   if (baseUrl.endsWith('/')) baseUrl = baseUrl.slice(0, -1);
-
   const verifyUrl = `${baseUrl}/verify/${token}`;
   const optOutUrl = `${baseUrl}/opt-out?token=${optOutToken}`;
   const fromEmail = env.EMAIL_FROM || 'security@vonbusch.digital';
   const subject = lead.vpnStatus === 'none' ? "ZTNA Scout: Your Security Analysis" : "ZTNA Scout: Verify your analysis request";
-  const body = `Hello ${lead.contactName},\n\nThank you for using ZTNA Scout. To ensure data integrity, please verify your request by clicking the link below:\n\n${verifyUrl}\n\nThis analysis is for ${lead.seats} seats at ${lead.companyName}.\n\nIf you wish to object to further contact from our security architects, please use this link: ${optOutUrl}\n\nBest regards,\nThe ZTNA Scout Team`;
+  const body = `Hello ${lead.contactName},\n\nThank you for using ZTNA Scout. To ensure data integrity and provide you with the results, please verify your request by clicking the link below:\n\n${verifyUrl}\n\nProject: ${lead.companyName} (${lead.seats} seats)\n\nIf you wish to object to further contact from our security architects, please use this link: ${optOutUrl}\n\nBest regards,\nThe ZTNA Scout Team`;
+  if (!env.RESEND_API_KEY) {
+    console.warn('[EMAIL] Skipping dispatch: RESEND_API_KEY is not configured in the environment.');
+    return { success: false, error: 'Email service not configured' };
+  }
   try {
-    if (env.RESEND_API_KEY) {
-      const resendUrl = 'https://api.resend.com/emails';
-      console.log(`[WORKER DIAGNOSTIC] Dispatching email via: ${resendUrl}`);
-      const res = await fetch('https://api.resend.com/emails', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${env.RESEND_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          from: `ZTNA Scout <${fromEmail}>`,
-          to: lead.email,
-          subject,
-          text: body
-        })
-      });
-      if (!res.ok) throw new Error(`Resend API returned ${res.status}: ${await res.text()}`);
+    const res = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${env.RESEND_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        from: `ZTNA Scout <${fromEmail}>`,
+        to: lead.email,
+        subject,
+        text: body
+      })
+    });
+    if (!res.ok) {
+      const errorText = await res.text();
+      console.error(`[EMAIL] Resend API error (${res.status}):`, errorText);
+      throw new Error(`Email provider error: ${res.status}`);
     }
     return { success: true };
   } catch (e) {
-    console.error('Email delivery failed:', e);
-    return { success: false, error: e instanceof Error ? e.message : String(e) };
+    console.error('[EMAIL] Delivery exception:', e);
+    return { success: false, error: e instanceof Error ? e.message : 'Unknown delivery error' };
   }
 }
 async function getMergedPricing(env: Env, vendorId: string): Promise<PricingModel> {
@@ -109,12 +112,15 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
     if (override.basePricePerMonth > 0) {
       return {
         ...base,
-        basePricePerMonth: override.basePricePerMonth,
+        basePricePerMonth: Number(override.basePricePerMonth.toFixed(2)),
         isQuoteOnly: override.isQuoteOnly
       };
     }
   }
-  return base;
+  return {
+    ...base,
+    basePricePerMonth: Number(base.basePricePerMonth.toFixed(2))
+  };
 }
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/submit', async (c) => {
@@ -124,7 +130,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const env = c.env as any;
       const secret = env.PUBLIC_TURNSTILE_SECRET_KEY || env.TURNSTILE_SECRET_KEY || "1x0000000000000000000000000000000AA";
       const isHuman = await verifyTurnstile(turnstileToken, secret);
-      if (!isHuman) return bad(c, 'Verification failed. Please try again.');
+      if (!isHuman) return bad(c, 'Bot verification failed. Please refresh and try again.');
       const leadId = crypto.randomUUID();
       const ip = c.req.header('cf-connecting-ip') || 'unknown';
       const lead: Lead = {
@@ -135,7 +141,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         contactAllowed: true,
         consentGiven: true,
         emailStatus: 'pending',
-        timing: formData.timing || 'immediate',
+        timing: formData.timing || 'planning',
         budgetRange: formData.budgetRange || 'med',
         consentRecord: {
           ipHash: btoa(ip).slice(0, 12),
@@ -168,8 +174,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       });
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
-      console.error('Submit failed', e);
-      return bad(c, 'Submission failed');
+      console.error('[API] Submit failed:', e);
+      return bad(c, 'An internal error occurred during submission.');
     }
   });
   app.get('/api/sample-comparison', async (c) => {
@@ -192,7 +198,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const results: ComparisonResult[] = allVendorResults.map(r => ({
       vendorId: r.id,
       vendorName: r.name,
-      tcoYear1: r.tco,
+      tcoYear1: Number(r.tco.toFixed(2)),
       scores: calculateScores(r.features, r.tco, maxTco, minTco),
       features: r.features
     }));
@@ -209,14 +215,16 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/verify/:token', async (c) => {
     const token = c.req.param('token');
     const tokenEntity = new VerificationTokenEntity(c.env, token);
-    if (!await tokenEntity.exists()) return notFound(c, 'Invalid or expired token');
+    if (!await tokenEntity.exists()) return notFound(c, 'Verification link is invalid.');
     const tokenData = await tokenEntity.getState();
     const leadEntity = new LeadEntity(c.env, tokenData.leadId);
+    if (!await leadEntity.exists()) return notFound(c, 'Associated lead data not found.');
     const leadState = await leadEntity.getState();
     if (leadState.status === 'confirmed' && leadState.comparisonId) {
       return ok(c, { comparisonId: leadState.comparisonId });
     }
-    if (tokenData.usedAt || tokenData.expiresAt < Date.now()) return bad(c, 'Token expired or used');
+    if (tokenData.expiresAt < Date.now()) return bad(c, 'Verification link has expired. Please request a new comparison.');
+    if (tokenData.usedAt) return bad(c, 'Verification link has already been used.');
     const allVendorResults = await Promise.all(vendors.map(async (v) => {
         const mergedPricing = await getMergedPricing(c.env, v.id);
         const vendorFeatures = features.find(f => f.vendorId === v.id) || { vendorId: v.id, hasZTNA: true, hasSWG: false, hasCASB: false, hasDLP: false, hasFWaaS: false, hasRBI: false, isBSIQualified: false };
@@ -234,7 +242,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const results: ComparisonResult[] = allVendorResults.map(r => ({
       vendorId: r.id,
       vendorName: r.name,
-      tcoYear1: r.tco,
+      tcoYear1: Number(r.tco.toFixed(2)),
       scores: calculateScores(r.features, r.tco, maxTco, minTco),
       features: r.features
     }));
@@ -292,7 +300,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/admin/pricing', async (c) => {
     const update = await c.req.json<PricingOverride>();
     const inst = new PricingOverrideEntity(c.env, update.vendorId);
-    await inst.save({ ...update, updatedAt: Date.now() });
+    await inst.save({ ...update, basePricePerMonth: Number(update.basePricePerMonth.toFixed(2)), updatedAt: Date.now() });
     return ok(c, { success: true });
   });
   app.get('/api/admin/pricing', async (c) => {
@@ -306,7 +314,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/comparison/:id', async (c) => {
     const comp = new ComparisonEntity(c.env, c.req.param('id'));
-    if (!await comp.exists()) return notFound(c);
+    if (!await comp.exists()) return notFound(c, 'Report not found.');
     return ok(c, await comp.getState());
   });
   app.post('/api/opt-out', async (c) => {
@@ -320,9 +328,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   });
   app.get('/api/config', (c) => {
     const env = c.env as any;
-    if (!env.PUBLIC_TURNSTILE_SITE_KEY && !env.TURNSTILE_SITE_KEY) {
-      console.warn('[WORKER CONFIG] Using Turnstile test site key - Check environment variables');
-    }
     return ok(c, {
       turnstileSiteKey: env.PUBLIC_TURNSTILE_SITE_KEY || env.TURNSTILE_SITE_KEY || "1x00000000000000000000AA"
     });
