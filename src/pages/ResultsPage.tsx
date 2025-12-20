@@ -34,7 +34,7 @@ export function ResultsPage() {
     queryFn: () => api<ComparisonSnapshot>(id === 'sample' ? '/api/sample-comparison' : `/api/comparison/${id}`),
     retry: 1
   });
-  const currencyFormatter = useMemo(() => new Intl.NumberFormat(i18n.language || 'en-DE', {
+  const currencyFormatter = useMemo(() => new Intl.NumberFormat(i18n.language === 'en' ? 'en-GB' : 'de-DE', {
     style: 'currency',
     currency: 'EUR',
     maximumFractionDigits: 0
@@ -121,7 +121,7 @@ export function ResultsPage() {
               {snapshot.inputs?.budgetRange && ` • ${t(`form.options.budget_${snapshot.inputs.budgetRange}`)}`}
             </p>
           </div>
-          <div className="flex gap-4 w-full md:w-auto">
+          <div className="flex gap-4 w-full md:w-auto print:hidden">
             <Button variant="outline" asChild className="hidden sm:flex h-14 px-8 border-2">
               <Link to="/"><ArrowLeft className="mr-2 h-4 w-4" /> {t('form.buttons.back')}</Link>
             </Button>
@@ -169,7 +169,7 @@ export function ResultsPage() {
                           {t(`results.expert_take_${i}`)}
                         </p>
                       </div>
-                      <Button variant="secondary" className="w-full h-11 font-bold" onClick={() => setSelectedVendor(v)}>{t('results.matrix.deep_dive')}</Button>
+                      <Button variant="secondary" className="w-full h-11 font-bold print:hidden" onClick={() => setSelectedVendor(v)}>{t('results.matrix.deep_dive')}</Button>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -180,7 +180,7 @@ export function ResultsPage() {
         <section className="space-y-8 mb-20">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-3xl font-display font-bold">{t('results.matrix.title')}</h2>
-            <Button variant="ghost" size="sm" onClick={() => setHideSimilar(!hideSimilar)} className={cn("gap-2 border px-4", hideSimilar && "text-primary border-primary/20 bg-primary/5")}>
+            <Button variant="ghost" size="sm" onClick={() => setHideSimilar(!hideSimilar)} className={cn("gap-2 border px-4 print:hidden", hideSimilar && "text-primary border-primary/20 bg-primary/5")}>
               <Filter className="w-4 h-4" />
               {hideSimilar ? t('results.matrix.show_all') : t('results.matrix.diff_only')}
             </Button>
@@ -221,13 +221,13 @@ export function ResultsPage() {
           <Card className="p-4 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
             <div className="w-full min-h-[550px] relative">
               <ResponsiveContainer width="100%" height={550} debounce={100}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: 100, right: 40, top: 20 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 120, right: 60, top: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={100}
+                    width={120}
                     tick={{ fontSize: 10, fontWeight: 700, fill: 'hsl(var(--foreground))' }}
                   />
                   <Tooltip
@@ -261,7 +261,7 @@ export function ResultsPage() {
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-lg">
             <Info className="h-8 w-8 text-white" />
           </div>
-          <div className="space-y-3 relative">
+          <div className="space-y-3 relative text-pretty">
             <h4 className="text-2xl font-bold">{t('results.methodology_title')}</h4>
             <p className="text-base text-slate-300 leading-relaxed italic max-w-4xl">
               {t('results.disclaimer')} {t('results.methodology_desc')}

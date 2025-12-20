@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 export function Footer({ className }: { className?: string }) {
   const { t } = useTranslation();
@@ -13,22 +14,18 @@ export function Footer({ className }: { className?: string }) {
             </span>
             <span className="font-medium">von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld</span>
             <div className="flex gap-4 mt-1">
-              <a
-                href="https://www.vonbusch.digital/impressum"
-                target="_blank"
-                rel="noopener noreferrer"
+              <Link
+                to="/impressum"
                 className="hover:text-foreground transition-colors underline-offset-4 hover:underline"
               >
                 {t('layout.footer.imprint')}
-              </a>
-              <a
-                href="https://www.vonbusch.digital/datenschutz"
-                target="_blank"
-                rel="noopener noreferrer"
+              </Link>
+              <Link
+                to="/datenschutz"
                 className="hover:text-foreground transition-colors underline-offset-4 hover:underline"
               >
                 {t('layout.footer.privacy')}
-              </a>
+              </Link>
             </div>
           </div>
           <div className="text-xs text-muted-foreground print:text-black print:text-[8pt] flex items-center gap-1">

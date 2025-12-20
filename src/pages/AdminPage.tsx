@@ -73,13 +73,18 @@ export function AdminPage() {
   };
   const filteredLeads = useMemo(() => {
     if (!leads) return [];
+    const normalizedTerm = searchTerm.toLowerCase().trim();
     return leads
       .filter(l => !hideOptOuts || l.contactAllowed)
-      .filter(l =>
-        l.companyName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        l.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        l.contactName.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      .filter(l => {
+        if (!normalizedTerm) return true;
+        return (
+          l.companyName.toLowerCase().includes(normalizedTerm) ||
+          l.email.toLowerCase().includes(normalizedTerm) ||
+          l.contactName.toLowerCase().includes(normalizedTerm) ||
+          l.id.toLowerCase().includes(normalizedTerm)
+        );
+      });
   }, [leads, hideOptOuts, searchTerm]);
   const handleExportCSV = () => {
     if (!filteredLeads.length) {
@@ -89,8 +94,8 @@ export function AdminPage() {
     const headers = ["ID", "Company", "Contact", "Email", "Phone", "Seats", "VPN", "Timing", "Status", "CreatedAt"];
     const rows = filteredLeads.map(l => [
       l.id,
-      l.companyName,
-      l.contactName,
+      `"${l.companyName.replace(/"/g, '""')}"`,
+      `"${l.contactName.replace(/"/g, '""')}"`,
       l.email,
       l.phone,
       l.seats,
@@ -99,7 +104,9 @@ export function AdminPage() {
       l.status,
       new Date(l.createdAt).toISOString()
     ]);
-    const csvContent = [headers, ...rows]
+    // Use UTF-8 BOM for Excel compatibility with German characters
+    const BOM = '\uFEFF';
+    const csvContent = BOM + [headers, ...rows]
       .map(e => e.join(";"))
       .join("\n");
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -131,7 +138,7 @@ export function AdminPage() {
               autoFocus
               className="h-14 text-center text-xl tracking-[0.5em] rounded-xl"
               onChange={e => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder="���•••••••"
               onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
             />
           </div>

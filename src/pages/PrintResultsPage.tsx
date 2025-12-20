@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -10,11 +10,16 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 export function PrintResultsPage() {
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { data: snapshot, isLoading } = useQuery({
     queryKey: ['comparison', id],
     queryFn: () => api<ComparisonSnapshot>(id === 'sample' ? '/api/sample-comparison' : `/api/comparison/${id}`),
   });
+  const currencyFormatter = useMemo(() => new Intl.NumberFormat(i18n.language === 'en' ? 'en-GB' : 'de-DE', {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0
+  }), [i18n.language]);
   useEffect(() => {
     if (snapshot) {
       const timer = setTimeout(() => {
@@ -62,13 +67,13 @@ export function PrintResultsPage() {
           <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">{t('results.tco_title')}</h2>
           <div className="w-full min-h-[550px] border p-4">
             <ResponsiveContainer width="100%" height={550} debounce={100}>
-              <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 80, top: 10, bottom: 10 }}>
+              <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 100, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" hide />
                 <YAxis
                   dataKey="name"
                   type="category"
-                  width={160}
+                  width={140}
                   tick={{ fontSize: 9, fontWeight: 'bold', fill: '#000' }}
                 />
                 <Bar dataKey="tco" barSize={24}>
@@ -78,7 +83,7 @@ export function PrintResultsPage() {
                   <LabelList
                     dataKey="tco"
                     position="right"
-                    formatter={(v: number) => `€${v.toLocaleString()}`}
+                    formatter={(v: number) => currencyFormatter.format(v)}
                     style={{ fontSize: 9, fontWeight: 'bold' }}
                   />
                 </Bar>
