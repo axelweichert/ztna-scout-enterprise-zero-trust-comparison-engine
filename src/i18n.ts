@@ -20,8 +20,8 @@ const resources = {
         footer: {
           imprint: "Imprint",
           privacy: "Privacy Policy",
-          credit: "Built with ♥ at",
-          service_line: "A service provided by von Busch GmbH"
+          service_line: "Ein Service der von Busch GmbH",
+          address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld"
         }
       },
       home: {
@@ -232,8 +232,8 @@ const resources = {
         footer: {
           imprint: "Impressum",
           privacy: "Datenschutz",
-          credit: "Mit ♥ bei",
-          service_line: "Ein Service der von Busch GmbH"
+          service_line: "Ein Service der von Busch GmbH",
+          address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld"
         }
       },
       home: {
@@ -285,13 +285,13 @@ const resources = {
         buttons: { continue: "Weiter", back: "Zurück", submit: "Bestätigen & Generieren", generating: "Analysiere..." },
         options: {
           vpn_active: "Aktives Legacy VPN",
-          vpn_replacing: "Migration l��uft",
+          vpn_replacing: "Migration läuft",
           vpn_none: "SDP / Cloud Native",
           timing_immediate: "Sofort",
           timing_3m: "Innerhalb 3 Monate",
           timing_6m: "In 6 Monaten",
           timing_planning: "Strategische Planung",
-          budget_low: "< ��10k / Jahr",
+          budget_low: "< €10k / Jahr",
           budget_med: "€10k - €50k / Jahr",
           budget_high: "€50k - €100k / Jahr",
           budget_enterprise: "€100k+ / Jahr"
@@ -444,8 +444,8 @@ const resources = {
         footer: {
           imprint: "Mentions Légales",
           privacy: "Confidentialité",
-          credit: "Développé avec ♥ chez",
-          service_line: "Un service fourni par von Busch GmbH"
+          service_line: "Ein Service der von Busch GmbH",
+          address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld"
         }
       },
       home: {
@@ -466,7 +466,7 @@ const resources = {
         steps: {
           title: "La méthodologie ZTNA Scout",
           subtitle: "Comment nous fournissons des analyses de précision.",
-          step1: { title: "Définir le périmètre", desc: "Identifier le nombre d'utilisateurs et l'architecture existante." },
+          step1: { title: "Définir le périm��tre", desc: "Identifier le nombre d'utilisateurs et l'architecture existante." },
           step2: { title: "Balayage du marché", desc: "Comparaison avec les prix catalogue et les matrices de fonctionnalités." },
           step3: { title: "Rapport stratégique", desc: "Recevez un export PDF professionnel avec projections TCO." }
         },
@@ -612,7 +612,7 @@ const resources = {
         loading: "Vérification...",
         success: "Identité vérifiée!",
         success_desc: "Votre rapport (ID: {{id}}) est prêt. Redirection en cours...",
-        error: "Échec de la vérification",
+        error: "��chec de la vérification",
         error_desc: "Le lien a expiré ou est invalide. Veuillez recommencer l'analyse."
       },
       legal: {
