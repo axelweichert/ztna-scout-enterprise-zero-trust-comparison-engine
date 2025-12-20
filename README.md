@@ -1,6 +1,6 @@
 # Cloudflare Workers React Boilerplate
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/axelweichert/ztna-scout-enterprise-zero-trust-comparison-engine)
 
 A production-ready full-stack template for Cloudflare Workers featuring a React frontend with shadcn/ui, Durable Objects for scalable stateful entities (users, chats, messages), Hono for API routing, TanStack Query for data fetching, Tailwind CSS for styling, and Vite for fast development.
 
@@ -96,7 +96,7 @@ const users = await api<User[]>('/api/users');
    wrangler deploy --env production
    ```
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/axelweichert/ztna-scout-enterprise-zero-trust-comparison-engine)
 
 **Live Preview**: After deploy, visit `<worker>.<subdomain>.workers.dev`.
 
