@@ -3,6 +3,9 @@ export interface ApiResponse<T = unknown> {
   data?: T;
   error?: string;
 }
+export interface AppConfig {
+  turnstileSiteKey: string;
+}
 // ZTNA Scout Types
 export type VpnStatus = 'active' | 'replacing' | 'none';
 export type Timing = 'immediate' | '3_months' | '6_months' | 'planning';
