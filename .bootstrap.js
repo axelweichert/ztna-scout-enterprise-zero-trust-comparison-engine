@@ -85,7 +85,8 @@ function runSetupCommands() {
     "bun add i18next-browser-languagedetector",
     "bun add react-turnstile",
     "bun add recharts",
-    "bun add lucide-react clsx tailwind-merge"
+    "bun add lucide-react clsx tailwind-merge",
+    "bun add date-fns"
 ];
     
     if (commands.length === 0) {
