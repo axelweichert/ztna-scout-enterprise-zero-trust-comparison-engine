@@ -7,9 +7,12 @@ export function Footer({ className }: { className?: string }) {
     <footer className={cn("border-t bg-slate-50/50 py-8 print:py-4 print:bg-white", className)}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-          <div className="flex flex-col md:flex-row items-center gap-2 md:gap-4 text-xs text-muted-foreground print:text-black print:text-[8pt]">
+          <div className="flex flex-col items-center md:items-start gap-1 text-xs text-muted-foreground print:text-black print:text-[8pt]">
+            <span className="font-bold text-foreground">
+              {t('layout.footer.service_line')}
+            </span>
             <span className="font-medium">von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld</span>
-            <div className="flex gap-4">
+            <div className="flex gap-4 mt-1">
               <a
                 href="https://www.vonbusch.digital/impressum"
                 target="_blank"

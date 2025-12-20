@@ -20,7 +20,8 @@ const resources = {
         footer: {
           imprint: "Imprint",
           privacy: "Privacy Policy",
-          credit: "Built with ♥ at"
+          credit: "Built with ♥ at",
+          service_line: "A service provided by von Busch GmbH"
         }
       },
       home: {
@@ -231,7 +232,8 @@ const resources = {
         footer: {
           imprint: "Impressum",
           privacy: "Datenschutz",
-          credit: "Mit ♥ bei"
+          credit: "Mit ♥ bei",
+          service_line: "Ein Service der von Busch GmbH"
         }
       },
       home: {
@@ -239,7 +241,7 @@ const resources = {
           badge: "B2B Analyse Engine",
           title1: "Enterprise Security",
           title2: "Vergleich neu gedacht",
-          description: "Schluss mit Sch��tzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
+          description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen"
         },
@@ -283,13 +285,13 @@ const resources = {
         buttons: { continue: "Weiter", back: "Zurück", submit: "Bestätigen & Generieren", generating: "Analysiere..." },
         options: {
           vpn_active: "Aktives Legacy VPN",
-          vpn_replacing: "Migration läuft",
+          vpn_replacing: "Migration l��uft",
           vpn_none: "SDP / Cloud Native",
           timing_immediate: "Sofort",
           timing_3m: "Innerhalb 3 Monate",
           timing_6m: "In 6 Monaten",
           timing_planning: "Strategische Planung",
-          budget_low: "< €10k / Jahr",
+          budget_low: "< ��10k / Jahr",
           budget_med: "€10k - €50k / Jahr",
           budget_high: "€50k - €100k / Jahr",
           budget_enterprise: "€100k+ / Jahr"
@@ -434,7 +436,7 @@ const resources = {
       layout: {
         header: {
           tooltips: {
-            vonBusch: "Développ�� par von Busch Digital",
+            vonBusch: "Développé par von Busch Digital",
             cloudflare: "Propulsé par Cloudflare Infrastructure",
             ubiquiti: "Cadre d'audit de sécurité"
           }
@@ -442,7 +444,8 @@ const resources = {
         footer: {
           imprint: "Mentions Légales",
           privacy: "Confidentialité",
-          credit: "Développé avec ♥ chez"
+          credit: "Développé avec ♥ chez",
+          service_line: "Un service fourni par von Busch GmbH"
         }
       },
       home: {
@@ -631,7 +634,7 @@ const resources = {
           section3_title: "3. Conservation",
           section3_desc: "Les prospects confirmés sont conservés pendant 24 mois. Les prospects non vérifiés sont purgés automatiquement après 30 jours.",
           section4_title: "4. Vos droits",
-          section4_desc: "Vous avez le droit d'accéder à vos données, de les rectifier ou de les supprimer à tout moment. Contactez-nous à security@vonbusch.digital."
+          section4_desc: "Vous avez le droit d'accéder à vos données, de les rectifier ou de les supprimer à tout moment. Contact us at security@vonbusch.digital."
         }
       }
     }
