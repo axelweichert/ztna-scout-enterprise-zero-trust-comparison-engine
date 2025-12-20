@@ -291,7 +291,7 @@ const resources = {
           timing_3m: "Innerhalb 3 Monate",
           timing_6m: "In 6 Monaten",
           timing_planning: "Strategische Planung",
-          budget_low: "< €10k / Jahr",
+          budget_low: "< ��10k / Jahr",
           budget_med: "€10k - €50k / Jahr",
           budget_high: "€50k - €100k / Jahr",
           budget_enterprise: "€100k+ / Jahr"
@@ -466,7 +466,7 @@ const resources = {
         steps: {
           title: "La méthodologie ZTNA Scout",
           subtitle: "Comment nous fournissons des analyses de précision.",
-          step1: { title: "Définir le périm��tre", desc: "Identifier le nombre d'utilisateurs et l'architecture existante." },
+          step1: { title: "Définir le périmètre", desc: "Identifier le nombre d'utilisateurs et l'architecture existante." },
           step2: { title: "Balayage du marché", desc: "Comparaison avec les prix catalogue et les matrices de fonctionnalités." },
           step3: { title: "Rapport stratégique", desc: "Recevez un export PDF professionnel avec projections TCO." }
         },
@@ -612,7 +612,7 @@ const resources = {
         loading: "Vérification...",
         success: "Identité vérifiée!",
         success_desc: "Votre rapport (ID: {{id}}) est prêt. Redirection en cours...",
-        error: "��chec de la vérification",
+        error: "Échec de la vérification",
         error_desc: "Le lien a expiré ou est invalide. Veuillez recommencer l'analyse."
       },
       legal: {
@@ -634,7 +634,7 @@ const resources = {
           section3_title: "3. Conservation",
           section3_desc: "Les prospects confirmés sont conservés pendant 24 mois. Les prospects non vérifiés sont purgés automatiquement après 30 jours.",
           section4_title: "4. Vos droits",
-          section4_desc: "Vous avez le droit d'accéder à vos données, de les rectifier ou de les supprimer à tout moment. Contact us at security@vonbusch.digital."
+          section4_desc: "Vous avez le droit d'accéder à vos données, de les rectifier ou de les supprimer à tout moment. Contactez-nous à security@vonbusch.digital."
         }
       }
     }

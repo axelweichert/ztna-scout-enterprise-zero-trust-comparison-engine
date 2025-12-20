@@ -12,7 +12,7 @@ export function Footer({ className }: { className?: string }) {
           <div className="space-y-1 text-sm md:text-base font-medium text-foreground print:text-black print:text-[9pt]">
             <p>{t('layout.footer.address')}</p>
             <p>{t('layout.footer.service_line')}</p>
-            <p>Built with ��� at Cloudflare.</p>
+            <p>Built with <span className="text-primary mx-0.5">♥</span> at Cloudflare.</p>
           </div>
           {/* Legal Links Row */}
           <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground print:hidden">

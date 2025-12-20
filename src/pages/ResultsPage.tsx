@@ -8,7 +8,7 @@ import type { ComparisonSnapshot, ComparisonResult } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar } from 'lucide-react';
+import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -98,7 +98,7 @@ export function ResultsPage() {
       )}>
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-xs text-muted-foreground uppercase">{t('results.badges.top_match')}:</span>
+            <span className="font-bold text-xs text-muted-foreground uppercase tracking-tighter">{t('results.badges.top_match')}:</span>
             <Badge className="bg-primary text-[10px]">{sortedResults[0]?.vendorName}</Badge>
           </div>
           <Button size="sm" className="btn-gradient h-8" onClick={() => navigate(`/vergleich/${id}/print`)}>
@@ -107,16 +107,19 @@ export function ResultsPage() {
         </div>
       </div>
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8 md:py-16">
-        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20 text-pretty">
-          <div className="space-y-4">
+        <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20">
+          <div className="space-y-4 text-pretty">
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground uppercase tracking-widest">
               <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> RID: {snapshot.id.slice(0, 8)}</span>
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {format(snapshot.createdAt, 'PPP')}</span>
+              <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">
+                <BadgeCheck className="w-3 h-3 mr-1" /> Verified Report
+              </Badge>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight leading-none">
               {snapshot.isSample ? t('results.sample_title') : t('results.title')}
             </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl">
+            <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
               {t('results.subtitle', { seats: snapshot.inputs?.seats })}
               {snapshot.inputs?.budgetRange && ` • ${t(`form.options.budget_${snapshot.inputs.budgetRange}`)}`}
             </p>
@@ -163,9 +166,9 @@ export function ResultsPage() {
                          <span className="text-xs font-bold text-muted-foreground uppercase">{t('results.matrix.total_score')}</span>
                          <span className="text-xl font-bold text-primary">{v.scores?.totalScore}</span>
                       </div>
-                      <div className="p-4 bg-muted/30 rounded-xl space-y-1 border border-muted/50">
+                      <div className="p-4 bg-muted/30 rounded-xl space-y-1.5 border border-muted/50">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.expert_take_label')}</p>
-                        <p className="text-sm leading-relaxed italic text-foreground/80">
+                        <p className="text-sm leading-relaxed italic text-foreground/80 font-medium">
                           {t(`results.expert_take_${i}`)}
                         </p>
                       </div>
@@ -189,10 +192,10 @@ export function ResultsPage() {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900 border-b">
-                  <th className="p-6 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">{t('results.matrix.capability')}</th>
+                  <th className="p-4 sm:p-6 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">{t('results.matrix.capability')}</th>
                   {top3.map(v => (
-                    <th key={v.vendorId} className="p-6 text-center border-l bg-white/50 dark:bg-slate-900/50">
-                      <p className="font-bold text-lg whitespace-nowrap">{v.vendorName}</p>
+                    <th key={v.vendorId} className="p-4 sm:p-6 text-center border-l bg-white/50 dark:bg-slate-900/50">
+                      <p className="font-bold text-base sm:text-lg whitespace-nowrap">{v.vendorName}</p>
                     </th>
                   ))}
                 </tr>
@@ -200,9 +203,9 @@ export function ResultsPage() {
               <tbody>
                 {filteredFeatures.map(({ key, label }) => (
                   <tr key={key} className="border-b last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group">
-                    <td className="p-6 font-semibold text-foreground/80 text-sm">{label}</td>
+                    <td className="p-4 sm:p-6 font-semibold text-foreground/80 text-sm">{label}</td>
                     {top3.map(v => (
-                      <td key={v.vendorId} className="p-6 text-center border-l bg-white/30 dark:bg-slate-900/30">
+                      <td key={v.vendorId} className="p-4 sm:p-6 text-center border-l bg-white/30 dark:bg-slate-900/30">
                         {(v.features as any)?.[key] ? (
                           <div className="bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 p-2 rounded-full inline-flex"><Check className="h-4 w-4" /></div>
                         ) : (
@@ -248,7 +251,7 @@ export function ResultsPage() {
                   />
                   <Bar dataKey="tco" radius={[0, 10, 10, 0]} barSize={32}>
                     {chartData.map((entry, index) => (
-                      <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : 'hsl(var(--primary))'} />
+                      <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : (entry.id === 'zscaler' ? '#0045D6' : '#1E293B')} />
                     ))}
                   </Bar>
                 </BarChart>
