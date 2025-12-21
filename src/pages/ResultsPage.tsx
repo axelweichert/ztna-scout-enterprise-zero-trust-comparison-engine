@@ -15,8 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Progress } from '@/components/ui/progress';
-import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { cn, formatDate, getRankLabel } from '@/lib/utils';
 export function ResultsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -110,10 +109,10 @@ export function ResultsPage() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20">
           <div className="space-y-4 text-pretty">
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground uppercase tracking-widest">
-              <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> RID: {snapshot.id.slice(0, 8)}</span>
-              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {format(snapshot.createdAt, 'PPP')}</span>
+              <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> {t('results.meta.rid')}: {snapshot.id.slice(0, 8)}</span>
+              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {formatDate(snapshot.createdAt, i18n.language)}</span>
               <Badge variant="outline" className="text-[10px] bg-emerald-50 text-emerald-700 border-emerald-200">
-                <BadgeCheck className="w-3 h-3 mr-1" /> Verified Report
+                <BadgeCheck className="w-3 h-3 mr-1" /> {t('results.meta.verified')}
               </Badge>
             </div>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight leading-none">
@@ -153,7 +152,7 @@ export function ResultsPage() {
                     <CardHeader>
                       <CardTitle className="text-2xl">{v.vendorName}</CardTitle>
                       <div className="flex flex-wrap items-center gap-2 mt-2">
-                        <Badge variant="outline" className="text-[10px] uppercase font-bold">{t(`results.matrix.rank_${i + 1}`)}</Badge>
+                        <Badge variant="outline" className="text-[10px] uppercase font-bold">{getRankLabel(i + 1, t)}</Badge>
                         {v.features.isBSIQualified && (
                           <Badge className="bg-emerald-100 text-emerald-700 text-[9px] border-none uppercase flex items-center gap-1">
                             <ShieldCheck className="w-3 h-3" /> {t('results.bsi_qualified')}
@@ -279,7 +278,7 @@ export function ResultsPage() {
           <div className="bg-primary text-primary-foreground p-10 relative overflow-hidden">
             <div className="absolute bottom-0 right-0 opacity-10 -mr-10 -mb-10"><ShieldCheck size={200} /></div>
             <DialogHeader>
-              <DialogTitle className="text-3xl font-display font-bold leading-tight">{selectedVendor?.vendorName} Scorecard</DialogTitle>
+              <DialogTitle className="text-3xl font-display font-bold leading-tight">{selectedVendor?.vendorName} {t('results.matrix.analytical_breakdown')}</DialogTitle>
               <CardDescription className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</CardDescription>
             </DialogHeader>
           </div>
@@ -311,7 +310,7 @@ export function ResultsPage() {
                 <div className="text-right">
                    <p className="text-xs font-bold text-muted-foreground uppercase mb-2">{t('results.matrix.market_rank')}</p>
                    <Badge variant="outline" className="h-10 px-6 text-xl font-bold bg-white dark:bg-slate-900 border-2">
-                    #{sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1}
+                    {getRankLabel(sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1, t)}
                    </Badge>
                 </div>
               </div>

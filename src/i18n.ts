@@ -108,6 +108,19 @@ const resources = {
         expert_take_0: "Exceptional balance of cost and compliance. Ideal for highly regulated enterprise environments.",
         expert_take_1: "Premium feature set with advanced threat protection. Recommended for high-risk digital profiles.",
         expert_take_2: "Scalable cloud architecture with rapid implementation paths and intuitive management.",
+        meta: {
+          rid: "Report-ID",
+          generated: "Generated on",
+          verified: "Verified Report"
+        },
+        print: {
+          title: "ZTNA Scout Analysis Report",
+          summary: "Executive Summary",
+          seats: "User Seats",
+          top_recommendation: "Top Recommendation",
+          transparency_title: "Transparency & Sources",
+          transparency_desc: "Calculations based on public market list rates (EUR) as of the verification date. TCO excludes volume discounts often available via direct enterprise negotiations."
+        },
         badges: {
           top_match: "Top Match",
           best_fit: "Best Fit",
@@ -276,7 +289,7 @@ const resources = {
         steps: { company: "Unternehmen", requirements: "Infrastruktur", legal: "Compliance" },
         labels: {
           companyName: "Firmenname",
-          contactPerson: "Ansprechpartner",
+          contactName: "Ansprechpartner",
           phone: "Telefonnummer",
           workEmail: "Geschäftliche E-Mail",
           seats: "Anzahl Benutzer",
@@ -299,7 +312,7 @@ const resources = {
           budget_enterprise: "100.000 €+ / Jahr"
         },
         legal: {
-          disclaimer: "Ihre Daten werden ausschlie��lich zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital (security@vonbusch.digital) verwendet. Es erfolgt keine Weitergabe an Dritte. Sie können der Kontaktaufnahme jederzeit über den Link in unseren Bestätigungs-E-Mails widersprechen."
+          disclaimer: "Ihre Daten werden ausschließlich zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital (security@vonbusch.digital) verwendet. Es erfolgt keine Weitergabe an Dritte. Sie können der Kontaktaufnahme jederzeit über den Link in unseren Bestätigungs-E-Mails widersprechen."
         },
         submitted: {
           title: "E-Mail Bestätigung",
@@ -321,6 +334,19 @@ const resources = {
         expert_take_0: "Hervorragende Balance zwischen Kosten und Compliance. Ideal für hochregulierte Unternehmensumgebungen.",
         expert_take_1: "Premium-Funktionsumfang mit fortgeschrittenem Bedrohungsschutz. Empfohlen für risikobehaftete digitale Profile.",
         expert_take_2: "Skalierbare Cloud-Architektur mit schnellen Implementierungswegen und intuitiver Verwaltung.",
+        meta: {
+          rid: "Bericht-ID",
+          generated: "Erstellt am",
+          verified: "Verifizierter Bericht"
+        },
+        print: {
+          title: "ZTNA Scout Analysebericht",
+          summary: "Management Summary",
+          seats: "Benutzerlizenzen",
+          top_recommendation: "Top Empfehlung",
+          transparency_title: "Transparenz & Quellen",
+          transparency_desc: "Die Berechnungen basieren auf öffentlichen Marktlistenpreisen (EUR) zum Zeitpunkt des Verifizierungsdatums. TCO exklusive Mengenrabatten, die oft in direkten Enterprise-Verhandlungen möglich sind."
+        },
         badges: {
           top_match: "Top Match",
           best_fit: "Beste Wahl",
@@ -475,7 +501,7 @@ const resources = {
         },
         faq: {
           title: "Perspectives stratégiques",
-          q1: "Les données sont-elles à jour ?",
+          q1: "Les données sont-elles �� jour ?",
           a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}",
           q2: "Pourquoi Cloudflare ?",
           a2: "Cloudflare propose actuellement la plateforme ZTNA la plus robuste et qualifiée BSI.",
@@ -486,10 +512,10 @@ const resources = {
         }
       },
       form: {
-        steps: { company: "Entit��", requirements: "Architecture", legal: "Conformité" },
+        steps: { company: "Entité", requirements: "Architecture", legal: "Conformité" },
         labels: {
           companyName: "Nom de l'entreprise",
-          contactPerson: "Nom du contact",
+          contactName: "Nom du contact",
           phone: "Numéro de téléphone",
           workEmail: "Email professionnel",
           seats: "Nombre d'utilisateurs",
@@ -522,7 +548,7 @@ const resources = {
       results: {
         title: "Résultat de l'analyse",
         sample_title: "Analyse de sécurité type",
-        live_sample_mode: "MODE DEMO LIVE : Utilisation de données de démonstration.",
+        live_sample_mode: "MODE DÉMO LIVE : Utilisation de données de démonstration.",
         subtitle: "Comparaison pour {{seats}} utilisateurs",
         export_pdf: "Télécharger le rapport",
         tco_title: "Projection TCO sur 12 mois",
@@ -534,6 +560,19 @@ const resources = {
         expert_take_0: "Équilibre exceptionnel entre coût et conformité. Idéal pour les environnements d'entreprise hautement réglementés.",
         expert_take_1: "Ensemble de fonctionnalités premium avec protection avancée contre les menaces. Recommandé pour les profils numériques à haut risque.",
         expert_take_2: "Architecture cloud évolutive avec des parcours de mise en œuvre rapides et une gestion intuitive.",
+        meta: {
+          rid: "ID-Rapport",
+          generated: "Généré le",
+          verified: "Rapport vérifié"
+        },
+        print: {
+          title: "Rapport d'analyse ZTNA Scout",
+          summary: "Résumé Exécutif",
+          seats: "Utilisateurs",
+          top_recommendation: "Meilleure recommandation",
+          transparency_title: "Transparence & Sources",
+          transparency_desc: "Calculs basés sur les prix publics (EUR) à la date de vérification. Le TCO exclut les remises sur volume souvent négociables pour les entreprises."
+        },
         badges: {
           top_match: "Meilleure correspondance",
           best_fit: "Meilleur choix",
@@ -552,9 +591,9 @@ const resources = {
           total_score: "Score Scout",
           analytical_breakdown: "Analyse détaillée",
           market_rank: "Rang du marché",
-          rank_1: "1ère place",
-          rank_2: "2ème place",
-          rank_3: "3ème place",
+          rank_1: "1re place",
+          rank_2: "2e place",
+          rank_3: "3e place",
           scout_total: "Total Scout",
           close_deep_dive: "Fermer l'analyse",
           expert_take_desc: {
