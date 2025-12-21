@@ -20,7 +20,8 @@ const fadeIn = {
   transition: { duration: 0.6 },
 };
 
-export default function HomePage() {
+// Named export (fixes: `import { HomePage } ...`)
+export function HomePage() {
   const { t } = useTranslation();
 
   return (
@@ -145,3 +146,6 @@ export default function HomePage() {
     </div>
   );
 }
+
+// Default export (keeps compatibility with `import HomePage from ...`)
+export default HomePage;
