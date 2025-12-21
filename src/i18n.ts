@@ -201,7 +201,7 @@ const resources = {
         trust: { bsi: "BSI-qualifiziert", gdpr: "DSGVO-konform", pdf: "PDF-Export", sase: "Global SASE" },
         steps: {
           title: "Die ZTNA Scout Methodik",
-          subtitle: "So erstellen wir präzise Analysen für Ihren Security Stack.",
+          subtitle: "So erstellen wir präzise Analysen f��r Ihren Security Stack.",
           step1: { title: "Anforderungen", desc: "Definition von Benutzeranzahl, Legacy-Architektur und Security-Needs." },
           step2: { title: "Markt-Abgleich", desc: "Unsere Engine gleicht Ihre Daten mit aktuellen Listenpreisen ab." },
           step3: { title: "Strategie-Bericht", desc: "Erhalt eines professionellen PDF-Exports mit TCO und Scout Score." }
@@ -243,7 +243,7 @@ const resources = {
         expert_take_2: "Skalierbare Cloud-Architektur mit schnellen Implementierungswegen und intuitiver Verwaltung.",
         meta: { rid: "Bericht-ID", generated: "Erstellt am", verified: "Verifizierter Bericht" },
         print: { title: "ZTNA Scout Analysebericht", tagline: "Automatisierte Marktanalyse – erstellt durch ZTNA Scout", summary: "Management Summary", seats: "Benutzerlizenzen", top_recommendation: "Top Empfehlung", transparency_title: "Transparenz & Quellen", transparency_desc: "Die Berechnungen basieren auf öffentlichen Marktlistenpreisen (EUR)." },
-        badges: { top_match: "Top Match", beste_wahl: "Beste Wahl", top_recommendations: "Top Empfehlungen" },
+        badges: { top_match: "Top Match", best_fit: "Beste Wahl", top_recommendations: "Top Empfehlungen" },
         matrix: {
           title: "Fähigkeiten-Matrix", capability: "Funktion", show_all: "Alle Zeilen", diff_only: "Unterschiede hervorheben", best_fit: "Beste Wahl", deep_dive: "Analyse-Details", feature_score: "Funktionsumfang (40%)", price_score: "Preis-Leistung (40%)", compliance_score: "Compliance (20%)", total_score: "Scout Score", analytical_breakdown: "Analytische Aufschlüsselung", market_rank: "Marktrang", rank_1: "1. Platz", rank_2: "2. Platz", rank_3: "3. Platz", scout_total: "Scout Gesamt", close_deep_dive: "Analyse schließen",
           expert_take_desc: { features: "ZTNA, SWG, CASB, DLP und Isolationsfunktionen.", price: "Wettbewerbsfähigkeit im Vergleich zum Marktdurchschnitt.", compliance: "BSI-Qualifizierungen und Sicherheitszertifikate." }

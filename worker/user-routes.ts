@@ -68,13 +68,14 @@ function calculateScores(feats: FeatureMatrix, tco: number, maxTco: number, minT
   const featurePoints = featureList.reduce((acc, key) => acc + (feats[key] ? 1 : 0), 0);
   const featureScore = Math.round((featurePoints / featureList.length) * 100);
   let priceScore = 70;
-  if (maxTco > minTco) {
+  // Robust spread handling to avoid division by zero or NaN
+  if (maxTco > minTco && (maxTco - minTco) > 0.01) {
     const spread = maxTco - minTco;
     priceScore = Math.round(100 - (((tco - minTco) / spread) * 100));
   } else {
-    priceScore = 75;
+    // If all prices are the same, give a neutral high score
+    priceScore = 80;
   }
-  // Clamp score
   priceScore = Math.max(0, Math.min(100, priceScore));
   const complianceScore = feats.isBSIQualified ? 100 : 40;
   const totalScore = Math.round((featureScore * 0.4) + (priceScore * 0.4) + (complianceScore * 0.2));
@@ -121,13 +122,15 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
   const base = PRICING.find(p => p.vendorId === vendorId) || { vendorId, basePricePerMonth: 25, isQuoteOnly: true, installationFee: 4000 };
   const overrideInst = new PricingOverrideEntity(env, vendorId);
   try {
-    const override = await overrideInst.getState();
-    if (override && override.basePricePerMonth > 0) {
-      return {
-        ...base,
-        basePricePerMonth: Number(override.basePricePerMonth.toFixed(2)),
-        isQuoteOnly: override.isQuoteOnly
-      };
+    if (await overrideInst.exists()) {
+      const override = await overrideInst.getState();
+      if (override && override.basePricePerMonth > 0) {
+        return {
+          ...base,
+          basePricePerMonth: Number(override.basePricePerMonth.toFixed(2)),
+          isQuoteOnly: override.isQuoteOnly
+        };
+      }
     }
   } catch (e) { /* ignore */ }
   return { ...base, basePricePerMonth: Number(base.basePricePerMonth.toFixed(2)) };
@@ -266,8 +269,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const pending = total - confirmed;
       const convRate = total > 0 ? Math.round((confirmed / total) * 100) : 0;
       const confirmedItems = items.filter(l => l.status === 'confirmed');
-      const avgSeats = confirmedItems.length > 0 
-        ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length) 
+      const avgSeats = confirmedItems.length > 0
+        ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length)
         : 0;
       const vpnCounts: Record<string, number> = {};
       items.forEach(l => {
@@ -275,7 +278,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         vpnCounts[vpn] = (vpnCounts[vpn] || 0) + 1;
       });
       const mostCommonVpn = Object.entries(vpnCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
-      // Generate 7-day time series
+      // Robust daily mapping for 7-day window
       const dailyMap: Record<string, { pending: number; confirmed: number }> = {};
       const now = new Date();
       for (let i = 6; i >= 0; i--) {

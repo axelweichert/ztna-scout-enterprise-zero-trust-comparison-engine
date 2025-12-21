@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { api } from '@/lib/api-client';
 import type { ComparisonSnapshot, ComparisonResult } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ export function ResultsPage() {
   const [selectedVendor, setSelectedVendor] = useState<ComparisonResult | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [hideSimilar, setHideSimilar] = useState(false);
-  const isSampleRoute = location.pathname === '/beispiel' || id === 'sample';
+  const isSampleRoute = location.pathname === '/beispiel' || location.pathname === '/vergleich/sample' || id === 'sample';
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
@@ -37,6 +37,27 @@ export function ResultsPage() {
     queryFn: () => api<ComparisonSnapshot>(isSampleRoute ? '/api/sample-comparison' : `/api/comparison/${id}`),
     retry: 1
   });
+  const sortedResults = useMemo(() => {
+    if (!snapshot) return [];
+    return [...snapshot.results].sort((a, b) => (b.scores?.totalScore ?? 0) - (a.scores?.totalScore ?? 0));
+  }, [snapshot]);
+  const top3 = useMemo(() => sortedResults.slice(0, 3), [sortedResults]);
+  const featureKeys = [
+    { key: 'hasZTNA', label: 'ZTNA' },
+    { key: 'hasSWG', label: 'SWG' },
+    { key: 'hasCASB', label: 'CASB' },
+    { key: 'hasDLP', label: 'DLP' },
+    { key: 'hasFWaaS', label: 'Firewall-as-a-Service' },
+    { key: 'hasRBI', label: 'Remote Browser Isolation' }
+  ];
+  const filteredFeatures = useMemo(() => {
+    if (!hideSimilar || top3.length < 2) return featureKeys;
+    return featureKeys.filter(fk => {
+      const values = top3.map(v => !!(v.features as any)?.[fk.key]);
+      // If all values are the same (all true or all false), filter it out
+      return !values.every(v => v === values[0]);
+    });
+  }, [hideSimilar, top3, featureKeys]);
   if (isLoading) return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -58,27 +79,11 @@ export function ResultsPage() {
       <Footer />
     </div>
   );
-  const sortedResults = [...snapshot.results].sort((a, b) => (b.scores?.totalScore ?? 0) - (a.scores?.totalScore ?? 0));
-  const top3 = sortedResults.slice(0, 3);
   const chartData = sortedResults.map(r => ({
     name: r.vendorName,
     tco: r.tcoYear1,
     id: r.vendorId
   }));
-  const featureKeys = [
-    { key: 'hasZTNA', label: 'ZTNA' },
-    { key: 'hasSWG', label: 'SWG' },
-    { key: 'hasCASB', label: 'CASB' },
-    { key: 'hasDLP', label: 'DLP' },
-    { key: 'hasFWaaS', label: 'Firewall-as-a-Service' },
-    { key: 'hasRBI', label: 'Remote Browser Isolation' }
-  ];
-  const filteredFeatures = hideSimilar
-    ? featureKeys.filter(fk => {
-        const values = top3.map(v => (v.features as any)?.[fk.key]);
-        return !values.every(v => v === values[0]);
-      })
-    : featureKeys;
   return (
     <div className="min-h-screen flex flex-col bg-background">
       <Header />
@@ -90,6 +95,7 @@ export function ResultsPage() {
           </p>
         </div>
       )}
+      {/* Floating Mini Header */}
       <div className={cn(
         "fixed top-16 left-0 right-0 z-40 bg-background/90 backdrop-blur-md border-b transition-transform duration-300 print:hidden",
         scrolled ? "translate-y-0" : "-translate-y-full"
@@ -105,8 +111,9 @@ export function ResultsPage() {
         </div>
       </div>
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8 md:py-16">
+        {/* Report Identification Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20">
-          <div className="space-y-4 text-pretty">
+          <div className="space-y-4 text-pretty w-full md:w-auto">
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground uppercase tracking-widest">
               <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> {t('results.meta.rid')}: {snapshot.id.slice(0, 8)}</span>
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {formatDate(snapshot.createdAt, i18n.language)}</span>
@@ -131,6 +138,7 @@ export function ResultsPage() {
             </Button>
           </div>
         </header>
+        {/* Top Recommendations */}
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold flex items-center gap-3">
             <Sparkles className="text-primary w-8 h-8" />
@@ -166,6 +174,7 @@ export function ResultsPage() {
                       <div className="p-4 bg-muted/30 rounded-xl space-y-1.5 border border-muted/50">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.expert_take_label')}</p>
                         <p className="text-sm leading-relaxed italic text-foreground/80 font-medium">
+                          {/* Map index accurately to expert take translations */}
                           {t(`results.expert_take_${i}`)}
                         </p>
                       </div>
@@ -177,6 +186,7 @@ export function ResultsPage() {
             </AnimatePresence>
           </div>
         </section>
+        {/* Feature Comparison Table */}
         <section className="space-y-8 mb-20">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-3xl font-display font-bold">{t('results.matrix.title')}</h2>
@@ -186,7 +196,7 @@ export function ResultsPage() {
             </Button>
           </div>
           <div className="overflow-x-auto rounded-2xl border bg-white dark:bg-slate-950 shadow-xl">
-            <table className="w-full border-collapse">
+            <table className="w-full border-collapse min-w-[600px]">
               <thead>
                 <tr className="bg-slate-50 dark:bg-slate-900 border-b">
                   <th className="p-4 sm:p-6 text-left text-xs font-bold uppercase tracking-wider text-muted-foreground w-1/4">{t('results.matrix.capability')}</th>
@@ -216,11 +226,12 @@ export function ResultsPage() {
             </table>
           </div>
         </section>
+        {/* TCO Analysis Chart */}
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-2 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
             <div className="w-full h-[450px] md:h-[600px] relative">
-              <ResponsiveContainer width="100%" height="100%" minHeight={400} debounce={50}>
+              <ResponsiveContainer width="100%" height="100%" minHeight={400} debounce={100}>
                 <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 30 : 60, right: 70, top: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
@@ -248,7 +259,7 @@ export function ResultsPage() {
                       return null;
                     }}
                   />
-                  <Bar dataKey="tco" radius={[0, 8, 8, 0]} barSize={isMobile ? 24 : 32}>
+                  <Bar dataKey="tco" radius={[0, 8, 8, 0]} barSize={isMobile ? 20 : 32}>
                     {chartData.map((entry, index) => (
                       <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : (entry.id === 'zscaler' ? '#0045D6' : '#1E293B')} />
                     ))}
@@ -258,6 +269,7 @@ export function ResultsPage() {
             </div>
           </Card>
         </section>
+        {/* Methodology Block */}
         <div className="bg-slate-900 dark:bg-slate-950 text-slate-100 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center border shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -mr-32 -mt-32" />
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-lg">
@@ -273,6 +285,7 @@ export function ResultsPage() {
         </div>
       </main>
       <Footer />
+      {/* Deep-Dive Modal */}
       <Dialog open={!!selectedVendor} onOpenChange={(open) => !open && setSelectedVendor(null)}>
         <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none rounded-3xl shadow-3xl">
           <div className="bg-primary text-primary-foreground p-8 sm:p-10 relative overflow-hidden">
