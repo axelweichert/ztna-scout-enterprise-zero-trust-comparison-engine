@@ -141,6 +141,14 @@ const resources = {
             features: "ZTNA, SWG, CASB, DLP and isolation capabilities.",
             price: "Competitiveness relative to market averages.",
             compliance: "BSI qualifications and security certifications."
+          },
+          features: {
+            hasZTNA: "Zero Trust Network Access",
+            hasSWG: "Secure Web Gateway",
+            hasCASB: "Cloud Access Security Broker",
+            hasDLP: "Data Loss Prevention",
+            hasFWaaS: "Firewall-as-a-Service",
+            hasRBI: "Remote Browser Isolation"
           }
         }
       },
@@ -201,7 +209,7 @@ const resources = {
         trust: { bsi: "BSI-qualifiziert", gdpr: "DSGVO-konform", pdf: "PDF-Export", sase: "Global SASE" },
         steps: {
           title: "Die ZTNA Scout Methodik",
-          subtitle: "So erstellen wir präzise Analysen f��r Ihren Security Stack.",
+          subtitle: "So erstellen wir präzise Analysen für Ihren Security Stack.",
           step1: { title: "Anforderungen", desc: "Definition von Benutzeranzahl, Legacy-Architektur und Security-Needs." },
           step2: { title: "Markt-Abgleich", desc: "Unsere Engine gleicht Ihre Daten mit aktuellen Listenpreisen ab." },
           step3: { title: "Strategie-Bericht", desc: "Erhalt eines professionellen PDF-Exports mit TCO und Scout Score." }
@@ -246,7 +254,15 @@ const resources = {
         badges: { top_match: "Top Match", best_fit: "Beste Wahl", top_recommendations: "Top Empfehlungen" },
         matrix: {
           title: "Fähigkeiten-Matrix", capability: "Funktion", show_all: "Alle Zeilen", diff_only: "Unterschiede hervorheben", best_fit: "Beste Wahl", deep_dive: "Analyse-Details", feature_score: "Funktionsumfang (40%)", price_score: "Preis-Leistung (40%)", compliance_score: "Compliance (20%)", total_score: "Scout Score", analytical_breakdown: "Analytische Aufschlüsselung", market_rank: "Marktrang", rank_1: "1. Platz", rank_2: "2. Platz", rank_3: "3. Platz", scout_total: "Scout Gesamt", close_deep_dive: "Analyse schließen",
-          expert_take_desc: { features: "ZTNA, SWG, CASB, DLP und Isolationsfunktionen.", price: "Wettbewerbsfähigkeit im Vergleich zum Marktdurchschnitt.", compliance: "BSI-Qualifizierungen und Sicherheitszertifikate." }
+          expert_take_desc: { features: "ZTNA, SWG, CASB, DLP und Isolationsfunktionen.", price: "Wettbewerbsfähigkeit im Vergleich zum Marktdurchschnitt.", compliance: "BSI-Qualifizierungen und Sicherheitszertifikate." },
+          features: {
+            hasZTNA: "Zero Trust Network Access",
+            hasSWG: "Secure Web Gateway",
+            hasCASB: "Cloud Access Security Broker",
+            hasDLP: "Data Loss Prevention",
+            hasFWaaS: "Firewall-as-a-Service",
+            hasRBI: "Remote Browser Isolation"
+          }
         }
       },
       admin: {
@@ -269,7 +285,7 @@ const resources = {
       common: { data_freshness: appConfig.data_freshness.fr, currency_symbol: "€" },
       layout: {
         header: { tooltips: { vonBusch: "Développé par von Busch Digital", cloudflare: "Propulsé par Cloudflare", ubiquiti: "Audit de sécurité" } },
-        footer: { imprint: "Mentions Légales", privacy: "Confidentialité", service_line: "Un service de von Busch GmbH", address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld" }
+        footer: { imprint: "Mentions L��gales", privacy: "Confidentialité", service_line: "Un service de von Busch GmbH", address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld" }
       },
       home: {
         hero: { badge: "Moteur d'analyse B2B", title1: "Sécurité d'entreprise", title2: "La comparaison redéfinie", description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO et des scores BSI.", cta_primary: "Lancer l'analyse", cta_secondary: "Voir un exemple", sase_map_cta: "SASE Cloud Map" },
@@ -292,7 +308,15 @@ const resources = {
         badges: { top_match: "Meilleure correspondance", best_fit: "Meilleur choix", top_recommendations: "Top Recommandations" },
         matrix: {
           title: "Matrice des capacités", capability: "Fonctionnalité", show_all: "Toutes les lignes", diff_only: "Différences", best_fit: "Meilleur choix", deep_dive: "Détails", feature_score: "Richesse (40%)", price_score: "Prix (40%)", compliance_score: "Conformité (20%)", total_score: "Score Scout", analytical_breakdown: "Analyse détaillée", market_rank: "Rang", rank_1: "1re place", rank_2: "2e place", rank_3: "3e place", scout_total: "Total Scout", close_deep_dive: "Fermer",
-          expert_take_desc: { features: "Capacités ZTNA, SWG, CASB, DLP.", price: "Compétitivité.", compliance: "Qualifications BSI." }
+          expert_take_desc: { features: "Capacités ZTNA, SWG, CASB, DLP.", price: "Compétitivité.", compliance: "Qualifications BSI." },
+          features: {
+            hasZTNA: "Zero Trust Network Access",
+            hasSWG: "Secure Web Gateway",
+            hasCASB: "Cloud Access Security Broker",
+            hasDLP: "Data Loss Prevention",
+            hasFWaaS: "Firewall-as-a-Service",
+            hasRBI: "Remote Browser Isolation"
+          }
         }
       },
       admin: {

@@ -19,12 +19,12 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn, formatDate, getRankLabel, formatCurrency } from '@/lib/utils';
 // Move featureKeys outside component to avoid re-renders and satisfy ESLint hooks/exhaustive-deps
 const FEATURE_KEYS = [
-  { key: 'hasZTNA', label: 'ZTNA' },
-  { key: 'hasSWG', label: 'SWG' },
-  { key: 'hasCASB', label: 'CASB' },
-  { key: 'hasDLP', label: 'DLP' },
-  { key: 'hasFWaaS', label: 'Firewall-as-a-Service' },
-  { key: 'hasRBI', label: 'Remote Browser Isolation' }
+  { key: 'hasZTNA', translationKey: 'results.matrix.features.hasZTNA' },
+  { key: 'hasSWG', translationKey: 'results.matrix.features.hasSWG' },
+  { key: 'hasCASB', translationKey: 'results.matrix.features.hasCASB' },
+  { key: 'hasDLP', translationKey: 'results.matrix.features.hasDLP' },
+  { key: 'hasFWaaS', translationKey: 'results.matrix.features.hasFWaaS' },
+  { key: 'hasRBI', translationKey: 'results.matrix.features.hasRBI' }
 ];
 export function ResultsPage() {
   const { id } = useParams();
@@ -205,9 +205,9 @@ export function ResultsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredFeatures.map(({ key, label }) => (
+                {filteredFeatures.map(({ key, translationKey }) => (
                   <tr key={key} className="border-b last:border-0 hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors group">
-                    <td className="p-4 sm:p-6 font-semibold text-foreground/80 text-sm">{label}</td>
+                    <td className="p-4 sm:p-6 font-semibold text-foreground/80 text-sm">{t(translationKey)}</td>
                     {top3.map(v => (
                       <td key={v.vendorId} className="p-4 sm:p-6 text-center border-l bg-white/30 dark:bg-slate-900/30">
                         {(v.features as any)?.[key] ? (

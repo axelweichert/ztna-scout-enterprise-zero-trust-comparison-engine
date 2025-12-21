@@ -21,13 +21,15 @@ export function formatDate(timestamp: number | Date, locale: string = "de-DE"): 
  * Robust currency formatter for ZTNA Scout.
  * Ensures consistent EUR formatting across all user locales.
  */
-export function formatCurrency(amount: number, locale: string = "de-DE"): string {
-  const safeLocale = locale.startsWith('en') ? 'en-GB' : (locale.startsWith('fr') ? 'fr-FR' : 'de-DE');
+export function formatCurrency(amount: number | undefined | null, locale: string = "de-DE"): string {
+  const safeAmount = amount ?? 0;
+  const safeLocale = (locale && locale.startsWith('en')) ? 'en-GB' : 
+                     (locale && locale.startsWith('fr')) ? 'fr-FR' : 'de-DE';
   return new Intl.NumberFormat(safeLocale, {
     style: 'currency',
     currency: 'EUR',
     maximumFractionDigits: 0
-  }).format(amount);
+  }).format(safeAmount);
 }
 /**
  * Retrieves the localized rank label (e.g., 1st Place, 1. Platz).

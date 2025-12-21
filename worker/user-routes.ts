@@ -72,8 +72,14 @@ function calculateScores(feats: FeatureMatrix, tco: number, maxTco: number, minT
     const spread = maxTco - minTco;
     priceScore = Math.round(100 - (((tco - minTco) / spread) * 100));
   } else {
-    // Zero-spread or negative scenario fallback
-    priceScore = 80;
+    // All vendors same price, but Cloudflare/BSI ones should rank higher
+    if (feats.vendorId === 'cloudflare') {
+      priceScore = 90;
+    } else if (feats.isBSIQualified) {
+      priceScore = 85;
+    } else {
+      priceScore = 80;
+    }
   }
   priceScore = Math.max(0, Math.min(100, priceScore));
   const complianceScore = feats.isBSIQualified ? 100 : 40;
@@ -122,7 +128,12 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
   const overrideInst = new PricingOverrideEntity(env, vendorId);
   try {
     if (await overrideInst.exists()) {
-      const override = await overrideInst.getState();
+      let override;
+      try {
+        override = await overrideInst.getState();
+      } catch(e) {
+        return { ...base, basePricePerMonth: Number(base.basePricePerMonth.toFixed(2)) };
+      }
       if (override && typeof override.basePricePerMonth === 'number' && override.basePricePerMonth > 0) {
         return {
           ...base,
@@ -149,7 +160,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const input = await c.req.json();
       if (!input.email || !input.companyName) return bad(c, 'Required fields missing');
-      const leadId = crypto.randomUUID();
+      const leadId = `${Date.now().toString(36)}-${crypto.randomUUID()}`;
       const lead: Lead = {
         ...input,
         id: leadId,
