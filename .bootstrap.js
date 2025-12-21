@@ -81,7 +81,7 @@ function runSetupCommands() {
     "bun add i18next@^23.16.0",
     "bun add react-i18next@^15.0.2",
     "bun add i18next-browser-languagedetector@^8.0.0",
-    "bun add i18next react-i18next i18next-browser-languagedetector",
+    "bun add i18next react-i18next react-turnstile",
     "bun add i18next-browser-languagedetector",
     "bun add react-turnstile recharts date-fns i18next react-i18next i18next-browser-languagedetector",
     "bun add recharts lucide-react clsx tailwind-merge date-fns i18next react-i18next i18next-browser-languagedetector react-turnstile",
