@@ -20,11 +20,18 @@ import { LegalPage } from '@/pages/LegalPage';
 import { OptOutPage } from '@/pages/OptOutPage';
 import { Toaster } from '@/components/ui/sonner';
 const queryClient = new QueryClient({
-  defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 1000 * 60 * 5 } },
+  defaultOptions: { 
+    queries: { 
+      refetchOnWindowFocus: false, 
+      staleTime: 1000 * 60 * 5,
+      retry: 1
+    } 
+  },
 });
 const router = createBrowserRouter([
   { path: "/", element: <HomePage />, errorElement: <RouteErrorBoundary /> },
   { path: "/beispiel", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
+  { path: "/vergleich/sample", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/vergleich/neu", element: <LeadFormPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/vergleich/:id", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/vergleich/:id/print", element: <PrintResultsPage />, errorElement: <RouteErrorBoundary /> },
