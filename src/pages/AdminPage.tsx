@@ -104,7 +104,6 @@ export function AdminPage() {
       l.status,
       new Date(l.createdAt).toISOString()
     ]);
-    // Use UTF-8 BOM for Excel compatibility with German characters
     const BOM = '\uFEFF';
     const csvContent = BOM + [headers, ...rows]
       .map(e => e.join(";"))
@@ -138,7 +137,7 @@ export function AdminPage() {
               autoFocus
               className="h-14 text-center text-xl tracking-[0.5em] rounded-xl"
               onChange={e => setPassword(e.target.value)}
-              placeholder="���•••••••"
+              placeholder="••••••••"
               onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
             />
           </div>
@@ -205,7 +204,7 @@ export function AdminPage() {
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
               <Input
                 placeholder="Search leads..."
-                className="pl-10 h-14 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm focus:ring-primary/20"
+                className="pl-10 h-14 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm focus-visible:ring-primary/20"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -221,7 +220,7 @@ export function AdminPage() {
                       <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.org')}</TableHead>
                       <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.stakeholder')}</TableHead>
                       <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.infra')}</TableHead>
-                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground text-center">{t('admin.table.verification')}</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground text-right pr-12">{t('admin.table.verification')}</TableHead>
                       <TableHead className="text-right font-bold uppercase text-[10px] tracking-widest text-muted-foreground pr-8">{t('admin.table.management')}</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -283,8 +282,8 @@ export function AdminPage() {
                             </Badge>
                           </div>
                         </TableCell>
-                        <TableCell className="text-center">
-                          <div className="flex flex-col items-center gap-1.5">
+                        <TableCell className="text-right pr-12">
+                          <div className="flex flex-col items-end gap-1.5">
                             <Badge className={cn("px-2.5 py-0.5 text-[10px] uppercase font-bold border-none",
                               lead.status === 'confirmed' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
                               {lead.status}
@@ -311,8 +310,9 @@ export function AdminPage() {
                                 size="icon"
                                 onClick={() => { if(window.confirm(t('admin.table.purge_confirm'))) deleteLead.mutate(lead.id); }}
                                 className="h-9 w-9 text-red-400 hover:text-red-600 hover:bg-red-50"
+                                disabled={deleteLead.isPending}
                               >
-                                <Trash2 className="w-4 h-4" />
+                                {deleteLead.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
                               </Button>
                            </div>
                         </TableCell>
@@ -345,7 +345,7 @@ export function AdminPage() {
                         <Input
                           type="number"
                           defaultValue={p.basePricePerMonth}
-                          className="pl-16 h-12 text-lg font-bold rounded-xl border-2 focus:ring-primary/20"
+                          className="pl-16 h-12 text-lg font-bold rounded-xl border-2 focus-visible:ring-primary/20"
                           step="0.01"
                           onBlur={(e) => {
                             const val = parseFloat(e.target.value);

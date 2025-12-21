@@ -70,14 +70,14 @@ export function PrintResultsPage() {
           <h2 className="text-lg font-bold mb-4 border-l-4 border-black pl-3">{t('results.tco_title')}</h2>
           <div className="w-full min-h-[550px] border p-4">
             <ResponsiveContainer width="100%" height={550} debounce={100}>
-              <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 100, top: 10, bottom: 10 }}>
+              <BarChart data={chartData} layout="vertical" margin={{ left: 170, right: 120, top: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" horizontal={false} />
                 <XAxis type="number" hide />
                 <YAxis
                   dataKey="name"
                   type="category"
-                  width={140}
-                  tick={{ fontSize: 9, fontWeight: 'bold', fill: '#000' }}
+                  width={170}
+                  tick={{ fontSize: 10, fontWeight: 'bold', fill: '#000', width: 160 }}
                 />
                 <Bar dataKey="tco" barSize={24}>
                   {chartData.map((entry, index) => (

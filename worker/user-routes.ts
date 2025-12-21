@@ -198,7 +198,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const leadEntity = new LeadEntity(c.env, tokenData.leadId);
     if (!await leadEntity.exists()) return notFound(c, 'Lead not found.');
     const leadState = await leadEntity.getState();
-    // Idempotency check
     if (leadState.status === 'confirmed' && leadState.comparisonId) {
       return ok(c, { comparisonId: leadState.comparisonId });
     }
@@ -241,7 +240,26 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     const leads = leadRes.items;
     const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
     const vpnMap: Record<string, number> = {};
-    leads.forEach(l => { vpnMap[l.vpnStatus] = (vpnMap[l.vpnStatus] || 0) + 1; });
+    const dayMap: Record<string, { pending: number; confirmed: number }> = {};
+    // Process last 14 days
+    const now = new Date();
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(now);
+      d.setDate(now.getDate() - i);
+      const dateStr = d.toISOString().split('T')[0];
+      dayMap[dateStr] = { pending: 0, confirmed: 0 };
+    }
+    leads.forEach(l => { 
+      vpnMap[l.vpnStatus] = (vpnMap[l.vpnStatus] || 0) + 1;
+      const dateStr = new Date(l.createdAt).toISOString().split('T')[0];
+      if (dayMap[dateStr]) {
+        if (l.status === 'confirmed') dayMap[dateStr].confirmed++;
+        else dayMap[dateStr].pending++;
+      }
+    });
+    const dailyLeads: TimeSeriesData[] = Object.entries(dayMap)
+      .map(([date, counts]) => ({ date, ...counts }))
+      .sort((a, b) => a.date.localeCompare(b.date));
     let mostCommonVpn = 'none';
     let maxCount = 0;
     Object.entries(vpnMap).forEach(([status, count]) => { if (count > maxCount) { maxCount = count; mostCommonVpn = status; } });
@@ -252,7 +270,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       conversionRate: leads.length > 0 ? Math.round((confirmedLeads / leads.length) * 100) : 0,
       avgSeats: leads.length > 0 ? Math.round(leads.reduce((acc, curr) => acc + (curr.seats || 0), 0) / leads.length) : 0,
       mostCommonVpn,
-      dailyLeads: [] // TimeSeries omitted for brevity in final review
+      dailyLeads
     });
   });
   app.post('/api/admin/pricing', async (c) => {
