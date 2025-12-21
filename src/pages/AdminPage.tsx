@@ -6,7 +6,7 @@ import { format } from 'date-fns';
 import {
   Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp,
   Loader2, CheckCircle2, RefreshCw, Users, Clock,
-  Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle, Zap
+  Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle, Zap, X
 } from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { AppLayout } from '@/components/layout/AppLayout';
@@ -145,7 +145,7 @@ export function AdminPage() {
               onKeyDown={e => e.key === 'Enter' && password === "admin123" && setIsAuthenticated(true)}
             />
           </div>
-          <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Verification failed")} className="w-full h-14 btn-gradient text-lg rounded-xl">{t('admin.terminal_unlock')}</Button>
+          <Button onClick={() => password === "admin123" ? setIsAuthenticated(true) : toast.error("Verification failed")} className="w-full h-14 btn-gradient text-lg rounded-xl transition-all active:scale-95">{t('admin.terminal_unlock')}</Button>
         </CardContent>
       </Card>
     </div>
@@ -162,11 +162,11 @@ export function AdminPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="h-12 border-2 rounded-xl" onClick={handleRefresh} disabled={leadsRefetching}>
+            <Button variant="outline" className="h-12 border-2 rounded-xl hover:scale-105 active:scale-95 transition-transform" onClick={handleRefresh} disabled={leadsRefetching}>
               <RefreshCw className={cn("mr-2 w-4 h-4", (leadsRefetching || statsLoading) && "animate-spin")} />
               {t('admin.sync_data')}
             </Button>
-            <Button onClick={handleExportCSV} className="h-12 btn-gradient px-6 rounded-xl shadow-lg">
+            <Button onClick={handleExportCSV} className="h-12 btn-gradient px-6 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-transform">
               <Download className="mr-2 w-4 h-4" /> {t('admin.export_csv')}
             </Button>
           </div>
@@ -182,7 +182,7 @@ export function AdminPage() {
             <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <div className={cn("p-2.5 rounded-xl", item.bg)}>
+                  <div className={cn("p-2.5 rounded-xl transition-colors", item.bg)}>
                     <item.icon className={cn("w-5 h-5", item.color)} />
                   </div>
                 </div>
@@ -199,18 +199,26 @@ export function AdminPage() {
         <Tabs defaultValue="pipeline" className="space-y-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <TabsList className="bg-white dark:bg-slate-900 border p-1.5 rounded-2xl h-14 w-full md:w-auto shadow-sm">
-              <TabsTrigger value="pipeline" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.pipeline')}</TabsTrigger>
-              <TabsTrigger value="pricing" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.pricing')}</TabsTrigger>
-              <TabsTrigger value="settings" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm">{t('admin.tabs.settings')}</TabsTrigger>
+              <TabsTrigger value="pipeline" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm transition-all">{t('admin.tabs.pipeline')}</TabsTrigger>
+              <TabsTrigger value="pricing" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm transition-all">{t('admin.tabs.pricing')}</TabsTrigger>
+              <TabsTrigger value="settings" className="px-8 h-full rounded-xl data-[state=active]:shadow-sm transition-all">{t('admin.tabs.settings')}</TabsTrigger>
             </TabsList>
             <div className="relative w-full md:w-72">
               <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Filter results..."
-                className="pl-10 h-14 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm focus-visible:ring-primary/20"
+                className="pl-10 pr-10 h-14 bg-white dark:bg-slate-900 border-2 rounded-2xl shadow-sm focus-visible:ring-primary/20"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              {searchTerm && (
+                <button 
+                  onClick={() => setSearchTerm("")}
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              )}
             </div>
           </div>
           <TabsContent value="pipeline" className="animate-in fade-in duration-500">
@@ -219,9 +227,9 @@ export function AdminPage() {
                 <Table>
                   <TableHeader className="bg-slate-50/80 dark:bg-slate-800/80 border-b">
                     <TableRow className="hover:bg-transparent">
-                      <TableHead className="p-5 font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.timestamp')}</TableHead>
-                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.org')}</TableHead>
-                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.stakeholder')}</TableHead>
+                      <TableHead className="p-5 font-bold uppercase text-[10px] tracking-widest text-muted-foreground w-[100px]">{t('admin.table.timestamp')}</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground min-w-[140px]">{t('admin.table.org')}</TableHead>
+                      <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground min-w-[140px]">{t('admin.table.stakeholder')}</TableHead>
                       <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground">{t('admin.table.infra')}</TableHead>
                       <TableHead className="font-bold uppercase text-[10px] tracking-widest text-muted-foreground text-right pr-12">{t('admin.table.verification')}</TableHead>
                       <TableHead className="text-right font-bold uppercase text-[10px] tracking-widest text-muted-foreground pr-8">{t('admin.table.management')}</TableHead>
@@ -253,7 +261,7 @@ export function AdminPage() {
                               {lead.status === 'confirmed' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Clock className="w-3.5 h-3.5 text-amber-500" />}
                             </span>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200 dark:border-slate-700">ID: {(lead.id || "").slice(0, 8)}</Badge>
+                              <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200 dark:border-slate-700 uppercase">ID: {(lead.id || "").slice(0, 8)}</Badge>
                               {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0 uppercase">{t('admin.table.opt_out')}</Badge>}
                             </div>
                           </div>
@@ -270,8 +278,8 @@ export function AdminPage() {
                                   <TooltipContent>{lead.email}</TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
-                              <a href={`tel:${lead.phone}`} className="text-muted-foreground hover:text-foreground"><Phone className="w-3.5 h-3.5" /></a>
-                              <button onClick={() => copyToClipboard(lead.email)} className="text-muted-foreground hover:text-foreground"><Copy className="w-3.5 h-3.5" /></button>
+                              <a href={`tel:${lead.phone}`} className="text-muted-foreground hover:text-foreground transition-colors"><Phone className="w-3.5 h-3.5" /></a>
+                              <button onClick={() => copyToClipboard(lead.email)} className="text-muted-foreground hover:text-foreground transition-colors"><Copy className="w-3.5 h-3.5" /></button>
                             </div>
                           </div>
                         </TableCell>
@@ -305,7 +313,7 @@ export function AdminPage() {
                         <TableCell className="text-right pr-6">
                            <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                               {lead.comparisonId && (
-                                <Button variant="ghost" size="icon" asChild className="h-9 w-9 text-blue-500">
+                                <Button variant="ghost" size="icon" asChild className="h-9 w-9 text-blue-500 hover:bg-blue-50 transition-colors">
                                   <Link to={`/vergleich/${lead.comparisonId}`} target="_blank"><ExternalLink className="w-4 h-4" /></Link>
                                 </Button>
                               )}
@@ -313,7 +321,7 @@ export function AdminPage() {
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => { if(window.confirm(t('admin.table.purge_confirm'))) deleteLead.mutate(lead.id); }}
-                                className="h-9 w-9 text-red-400 hover:text-red-600"
+                                className="h-9 w-9 text-red-400 hover:text-red-600 hover:bg-red-50 transition-colors"
                                 disabled={deleteLead.isPending}
                               >
                                 {deleteLead.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Trash2 className="w-4 h-4" />}
@@ -332,8 +340,8 @@ export function AdminPage() {
               {pricingLoading ? (
                 <div className="col-span-full py-20 text-center"><Loader2 className="animate-spin mx-auto text-primary w-12 h-12" /></div>
               ) : pricingData?.map((p) => (
-                <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden rounded-2xl bg-white dark:bg-slate-900">
-                  <CardHeader className="bg-slate-50/80 dark:bg-slate-800/80 border-b py-4 px-6">
+                <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden rounded-2xl bg-white dark:bg-slate-900 group">
+                  <CardHeader className="bg-slate-50/80 dark:bg-slate-800/80 border-b py-4 px-6 transition-colors group-hover:bg-slate-100/80 dark:group-hover:bg-slate-700/80">
                     <CardTitle className="text-lg flex justify-between items-center">
                       <span className="font-bold tracking-tight">{p.vendorId.charAt(0).toUpperCase() + p.vendorId.slice(1)}</span>
                       {p.updatedAt > 0 && <span className="text-[10px] font-mono text-muted-foreground">{format(p.updatedAt, 'MMM dd')}</span>}
@@ -349,7 +357,7 @@ export function AdminPage() {
                         <Input
                           type="number"
                           defaultValue={p.basePricePerMonth}
-                          className="pl-16 h-12 text-lg font-bold rounded-xl border-2"
+                          className="pl-16 h-12 text-lg font-bold rounded-xl border-2 focus:border-primary/40 transition-all"
                           step="0.01"
                           onBlur={(e) => {
                             const val = parseFloat(e.target.value);
@@ -358,7 +366,7 @@ export function AdminPage() {
                         />
                       </div>
                     </div>
-                    <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-dashed">
+                    <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                       <div className="space-y-0.5">
                         <Label className="text-sm font-bold">{t('admin.pricing.quote_required')}</Label>
                         <p className="text-[10px] text-muted-foreground uppercase font-mono">{t('admin.pricing.quote_desc')}</p>

@@ -13,7 +13,8 @@ export function PrintResultsPage() {
   const { t, i18n } = useTranslation();
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 500);
+    return () => clearTimeout(timer);
   }, []);
   const { data: snapshot, isLoading } = useQuery({
     queryKey: ['comparison', id],
@@ -23,7 +24,7 @@ export function PrintResultsPage() {
     if (snapshot && mounted) {
       const timer = setTimeout(() => {
         window.print();
-      }, 2500); 
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [snapshot, mounted]);
@@ -73,23 +74,23 @@ export function PrintResultsPage() {
         </section>
         <section className="mb-12">
           <h2 className="text-base font-bold mb-4 border-l-4 border-black pl-3 uppercase tracking-tight">{t('results.tco_title')}</h2>
-          <div className="w-full h-[550px] border border-gray-200 p-8 bg-white rounded-sm min-h-[550px]">
+          <div className="w-full h-[550px] border border-gray-200 p-8 bg-white rounded-sm min-h-[550px] relative">
             {mounted && (
-              <ResponsiveContainer width="99.9%" height="100%" minHeight={550} aspect={undefined}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 110, top: 10, bottom: 10 }}>
+              <ResponsiveContainer width="99.9%" height="100%" debounce={50}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 110, top: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={150}
+                    width={130}
                     tick={{ fontSize: 10, fontWeight: 'bold', fill: '#000' }}
                     axisLine={false}
                     tickLine={false}
                   />
                   <Bar dataKey="tco" barSize={22} radius={[0, 4, 4, 0]}>
                     {chartData.map((entry, index) => (
-                      <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : '#1E293B'} />
+                      <Cell key={`cell-${index}`} fill={entry.id === 'cloudflare' ? '#F48120' : '#1E293B'} />
                     ))}
                     <LabelList
                       dataKey="tco"

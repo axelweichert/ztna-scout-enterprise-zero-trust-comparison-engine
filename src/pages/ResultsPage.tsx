@@ -40,7 +40,7 @@ export function ResultsPage() {
     return p === '/beispiel' || p === '/vergleich/sample' || id === 'sample' || id === 'demo';
   }, [location.pathname, id]);
   useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 150);
+    const timer = setTimeout(() => setMounted(true), 250);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const handleScroll = () => setScrolled(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
@@ -206,19 +206,21 @@ export function ResultsPage() {
         <section className="space-y-8 mb-24">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden">
-            <div className="w-full min-h-[400px]" style={{ minHeight: '400px' }}>
+            <div className="w-full h-[400px] relative" style={{ minHeight: '400px' }}>
               {mounted && (
-                <ResponsiveContainer width="100%" height="100%" minHeight={400} aspect={undefined}>
+                <ResponsiveContainer width="99.9%" height="100%" debounce={50}>
                   <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 10 : 60, right: 60, top: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                     <XAxis type="number" hide />
                     <YAxis dataKey="name" type="category" width={isMobile ? 100 : 160} tickLine={false} axisLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: 'hsl(var(--foreground))' }} />
                     <Tooltip cursor={{ fill: 'hsl(var(--primary)/0.03)' }} content={({ active, payload }) => {
-                        if (active && payload?.length) {
+                        if (active && payload && payload.length) {
+                          const data = payload[0];
+                          if (!data || data.value === undefined) return null;
                           return (
                             <div className="bg-white p-5 shadow-3xl border border-primary/10 rounded-2xl min-w-[200px]">
-                              <p className="font-bold text-[10px] mb-2 text-muted-foreground uppercase tracking-widest">{payload[0].payload.name}</p>
-                              <p className="text-primary font-bold text-2xl font-mono">{formatCurrency(payload[0].value as number, i18n.language)}</p>
+                              <p className="font-bold text-[10px] mb-2 text-muted-foreground uppercase tracking-widest">{data.payload?.name || 'Vendor'}</p>
+                              <p className="text-primary font-bold text-2xl font-mono">{formatCurrency(data.value as number, i18n.language)}</p>
                               <div className="h-px bg-slate-100 my-4" />
                               <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">{t('results.chart.calculated_tco')}</p>
                             </div>
@@ -229,7 +231,7 @@ export function ResultsPage() {
                     />
                     <Bar dataKey="tco" radius={[0, 10, 10, 0]} barSize={isMobile ? 20 : 32}>
                       {chartData.map((entry, index) => (
-                        <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : (entry.id === 'zscaler' ? '#0045D6' : '#1E293B')} />
+                        <Cell key={`cell-${index}`} fill={entry.id === 'cloudflare' ? '#F48120' : (entry.id === 'zscaler' ? '#0045D6' : '#1E293B')} />
                       ))}
                     </Bar>
                   </BarChart>
