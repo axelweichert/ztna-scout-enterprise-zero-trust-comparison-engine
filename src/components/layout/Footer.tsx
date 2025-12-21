@@ -1,17 +1,15 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 export function Footer({ className }: { className?: string }) {
-  const { t } = useTranslation();
   return (
     <footer className={cn("border-t bg-slate-50/50 py-12 md:py-16 print:py-6 print:bg-white", className)}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col items-center text-center gap-6">
           {/* 3-Line Branding Block */}
           <div className="space-y-1 text-sm md:text-base font-medium text-foreground print:text-black print:text-[9pt]">
-            <p>{t('layout.footer.address')}</p>
-            <p>{t('layout.footer.service_line')}</p>
+            <p>von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld</p>
+            <p>A strategic security service by von Busch GmbH</p>
             <p>Built with <span className="text-primary mx-0.5">♥</span> at Cloudflare.</p>
           </div>
           {/* Legal Links Row */}
@@ -20,14 +18,14 @@ export function Footer({ className }: { className?: string }) {
               to="/impressum"
               className="hover:text-primary transition-colors underline-offset-4 hover:underline font-semibold uppercase tracking-widest"
             >
-              {t('layout.footer.imprint')}
+              Imprint
             </Link>
             <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
             <Link
               to="/datenschutz"
               className="hover:text-primary transition-colors underline-offset-4 hover:underline font-semibold uppercase tracking-widest"
             >
-              {t('layout.footer.privacy')}
+              Privacy Policy
             </Link>
           </div>
           {/* Copyright Metadata */}

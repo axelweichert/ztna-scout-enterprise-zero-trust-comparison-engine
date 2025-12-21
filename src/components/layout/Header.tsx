@@ -1,5 +1,4 @@
 import React from 'react';
-import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import {
   Tooltip,
@@ -15,7 +14,6 @@ interface HeaderProps {
   rightSlot?: React.ReactNode;
 }
 export function Header({ className, leftSlot, rightSlot }: HeaderProps) {
-  const { t } = useTranslation();
   return (
     <header className={cn("sticky top-0 z-50 w-full border-b bg-background/80 backdrop-blur-md print:hidden", className)}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
@@ -49,7 +47,7 @@ export function Header({ className, leftSlot, rightSlot }: HeaderProps) {
                       </svg>
                     </a>
                   </TooltipTrigger>
-                  <TooltipContent>{t('layout.header.tooltips.vonBusch')}</TooltipContent>
+                  <TooltipContent>Developed by von Busch Digital</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -64,7 +62,7 @@ export function Header({ className, leftSlot, rightSlot }: HeaderProps) {
                       </svg>
                     </a>
                   </TooltipTrigger>
-                  <TooltipContent>{t('layout.header.tooltips.cloudflare')}</TooltipContent>
+                  <TooltipContent>Powered by Cloudflare Infrastructure</TooltipContent>
                 </Tooltip>
                 <Tooltip>
                   <TooltipTrigger asChild>
@@ -79,7 +77,7 @@ export function Header({ className, leftSlot, rightSlot }: HeaderProps) {
                       </svg>
                     </a>
                   </TooltipTrigger>
-                  <TooltipContent>{t('layout.header.tooltips.ubiquiti')}</TooltipContent>
+                  <TooltipContent>Security Audit Framework</TooltipContent>
                 </Tooltip>
               </div>
             </TooltipProvider>

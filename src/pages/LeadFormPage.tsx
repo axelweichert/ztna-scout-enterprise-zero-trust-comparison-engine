@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useTranslation } from 'react-i18next';
-import Turnstile from 'react-turnstile';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -16,7 +15,7 @@ import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
 import { MailCheck, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
-import type { LeadFormData, AppConfig } from '@shared/types';
+import type { LeadFormData } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),
   contactName: z.string().min(2, "Required"),
@@ -28,12 +27,10 @@ const leadSchema = z.object({
   budgetRange: z.string().min(1, "Required"),
 });
 export function LeadFormPage() {
-  const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
   const [verificationToken, setVerificationToken] = useState<string | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null);
+  const [isVerified, setIsVerified] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const navigate = useNavigate();
   const form = useForm<LeadFormData>({
@@ -49,33 +46,22 @@ export function LeadFormPage() {
       budgetRange: 'med'
     }
   });
-  useEffect(() => {
-    const fetchConfig = async () => {
-      try {
-        const config = await api<AppConfig>('/api/config');
-        setTurnstileSiteKey(config.turnstileSiteKey);
-      } catch (error) {
-        console.error('Failed to fetch config:', error);
-        setTurnstileSiteKey("1x00000000000000000000AA");
-      }
-    };
-    fetchConfig();
-  }, []);
+
   const steps = [
-    { title: t('form.steps.company') },
-    { title: t('form.steps.requirements') },
-    { title: t('form.steps.legal') }
+    { title: 'Entity' },
+    { title: 'Architecture' },
+    { title: 'Compliance' }
   ];
   const handleFormSubmit: SubmitHandler<LeadFormData> = async (data) => {
-    if (!turnstileToken) {
-      toast.error("Please complete the bot verification.");
+    if (!isVerified) {
+      toast.error("Please complete the demo verification.");
       return;
     }
     setIsProcessing(true);
     try {
       const response = await api<{ verificationToken?: string }>('/api/submit', {
         method: 'POST',
-        body: JSON.stringify({ ...data, turnstileToken })
+        body: JSON.stringify(data)
       });
       if (response.verificationToken) {
         setVerificationToken(response.verificationToken);
@@ -103,8 +89,8 @@ export function LeadFormPage() {
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
               <MailCheck className="w-10 h-10 text-primary" />
             </div>
-            <h2 className="text-3xl font-display font-bold mb-4">{t('form.submitted.title')}</h2>
-            <p className="text-muted-foreground mb-8 leading-relaxed">{t('form.submitted.desc')}</p>
+            <h2 className="text-3xl font-display font-bold mb-4">Verification Sent</h2>
+            <p className="text-muted-foreground mb-8 leading-relaxed">To ensure data integrity, please check your corporate inbox and click the verification link to unlock your report.</p>
             <div className="space-y-4">
               {verificationToken && (
                 <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-6 text-left">
@@ -148,98 +134,94 @@ export function LeadFormPage() {
                   {step === 0 && (
                     <motion.div key="s0" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.companyName')}</Label>
+                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Entity Name</Label>
                         <Input {...form.register('companyName')} className="h-14 rounded-xl" placeholder="Global Corp" />
                         {form.formState.errors.companyName && <p className="text-xs text-destructive">{form.formState.errors.companyName.message}</p>}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.contactPerson')}</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Liaison Name</Label>
                           <Input {...form.register('contactName')} className="h-14 rounded-xl" placeholder="Jane Doe" />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.phone')}</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Phone Number</Label>
                           <Input {...form.register('phone')} type="tel" className="h-14 rounded-xl" placeholder="+49 521 1234567" />
                         </div>
                       </div>
                       <div className="space-y-2">
-                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.workEmail')}</Label>
+                        <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Corporate Email</Label>
                         <Input {...form.register('email')} type="email" className="h-14 rounded-xl" placeholder="jane.doe@company.com" />
                       </div>
-                      <Button type="button" className="w-full btn-gradient py-7 text-lg shadow-lg rounded-xl" onClick={nextStep}>{t('form.buttons.continue')}</Button>
+                      <Button type="button" className="w-full btn-gradient py-7 text-lg shadow-lg rounded-xl" onClick={nextStep}>Proceed</Button>
                     </motion.div>
                   )}
                   {step === 1 && (
                     <motion.div key="s1" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.seats')}</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Deployment Scale</Label>
                           <Input {...form.register('seats', { valueAsNumber: true })} type="number" className="h-14 rounded-xl" />
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.budgetRange')}</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Project Budget</Label>
                           <select {...form.register('budgetRange')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
-                            <option value="low">{t('form.options.budget_low')}</option>
-                            <option value="med">{t('form.options.budget_med')}</option>
-                            <option value="high">{t('form.options.budget_high')}</option>
-                            <option value="enterprise">{t('form.options.budget_enterprise')}</option>
+                            <option value="low">&lt; €10k / year</option>
+                            <option value="med">€10k - €50k / year</option>
+                            <option value="high">€50k - €100k / year</option>
+                            <option value="enterprise">€100k+ / year</option>
                           </select>
                         </div>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.vpnStatus')}</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Legacy State</Label>
                           <select {...form.register('vpnStatus')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
-                            <option value="active">{t('form.options.vpn_active')}</option>
-                            <option value="replacing">{t('form.options.vpn_replacing')}</option>
-                            <option value="none">{t('form.options.vpn_none')}</option>
+                            <option value="active">Active Legacy VPN</option>
+                            <option value="replacing">Ongoing Migration</option>
+                            <option value="none">SDP / Cloud Native</option>
                           </select>
                         </div>
                         <div className="space-y-2">
-                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('form.labels.timing')}</Label>
+                          <Label className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Migration Timeline</Label>
                           <select {...form.register('timing')} className="w-full h-14 rounded-xl border border-input bg-background px-4 outline-none transition-all focus:ring-2 focus:ring-primary/20">
-                            <option value="immediate">{t('form.options.timing_immediate')}</option>
-                            <option value="3_months">{t('form.options.timing_3m')}</option>
-                            <option value="6_months">{t('form.options.timing_6m')}</option>
-                            <option value="planning">{t('form.options.timing_planning')}</option>
+                            <option value="immediate">Immediate</option>
+                            <option value="3_months">Within 3 Months</option>
+                            <option value="6_months">Next 6 Months</option>
+                            <option value="planning">Strategic Planning</option>
                           </select>
                         </div>
                       </div>
                       <div className="flex gap-4 pt-4">
-                        <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(0)}>{t('form.buttons.back')}</Button>
-                        <Button type="button" className="flex-1 btn-gradient py-7 shadow-lg" onClick={nextStep}>{t('form.buttons.continue')}</Button>
+                        <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(0)}>Return</Button>
+                        <Button type="button" className="flex-1 btn-gradient py-7 shadow-lg" onClick={nextStep}>Proceed</Button>
                       </div>
                     </motion.div>
                   )}
                   {step === 2 && (
                     <motion.div key="s2" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
                       <div className="p-6 border rounded-2xl bg-slate-50/50 space-y-4">
-                        <h4 className="font-bold text-sm uppercase tracking-wider">{t('form.steps.legal')}</h4>
+                        <h4 className="font-bold text-sm uppercase tracking-wider">Compliance</h4>
                         <p className="text-sm leading-relaxed text-muted-foreground italic">
-                          {t('form.legal.disclaimer')}
+                          Your data is used exclusively for the generation of this analysis and professional follow-up by certified security architects at von Busch Digital (security@vonbusch.digital). No data is shared with third parties. You can object at any time using the link in our emails.
                         </p>
                       </div>
                       <div className="flex justify-center py-4">
-                        {turnstileSiteKey ? (
-                          <Turnstile
-                            sitekey={turnstileSiteKey}
-                            onVerify={(token) => setTurnstileToken(token)}
-                          />
-                        ) : (
-                          <div className="h-[65px] flex items-center justify-center">
-                            <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-                          </div>
-                        )}
+                        <div className="flex items-center p-6 border-2 border-dashed border-muted rounded-2xl bg-muted/20 justify-center min-h-[78px]">
+                          <label className="flex items-center gap-3 cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+                            <input type="checkbox" className="w-5 h-5 rounded border-muted bg-background" checked={isVerified} onChange={(e) => setIsVerified(e.target.checked)} />
+                            <span>Demo verification: Confirm I'm human</span>
+                          </label>
+                        </div>
                       </div>
                       <div className="flex gap-4">
-                        <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(1)} disabled={isProcessing}>{t('form.buttons.back')}</Button>
-                        <Button type="submit" className="flex-1 btn-gradient py-7 shadow-xl" disabled={isProcessing || !turnstileSiteKey}>
+                        <Button type="button" variant="ghost" className="flex-1 py-7" onClick={() => setStep(1)} disabled={isProcessing}>Return</Button>
+                        <Button type="submit" className="flex-1 btn-gradient py-7 shadow-xl" disabled={isProcessing || !isVerified}>
                           {isProcessing ? (
                             <>
                               <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                              {t('form.buttons.generating')}
+                              Processing Analysis...
                             </>
-                          ) : t('form.buttons.submit')}
+                          ) : 'Verify & Generate'}
                         </Button>
                       </div>
                     </motion.div>
