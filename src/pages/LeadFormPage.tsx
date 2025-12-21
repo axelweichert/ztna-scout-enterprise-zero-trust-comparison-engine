@@ -15,7 +15,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { api } from '@/lib/api-client';
 import { toast } from 'sonner';
-import { MailCheck, Loader2 } from 'lucide-react';
+import { MailCheck, Loader2, ArrowRight, ShieldCheck } from 'lucide-react';
 import type { LeadFormData, AppConfig } from '@shared/types';
 const leadSchema = z.object({
   companyName: z.string().min(2, "Required"),
@@ -31,6 +31,7 @@ export function LeadFormPage() {
   const { t } = useTranslation();
   const [step, setStep] = useState(0);
   const [submitted, setSubmitted] = useState(false);
+  const [verificationToken, setVerificationToken] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileSiteKey, setTurnstileSiteKey] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -55,7 +56,6 @@ export function LeadFormPage() {
         setTurnstileSiteKey(config.turnstileSiteKey);
       } catch (error) {
         console.error('Failed to fetch config:', error);
-        // Fallback to demo key if config fetch fails
         setTurnstileSiteKey("1x00000000000000000000AA");
       }
     };
@@ -73,10 +73,13 @@ export function LeadFormPage() {
     }
     setIsProcessing(true);
     try {
-      await api('/api/submit', {
+      const response = await api<{ verificationToken?: string }>('/api/submit', {
         method: 'POST',
         body: JSON.stringify({ ...data, turnstileToken })
       });
+      if (response.verificationToken) {
+        setVerificationToken(response.verificationToken);
+      }
       setSubmitted(true);
     } catch (e) {
       toast.error("Submission failed. Please check your data and try again.");
@@ -96,13 +99,33 @@ export function LeadFormPage() {
       <Header />
       <main className="flex-1 flex items-center justify-center p-4">
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="max-w-md w-full">
-          <Card className="text-center p-12 shadow-2xl border-none bg-white rounded-3xl">
+          <Card className="text-center p-8 md:p-12 shadow-2xl border-none bg-white rounded-3xl">
             <div className="w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-8">
               <MailCheck className="w-10 h-10 text-primary" />
             </div>
             <h2 className="text-3xl font-display font-bold mb-4">{t('form.submitted.title')}</h2>
             <p className="text-muted-foreground mb-8 leading-relaxed">{t('form.submitted.desc')}</p>
-            <Button className="w-full btn-gradient py-6" onClick={() => navigate('/')}>Return Home</Button>
+            <div className="space-y-4">
+              {verificationToken && (
+                <div className="p-6 bg-slate-50 rounded-2xl border border-slate-100 mb-6 text-left">
+                  <div className="flex items-center gap-2 mb-2 text-primary">
+                    <ShieldCheck className="w-4 h-4" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">Demo Access Key</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-4">In a live environment, this link is sent via email. Click below to bypass email verification for testing.</p>
+                  <Button 
+                    className="w-full btn-gradient py-6 rounded-xl group"
+                    onClick={() => navigate(`/verify/${verificationToken}`)}
+                  >
+                    View Result Now
+                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </Button>
+                </div>
+              )}
+              <Button variant="outline" className="w-full h-14 rounded-xl border-2" onClick={() => navigate('/')}>
+                Return Home
+              </Button>
+            </div>
           </Card>
         </motion.div>
       </main>

@@ -6,7 +6,7 @@ import { calculateTCO, calculateScores } from "./calculator";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, AdminStats, TimeSeriesData
+  VerificationToken, OptOutToken, AdminStats
 } from "./shared-types";
 const VENDORS = [
   { "id": "cloudflare", "name": "Cloudflare", "website": "https://www.cloudflare.com" },
@@ -153,9 +153,23 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await new VerificationTokenEntity(c.env, vToken).save({ hash: vToken, leadId, expiresAt: Date.now() + 604800000 });
       const optOutToken = crypto.randomUUID();
       await new OptOutTokenEntity(c.env, optOutToken).save({ hash: optOutToken, leadId, createdAt: Date.now() });
-      return ok(c, { leadId, requiresVerification: true });
+      return ok(c, { leadId, requiresVerification: true, verificationToken: vToken });
     } catch (e) {
       return bad(c, 'Submission failed.');
+    }
+  });
+  app.post('/api/opt-out', async (c) => {
+    try {
+      const { token } = await c.req.json();
+      const entity = new OptOutTokenEntity(c.env, token);
+      if (!(await entity.exists())) return bad(c, 'Invalid token');
+      const tokenData = await entity.getState();
+      const lead = new LeadEntity(c.env, tokenData.leadId);
+      if (!(await lead.exists())) return notFound(c, 'Lead not found');
+      await lead.patch({ contactAllowed: false, optedOutAt: Date.now() });
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Opt-out failed');
     }
   });
   app.get('/api/sample-comparison', async (c) => {
@@ -204,14 +218,27 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const leads = await LeadEntity.list(c.env, null, 1000);
       const items = leads.items || [];
       const confirmedItems = items.filter(l => l.status === 'confirmed');
+      const vpnCounts: Record<string, number> = {};
+      items.forEach(l => {
+        const v = l.vpnStatus || 'none';
+        vpnCounts[v] = (vpnCounts[v] || 0) + 1;
+      });
+      let mostCommon = 'none';
+      let maxCount = 0;
+      Object.entries(vpnCounts).forEach(([vpn, count]) => {
+        if (count > maxCount) {
+          maxCount = count;
+          mostCommon = vpn;
+        }
+      });
       const stats: AdminStats = {
         totalLeads: items.length,
         pendingLeads: items.length - confirmedItems.length,
         confirmedLeads: confirmedItems.length,
         conversionRate: items.length > 0 ? Math.round((confirmedItems.length / items.length) * 100) : 0,
         avgSeats: confirmedItems.length > 0 ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length) : 0,
-        mostCommonVpn: 'none',
-        dailyLeads: []
+        mostCommonVpn: mostCommon,
+        dailyLeads: [] // Time-series data would require D1 date grouping
       };
       return ok(c, stats);
     } catch (e) {
@@ -221,6 +248,20 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/admin/leads', async (c) => {
     const leads = await LeadEntity.list(c.env, null, 1000);
     return ok(c, (leads.items || []).sort((a, b) => b.createdAt - a.createdAt));
+  });
+  app.delete('/api/admin/leads/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const leadInst = new LeadEntity(c.env, id);
+      const leadState = await leadInst.getState();
+      if (leadState.comparisonId) {
+        await ComparisonEntity.delete(c.env, leadState.comparisonId);
+      }
+      await LeadEntity.delete(c.env, id);
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Failed to purge lead');
+    }
   });
   app.get('/api/admin/pricing', async (c) => {
     const data = await Promise.all(VENDORS.map(async (v) => {
