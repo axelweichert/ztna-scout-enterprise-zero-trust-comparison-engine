@@ -21,7 +21,7 @@ const resources = {
           imprint: "Imprint",
           privacy: "Privacy Policy",
           service_line: "A strategic security service by von Busch GmbH",
-          address: "von Busch GmbH ��� Alfred-Bozi-Straße 12 – 33602 Bielefeld"
+          address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld"
         }
       },
       home: {
@@ -41,7 +41,8 @@ const resources = {
           sase: "Global SASE"
         },
         steps: {
-          title: "The ZTNA Scout Methodology",
+          badge: "Precision Methodology",
+          title: "PRECISION METHODOLOGY",
           subtitle: "How we deliver precision analytics for your security stack.",
           step1: { title: "Define Scope", desc: "Identify user count, legacy architecture, and specific security requirements." },
           step2: { title: "Market Sweep", desc: "Our engine maps your data against current list prices and feature matrixes." },
@@ -212,14 +213,15 @@ const resources = {
           badge: "B2B Analyse Engine",
           title1: "Enterprise Security",
           title2: "Vergleich neu gedacht",
-          description: "Schluss mit Sch��tzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen und BSI-Konformitätsbewertungen.",
+          description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen und BSI-Konformitätsbewertungen.",
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen",
           sase_map_cta: "SASE Cloud Map"
         },
         trust: { bsi: "BSI-qualifiziert", gdpr: "DSGVO-konform", pdf: "PDF-Export", sase: "Global SASE" },
         steps: {
-          title: "Die ZTNA Scout Methodik",
+          badge: "Präzise Methodik",
+          title: "PRÄZISE METHODIK",
           subtitle: "So erstellen wir präzise Analysen für Ihren Security Stack.",
           step1: { title: "Anforderungen", desc: "Definition von Benutzeranzahl, Legacy-Architektur und Security-Needs." },
           step2: { title: "Markt-Abgleich", desc: "Unsere Engine gleicht Ihre Daten mit aktuellen Listenpreisen ab." },
@@ -332,7 +334,7 @@ const resources = {
       home: {
         hero: { badge: "Moteur d'analyse B2B", title1: "Sécurité d'entreprise", title2: "La comparaison redéfinie", description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO et des scores BSI.", cta_primary: "Lancer l'analyse", cta_secondary: "Voir un exemple", sase_map_cta: "SASE Cloud Map" },
         trust: { bsi: "Qualifié BSI", gdpr: "Conforme RGPD", pdf: "Export PDF", sase: "SASE Global" },
-        steps: { title: "La méthodologie ZTNA Scout", subtitle: "Comment nous fournissons des analyses de précision.", step1: { title: "Périmètre", desc: "Modifier le nombre d'utilisateurs et l'architecture." }, step2: { title: "Balayage", desc: "Comparaison avec les prix catalogue et les fonctionnalités." }, step3: { title: "Rapport", desc: "Recevez un export PDF professionnel avec projections TCO." } },
+        steps: { badge: "Méthodologie de précision", title: "MÉTHODOLOGIE DE PRÉCISION", subtitle: "Comment nous fournissons des analyses de précision.", step1: { title: "Périmètre", desc: "Modifier le nombre d'utilisateurs et l'architecture." }, step2: { title: "Balayage", desc: "Comparaison avec les prix catalogue et les fonctionnalités." }, step3: { title: "Rapport", desc: "Recevez un export PDF professionnel avec projections TCO." } },
         faq: { title: "Perspectives stratégiques", q1: "Données à jour ?", a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}", q2: "Pourquoi Cloudflare ?", a2: "Cloudflare propose la plateforme ZTNA la plus robuste et qualifiée BSI.", q3: "Prix définitifs ?", a3: "Estimations basées sur les prix catalogue. Remises possibles.", q4: "Données protégées ?", a4: "Nous sommes conformes au RGPD. Les données sont chiffrées." }
       },
       form: {

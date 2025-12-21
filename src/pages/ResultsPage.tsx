@@ -33,14 +33,15 @@ export function ResultsPage() {
   const { t, i18n } = useTranslation();
   const [selectedVendor, setSelectedVendor] = useState<ComparisonResult | null>(null);
   const [scrolled, setScrolled] = useState(false);
-  const [hideSimilar, setHideSimilar] = useState(false);
+
   const [mounted, setMounted] = useState(false);
   const isSampleRoute = useMemo(() => {
     const p = location.pathname;
     return p === '/beispiel' || p === '/vergleich/sample' || id === 'sample' || id === 'demo';
   }, [location.pathname, id]);
   useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), 250);
+    let timer: NodeJS.Timeout;
+    timer = setTimeout(() => setMounted(true), 250);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const handleScroll = () => setScrolled(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
@@ -48,7 +49,7 @@ export function ResultsPage() {
       clearTimeout(timer);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [id]);
+  }, [id, isSampleRoute]);
   const { data: snapshot, isLoading, error } = useQuery({
     queryKey: ['comparison', isSampleRoute ? 'sample' : id],
     queryFn: () => api<ComparisonSnapshot>(isSampleRoute ? '/api/sample-comparison' : `/api/comparison/${id}`),
@@ -167,10 +168,7 @@ export function ResultsPage() {
         <section className="space-y-8 mb-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-3xl font-display font-bold">{t('results.matrix.comparison_title')}</h2>
-            <Button variant="ghost" size="sm" onClick={() => setHideSimilar(!hideSimilar)} className={cn("gap-2 border px-4 rounded-xl print:hidden", hideSimilar && "text-primary border-primary/20 bg-primary/5")}>
-              <Filter className="w-4 h-4" />
-              {hideSimilar ? t('results.matrix.show_all') : t('results.matrix.diff_only')}
-            </Button>
+
           </div>
           <div className="overflow-x-auto rounded-[2rem] border bg-white dark:bg-slate-950 shadow-xl">
             <table className="w-full border-collapse min-w-[600px]">
@@ -206,13 +204,13 @@ export function ResultsPage() {
         <section className="space-y-8 mb-24">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden">
-            <div className="w-full h-[400px] relative" style={{ minHeight: '400px' }}>
-              {mounted && (
-                <ResponsiveContainer width="99.9%" height="100%" debounce={50}>
-                  <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 10 : 60, right: 60, top: 20, bottom: 20 }}>
+              <div className="w-full h-[400px] relative">
+                {mounted && (
+                  <ResponsiveContainer width="100%" height={400}>
+                    <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 10 : 60, right: 60, top: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" width={isMobile ? 100 : 160} tickLine={false} axisLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: 'hsl(var(--foreground))' }} />
+                    <YAxis dataKey="name" type="category" width={isMobile ? 120 : 220} tickLine={false} axisLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: 'hsl(var(--foreground))' }} />
                     <Tooltip cursor={{ fill: 'hsl(var(--primary)/0.03)' }} content={({ active, payload }) => {
                         if (active && payload && payload.length) {
                           const data = payload[0];
@@ -259,7 +257,7 @@ export function ResultsPage() {
           <div className="bg-primary text-primary-foreground p-10 sm:p-12">
             <DialogHeader>
               <DialogTitle className="text-4xl font-display font-bold leading-tight">
-                {selectedVendor?.vendorName}
+                {selectedVendor?.vendorName || ''}
               </DialogTitle>
               <DialogDescription className="text-primary-foreground/80 font-mono text-[10px] uppercase tracking-[0.4em] mt-3 font-bold">
                 {t('results.matrix.analytical_breakdown')}
@@ -294,7 +292,7 @@ export function ResultsPage() {
                 <div className="text-right">
                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">{t('results.matrix.market_position')}</p>
                    <Badge variant="outline" className="h-12 px-6 text-xl font-bold bg-white border-2 rounded-xl">
-                    {getRankLabel(sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1, t)}
+                    {selectedVendor ? getRankLabel(sortedResults.findIndex(r => r.vendorId === selectedVendor.vendorId) + 1, t) : '—'}
                    </Badge>
                 </div>
               </div>

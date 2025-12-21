@@ -28,7 +28,7 @@ const fadeIn: Variants = {
     transition: {
       delay: i * 0.1,
       duration: 0.6,
-      ease: [0.22, 1, 0.36, 1] as any
+      ease: [0.22, 1, 0.36, 1]
     }
   })
 };
@@ -107,8 +107,8 @@ export default function HomePage() {
                   <Globe className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <span className="block font-bold text-sm tracking-tight">SASE Cloud Map</span>
-                  <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-widest">Global Infrastructure</span>
+                  <span className="block font-bold text-sm tracking-tight">{t('home.hero.sase_map_title')}</span>
+                  <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{t('home.hero.sase_map_subtitle')}</span>
                 </div>
                 <ArrowRight className="ml-4 w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </a>
@@ -120,7 +120,7 @@ export default function HomePage() {
             <div className="text-center mb-24">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
                 <BarChart3 className="w-3 h-3" />
-                <span>Precision Methodology</span>
+                <span>{t('home.steps.badge')}</span>
               </div>
               <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight dark:text-slate-100">
                 {t('home.steps.title')}
