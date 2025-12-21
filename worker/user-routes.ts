@@ -107,16 +107,16 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
 async function getMergedPricing(env: Env, vendorId: string): Promise<PricingModel> {
   const base = pricing.find(p => p.vendorId === vendorId) || { vendorId, basePricePerMonth: 25, isQuoteOnly: true, installationFee: 4000 };
   const overrideInst = new PricingOverrideEntity(env, vendorId);
-  if (await overrideInst.exists()) {
+  try {
     const override = await overrideInst.getState();
-    if (override.basePricePerMonth > 0) {
+    if (override && override.basePricePerMonth > 0) {
       return {
         ...base,
         basePricePerMonth: Number(override.basePricePerMonth.toFixed(2)),
         isQuoteOnly: override.isQuoteOnly
       };
     }
-  }
+  } catch (e) { /* Fallback to seed data */ }
   return {
     ...base,
     basePricePerMonth: Number(base.basePricePerMonth.toFixed(2))
@@ -215,12 +215,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, snapshot);
   });
   app.get('/api/verify/:token', async (c) => {
+    console.log('[API] Processing verification for token');
     const token = c.req.param('token');
     const tokenEntity = new VerificationTokenEntity(c.env, token);
     if (!await tokenEntity.exists()) return notFound(c, 'Verification link is invalid.');
     const tokenData = await tokenEntity.getState();
     const leadEntity = new LeadEntity(c.env, tokenData.leadId);
     if (!await leadEntity.exists()) return notFound(c, 'Associated lead data not found.');
+    
     const leadState = await leadEntity.getState();
     // Idempotency: if already confirmed, just return the existing comparison
     if (leadState.status === 'confirmed' && leadState.comparisonId) {
@@ -260,6 +262,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     await ComparisonEntity.create(c.env, snapshot);
     await leadEntity.patch({ status: 'confirmed', confirmedAt: Date.now(), comparisonId: snapshotId });
     await tokenEntity.patch({ usedAt: Date.now() });
+    
+    console.log('[API] Verification successful, snapshot created:', snapshotId);
     return ok(c, { comparisonId: snapshotId });
   });
   app.get('/api/admin/leads', async (c) => {
@@ -293,14 +297,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     Object.entries(vpnMap).forEach(([status, count]) => {
       if (count > maxCount) {
         maxCount = count;
-        mostCommonVpn = status;
+        mostCommonVpn = status || 'none';
       }
     });
     const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
     const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, curr) => acc + (curr.seats || 0), 0) / totalLeads) : 0;
     const dailyLeads: TimeSeriesData[] = [];
     const now = new Date();
-    for (let i = 13; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
       const d = new Date(now);
       d.setDate(d.getDate() - i);
       const dateStr = d.toISOString().split('T')[0];

@@ -221,9 +221,9 @@ export function ResultsPage() {
         </section>
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
-          <Card className="p-4 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
-            <div className="w-full min-h-[550px] relative">
-              <ResponsiveContainer width="100%" height={550} debounce={100}>
+          <Card className="p-2 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
+            <div className="w-full h-[400px] md:h-[600px] relative">
+              <ResponsiveContainer width="100%" height="100%" debounce={100}>
                 <BarChart data={chartData} layout="vertical" margin={{ left: 120, right: 60, top: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
@@ -264,9 +264,9 @@ export function ResultsPage() {
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-lg">
             <Info className="h-8 w-8 text-white" />
           </div>
-          <div className="space-y-3 relative text-pretty">
+          <div className="space-y-3 relative">
             <h4 className="text-2xl font-bold">{t('results.methodology_title')}</h4>
-            <p className="text-base text-slate-300 leading-relaxed italic max-w-4xl">
+            <p className="text-base text-slate-300 leading-relaxed italic max-w-4xl text-pretty">
               {t('results.disclaimer')} {t('results.methodology_desc')}
             </p>
             <p className="text-xs text-slate-500 font-mono tracking-widest uppercase">{t('common.data_freshness')}</p>
