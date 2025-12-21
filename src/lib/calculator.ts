@@ -11,7 +11,7 @@ export function calculateTCO(seats: number, pricing: PricingModel): number {
 /**
  * Normalizes vendor scores based on features, price competitiveness, and compliance.
  * Weights: Features (40%), Price (40%), Compliance (20%).
- * Handles zero-range edge cases by defaulting to 100.
+ * Handles zero-range edge cases by defaulting to 100 for price competitiveness if all prices are identical.
  */
 export function calculateScores(
   features: FeatureMatrix,
@@ -36,10 +36,14 @@ export function calculateScores(
   if (features.hasFWaaS) featureScore += featureWeight.hasFWaaS;
   if (features.hasRBI) featureScore += featureWeight.hasRBI;
   // Price Score (0-100, lower TCO is better)
+  // range > 0 check is critical to prevent Division by Zero
   const range = maxTco - minTco;
-  let priceScore = 100;
+  let priceScore = 100; 
   if (range > 0) {
     priceScore = 100 * (1 - (tco - minTco) / range);
+  } else {
+    // If all vendors have the same price, they all get 100 points
+    priceScore = 100;
   }
   priceScore = Math.max(0, Math.min(100, priceScore));
   // Compliance Score (0 or 100 based on BSI)
