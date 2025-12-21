@@ -32,7 +32,9 @@ const resources = {
           description: "Stop guessing. Compare 13+ ZTNA providers with deterministic TCO projections and BSI compliance scoring.",
           cta_primary: "Start Free Analysis",
           cta_secondary: "Explore Live Sample",
-          sase_map_cta: "SASE Cloud Map"
+          sase_map_cta: "Cloud Infrastructure",
+          sase_map_title: "SASE Cloud Map",
+          sase_map_subtitle: "Interactive Infrastructure Explorer"
         },
         trust: {
           bsi: "BSI Qualified",
@@ -42,7 +44,7 @@ const resources = {
         },
         steps: {
           badge: "Precision Methodology",
-          title: "PRECISION METHODOLOGY",
+          title: "Precision Methodology",
           subtitle: "How we deliver precision analytics for your security stack.",
           step1: { title: "Define Scope", desc: "Identify user count, legacy architecture, and specific security requirements." },
           step2: { title: "Market Sweep", desc: "Our engine maps your data against current list prices and feature matrixes." },
@@ -216,12 +218,14 @@ const resources = {
           description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen und BSI-Konformitätsbewertungen.",
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen",
-          sase_map_cta: "SASE Cloud Map"
+          sase_map_cta: "Infrastruktur-Explorer",
+          sase_map_title: "SASE Cloud Map",
+          sase_map_subtitle: "Interaktiver Infrastruktur-Explorer"
         },
         trust: { bsi: "BSI-qualifiziert", gdpr: "DSGVO-konform", pdf: "PDF-Export", sase: "Global SASE" },
         steps: {
           badge: "Präzise Methodik",
-          title: "PRÄZISE METHODIK",
+          title: "Präzise Methodik",
           subtitle: "So erstellen wir präzise Analysen für Ihren Security Stack.",
           step1: { title: "Anforderungen", desc: "Definition von Benutzeranzahl, Legacy-Architektur und Security-Needs." },
           step2: { title: "Markt-Abgleich", desc: "Unsere Engine gleicht Ihre Daten mit aktuellen Listenpreisen ab." },
@@ -264,7 +268,7 @@ const resources = {
         expert_take_2: "Skalierbare Cloud-Architektur mit schnellen Implementierungswegen und intuitiver Verwaltung.",
         meta: { rid: "Bericht-ID", generated: "Erstellt am", verified: "Verifizierter Bericht" },
         chart: { calculated_tco: "Berechnete 1-Jahres TCO" },
-        print: { title: "ZTNA Scout Analysebericht", tagline: "Marktanalyse-Bericht – erstellt durch ZTNA Scout", summary: "Management Summary", seats: "Benutzerlizenzen", top_recommendation: "Top Empfehlung", transparency_title: "Transparenz & Quellen", transparency_desc: "Die Berechnungen basieren auf öffentlichen Marktlistenpreisen (EUR)." },
+        print: { title: "ZTNA Scout Analysebericht", tagline: "Marktanalyse-Bericht – erstellt durch ZTNA Scout", summary: "Management Summary", seats: "Benutzerlizenzen", top_recommendation: "Top Empfehlung", transparency_title: "Transparenz & Quellen", transparency_desc: "Die Berechnungen basieren auf ��ffentlichen Marktlistenpreisen (EUR)." },
         badges: {
           top_match: "Top Match",
           best_match: "Bester Treffer",
@@ -332,9 +336,19 @@ const resources = {
         footer: { imprint: "Mentions Légales", privacy: "Confidentialité", service_line: "Un service de sécurité stratégique par von Busch GmbH", address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld" }
       },
       home: {
-        hero: { badge: "Moteur d'analyse B2B", title1: "Sécurité d'entreprise", title2: "La comparaison redéfinie", description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO et des scores BSI.", cta_primary: "Lancer l'analyse", cta_secondary: "Voir un exemple", sase_map_cta: "SASE Cloud Map" },
+        hero: {
+          badge: "Moteur d'analyse B2B",
+          title1: "Sécurité d'entreprise",
+          title2: "La comparaison redéfinie",
+          description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO et des scores BSI.",
+          cta_primary: "Lancer l'analyse",
+          cta_secondary: "Voir un exemple",
+          sase_map_cta: "Cloud Infrastructure",
+          sase_map_title: "SASE Cloud Map",
+          sase_map_subtitle: "Explorateur d'infrastructure interactif"
+        },
         trust: { bsi: "Qualifié BSI", gdpr: "Conforme RGPD", pdf: "Export PDF", sase: "SASE Global" },
-        steps: { badge: "Méthodologie de précision", title: "MÉTHODOLOGIE DE PRÉCISION", subtitle: "Comment nous fournissons des analyses de précision.", step1: { title: "Périmètre", desc: "Modifier le nombre d'utilisateurs et l'architecture." }, step2: { title: "Balayage", desc: "Comparaison avec les prix catalogue et les fonctionnalités." }, step3: { title: "Rapport", desc: "Recevez un export PDF professionnel avec projections TCO." } },
+        steps: { badge: "Méthodologie de précision", title: "Méthodologie de précision", subtitle: "Comment nous fournissons des analyses de précision.", step1: { title: "Périmètre", desc: "Modifier le nombre d'utilisateurs et l'architecture." }, step2: { title: "Balayage", desc: "Comparaison avec les prix catalogue et les fonctionnalités." }, step3: { title: "Rapport", desc: "Recevez un export PDF professionnel avec projections TCO." } },
         faq: { title: "Perspectives stratégiques", q1: "Données à jour ?", a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}", q2: "Pourquoi Cloudflare ?", a2: "Cloudflare propose la plateforme ZTNA la plus robuste et qualifiée BSI.", q3: "Prix définitifs ?", a3: "Estimations basées sur les prix catalogue. Remises possibles.", q4: "Données protégées ?", a4: "Nous sommes conformes au RGPD. Les données sont chiffrées." }
       },
       form: {
@@ -357,7 +371,7 @@ const resources = {
         methodology_title: "Méthodologie & Transparence",
         methodology_desc: "Scores basés sur les fonctionnalités (40%), le prix (40%) et la conformité (20%).",
         expert_take_label: "L'avis de l'expert",
-        expert_take_0: "Équilibre exceptionnel entre coût et conformité.",
+        expert_take_0: "Équilibre exceptionnel entre co��t et conformité.",
         expert_take_1: "Fonctionnalités premium avec protection avancée.",
         expert_take_2: "Architecture cloud évolutive et gestion intuitive.",
         meta: { rid: "ID-Rapport", generated: "Généré le", verified: "Rapport vérifié" },

@@ -39,6 +39,7 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary selection:text-white">
       <Header />
       <main className="flex-1 overflow-x-hidden">
+        {/* Hero Section */}
         <section className="relative pt-24 pb-32 md:pt-40 md:pb-56">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(244,129,32,0.12),transparent_70%)] -z-10" />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -89,6 +90,7 @@ export default function HomePage() {
                 </Link>
               </Button>
             </motion.div>
+            {/* SASE Cloud Map Integration */}
             <motion.div
               variants={fadeIn}
               initial="hidden"
@@ -108,13 +110,14 @@ export default function HomePage() {
                 </div>
                 <div className="text-left">
                   <span className="block font-bold text-sm tracking-tight">{t('home.hero.sase_map_title')}</span>
-                  <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-widest">{t('home.hero.sase_map_subtitle')}</span>
+                  <span className="block text-[10px] text-muted-foreground font-medium uppercase tracking-widest leading-none mt-1">{t('home.hero.sase_map_subtitle')}</span>
                 </div>
                 <ArrowRight className="ml-4 w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </a>
             </motion.div>
           </div>
         </section>
+        {/* Methodology Section */}
         <section className="py-32 md:py-48 bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-24">
@@ -157,6 +160,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
+        {/* FAQ Section */}
         <section className="py-32 md:py-48 bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
@@ -169,7 +173,7 @@ export default function HomePage() {
                 <HelpCircle className="w-10 h-10 text-primary" />
               </div>
               <h2 className="text-4xl md:text-5xl font-display font-bold dark:text-slate-100">{t('home.faq.title')}</h2>
-              <p className="text-muted-foreground text-lg">{t('home.hero.badge')}</p>
+              <p className="text-muted-foreground text-lg uppercase tracking-widest font-bold opacity-60">{t('home.hero.badge')}</p>
             </motion.div>
             <Accordion type="single" collapsible className="w-full space-y-6">
               {[1, 2, 3, 4].map((i) => (

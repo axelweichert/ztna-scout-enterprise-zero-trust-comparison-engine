@@ -110,7 +110,7 @@ export function PrintResultsPage() {
           </div>
         </section>
         <section className="break-inside-avoid">
-          <h2 className="text-base font-bold mb-4 border-l-4 border-black pl-3 uppercase tracking-tight">{t('results.matrix.title')}</h2>
+          <h2 className="text-base font-bold mb-4 border-l-4 border-black pl-3 uppercase tracking-tight">{t('results.matrix.comparison_title')}</h2>
           <table className="w-full text-[10px] border-collapse border border-gray-200 shadow-sm">
             <thead>
               <tr className="bg-black text-white">

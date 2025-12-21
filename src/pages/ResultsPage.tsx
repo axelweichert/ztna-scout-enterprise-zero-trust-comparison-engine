@@ -8,7 +8,7 @@ import type { ComparisonSnapshot, ComparisonResult } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Printer, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar, BadgeCheck } from 'lucide-react';
+import { ShieldCheck, Printer, Check, X, Sparkles, AlertTriangle, FileText, Calendar, BadgeCheck, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -33,15 +33,13 @@ export function ResultsPage() {
   const { t, i18n } = useTranslation();
   const [selectedVendor, setSelectedVendor] = useState<ComparisonResult | null>(null);
   const [scrolled, setScrolled] = useState(false);
-
   const [mounted, setMounted] = useState(false);
   const isSampleRoute = useMemo(() => {
     const p = location.pathname;
     return p === '/beispiel' || p === '/vergleich/sample' || id === 'sample' || id === 'demo';
   }, [location.pathname, id]);
   useEffect(() => {
-    let timer: NodeJS.Timeout;
-    timer = setTimeout(() => setMounted(true), 250);
+    const timer = setTimeout(() => setMounted(true), 250);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const handleScroll = () => setScrolled(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
@@ -96,6 +94,7 @@ export function ResultsPage() {
           </p>
         </motion.div>
       )}
+      {/* Floating Header Actions */}
       <div className={cn("fixed top-16 left-0 right-0 z-40 bg-background/90 backdrop-blur-md border-b transition-transform duration-300 print:hidden shadow-sm", scrolled ? "translate-y-0" : "-translate-y-full")}>
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -108,10 +107,11 @@ export function ResultsPage() {
         </div>
       </div>
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-12 md:py-20">
+        {/* Main Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20">
           <div className="space-y-4 text-pretty w-full md:w-auto">
             <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> {t('results.meta.rid')}: {snapshot.id.slice(0, 8)}</span>
+              <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> {t('results.meta.rid')}: {snapshot.id.slice(0, 8).toUpperCase()}</span>
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {formatDate(snapshot.createdAt, i18n.language)}</span>
               <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200"><BadgeCheck className="w-3 h-3 mr-1" /> {t('results.badges.verified')}</Badge>
             </div>
@@ -128,6 +128,7 @@ export function ResultsPage() {
             </Button>
           </div>
         </header>
+        {/* Top Picks Section */}
         <section className="space-y-10 mb-24">
           <h2 className="text-3xl font-display font-bold flex items-center gap-3">
             <Sparkles className="text-primary w-8 h-8" />
@@ -165,11 +166,9 @@ export function ResultsPage() {
             ))}
           </div>
         </section>
+        {/* Capability Matrix */}
         <section className="space-y-8 mb-24">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-3xl font-display font-bold">{t('results.matrix.comparison_title')}</h2>
-
-          </div>
+          <h2 className="text-3xl font-display font-bold">{t('results.matrix.comparison_title')}</h2>
           <div className="overflow-x-auto rounded-[2rem] border bg-white dark:bg-slate-950 shadow-xl">
             <table className="w-full border-collapse min-w-[600px]">
               <thead className="bg-slate-50 dark:bg-slate-900">
@@ -201,6 +200,7 @@ export function ResultsPage() {
             </table>
           </div>
         </section>
+        {/* TCO Chart */}
         <section className="space-y-8 mb-24">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden">
@@ -238,6 +238,7 @@ export function ResultsPage() {
             </div>
           </Card>
         </section>
+        {/* Methodology Block */}
         <div className="bg-slate-900 text-slate-100 rounded-[2.5rem] p-8 md:p-14 flex flex-col md:flex-row gap-10 items-center border shadow-3xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 blur-[120px] rounded-full -mr-48 -mt-48" />
           <div className="w-20 h-20 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-lg transform -rotate-3">
@@ -252,6 +253,7 @@ export function ResultsPage() {
         </div>
       </main>
       <Footer />
+      {/* Deep Dive Modal */}
       <Dialog open={!!selectedVendor} onOpenChange={(open) => !open && setSelectedVendor(null)}>
         <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none rounded-[2rem] shadow-3xl">
           <div className="bg-primary text-primary-foreground p-10 sm:p-12">
@@ -292,7 +294,7 @@ export function ResultsPage() {
                 <div className="text-right">
                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">{t('results.matrix.market_position')}</p>
                    <Badge variant="outline" className="h-12 px-6 text-xl font-bold bg-white border-2 rounded-xl">
-                    {selectedVendor ? getRankLabel(sortedResults.findIndex(r => r.vendorId === selectedVendor.vendorId) + 1, t) : '—'}
+                    {selectedVendor ? getRankLabel(sortedResults.findIndex(r => r.vendorId === selectedVendor.vendorId) + 1, t) : '��'}
                    </Badge>
                 </div>
               </div>
