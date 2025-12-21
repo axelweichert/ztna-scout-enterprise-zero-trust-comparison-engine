@@ -12,46 +12,46 @@ const VENDORS = [
   { "id": "cloudflare", "name": "Cloudflare", "website": "https://www.cloudflare.com" },
   { "id": "zscaler", "name": "Zscaler", "website": "https://www.zscaler.com" },
   { "id": "akamai", "name": "Akamai", "website": "https://www.akamai.com" },
-  { "id": "paloalto", "name": "Palo Alto Networks", "website": "https://www.paloaltonetworks.com" },
-  { "id": "netskope", "name": "Netskope", "website": "https://www.netskope.com" },
   { "id": "fortinet", "name": "Fortinet", "website": "https://www.fortinet.com" },
-  { "id": "cisco", "name": "Cisco", "website": "https://www.cisco.com" },
-  { "id": "broadcom", "name": "Broadcom (Symantec)", "website": "https://www.broadcom.com" },
-  { "id": "forcepoint", "name": "Forcepoint", "website": "https://www.forcepoint.com" },
+  { "id": "aruba", "name": "HPE Aruba SSE", "website": "https://www.arubanetworks.com/products/security/sase/" },
+  { "id": "cisco", "name": "Cisco Umbrella", "website": "https://www.cisco.com" },
+  { "id": "checkpoint", "name": "Check Point Harmony SASE", "website": "https://www.checkpoint.com" },
+  { "id": "cato", "name": "Cato Networks", "website": "https://www.catonetworks.com/" },
+  { "id": "forcepoint", "name": "Forcepoint ONE", "website": "https://www.forcepoint.com" },
   { "id": "iboss", "name": "iboss", "website": "https://www.iboss.com" },
-  { "id": "checkpoint", "name": "Check Point", "website": "https://www.checkpoint.com" },
-  { "id": "perimeter81", "name": "Perimeter 81 (Checkpoint)", "website": "https://www.perimeter81.com" },
-  { "id": "barracuda", "name": "Barracuda", "website": "https://www.barracuda.com" }
+  { "id": "netskope", "name": "Netskope", "website": "https://www.netskope.com" },
+  { "id": "paloalto", "name": "Palo Alto Prisma Access", "website": "https://www.paloaltonetworks.com" },
+  { "id": "dt_managed_sase", "name": "Deutsche Telekom Managed SASE", "website": "https://business.telekom.com/global/products-and-solutions/next-level-networking/sase/" }
 ];
 const FEATURES = [
   { "vendorId": "cloudflare", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": true },
   { "vendorId": "zscaler", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
-  { "vendorId": "akamai", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": false, "hasFWaaS": false, "hasRBI": true, "isBSIQualified": false },
-  { "vendorId": "paloalto", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
-  { "vendorId": "netskope", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "akamai", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": false, "hasFWaaS": false, "hasRBI": true, "isBSIQualified": true },
   { "vendorId": "fortinet", "hasZTNA": true, "hasSWG": true, "hasCASB": false, "hasDLP": false, "hasFWaaS": true, "hasRBI": false, "isBSIQualified": false },
+  { "vendorId": "aruba", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": false, "isBSIQualified": false },
   { "vendorId": "cisco", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
-  { "vendorId": "broadcom", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "checkpoint", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "cato", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
   { "vendorId": "forcepoint", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": false, "hasRBI": true, "isBSIQualified": false },
   { "vendorId": "iboss", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
-  { "vendorId": "checkpoint", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
-  { "vendorId": "perimeter81", "hasZTNA": true, "hasSWG": false, "hasCASB": false, "hasDLP": false, "hasFWaaS": true, "hasRBI": false, "isBSIQualified": false },
-  { "vendorId": "barracuda", "hasZTNA": true, "hasSWG": true, "hasCASB": false, "hasDLP": false, "hasFWaaS": true, "hasRBI": false, "isBSIQualified": false }
+  { "vendorId": "netskope", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "paloalto", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": false },
+  { "vendorId": "dt_managed_sase", "hasZTNA": true, "hasSWG": true, "hasCASB": true, "hasDLP": true, "hasFWaaS": true, "hasRBI": true, "isBSIQualified": true }
 ];
 const PRICING = [
   { "vendorId": "cloudflare", "basePricePerMonth": 12.50, "isQuoteOnly": false, "installationFee": 4000 },
   { "vendorId": "zscaler", "basePricePerMonth": 35.00, "isQuoteOnly": true, "installationFee": 4000 },
   { "vendorId": "akamai", "basePricePerMonth": 28.00, "isQuoteOnly": true, "installationFee": 4000 },
-  { "vendorId": "paloalto", "basePricePerMonth": 45.00, "isQuoteOnly": true, "installationFee": 4000 },
-  { "vendorId": "netskope", "basePricePerMonth": 32.00, "isQuoteOnly": true, "installationFee": 4000 },
   { "vendorId": "fortinet", "basePricePerMonth": 18.00, "isQuoteOnly": false, "installationFee": 4000 },
+  { "vendorId": "aruba", "basePricePerMonth": 27.00, "isQuoteOnly": true, "installationFee": 4000 },
   { "vendorId": "cisco", "basePricePerMonth": 30.00, "isQuoteOnly": true, "installationFee": 4000 },
-  { "vendorId": "broadcom", "basePricePerMonth": 40.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "checkpoint", "basePricePerMonth": 24.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "cato", "basePricePerMonth": 29.00, "isQuoteOnly": true, "installationFee": 4000 },
   { "vendorId": "forcepoint", "basePricePerMonth": 25.00, "isQuoteOnly": true, "installationFee": 4000 },
   { "vendorId": "iboss", "basePricePerMonth": 22.00, "isQuoteOnly": true, "installationFee": 4000 },
-  { "vendorId": "checkpoint", "basePricePerMonth": 24.00, "isQuoteOnly": true, "installationFee": 4000 },
-  { "vendorId": "perimeter81", "basePricePerMonth": 15.00, "isQuoteOnly": false, "installationFee": 2000 },
-  { "vendorId": "barracuda", "basePricePerMonth": 14.00, "isQuoteOnly": false, "installationFee": 3000 }
+  { "vendorId": "netskope", "basePricePerMonth": 32.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "paloalto", "basePricePerMonth": 45.00, "isQuoteOnly": true, "installationFee": 4000 },
+  { "vendorId": "dt_managed_sase", "basePricePerMonth": 38.00, "isQuoteOnly": true, "installationFee": 4000 }
 ];
 class LeadEntity extends IndexedEntity<Lead> {
   static readonly entityName = "lead";
