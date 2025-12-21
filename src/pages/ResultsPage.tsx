@@ -222,15 +222,17 @@ export function ResultsPage() {
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-2 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
             <div className="w-full h-[400px] md:h-[600px] relative">
-              <ResponsiveContainer width="100%" height="100%" debounce={100}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 60, top: 20, bottom: 20 }}>
+              <ResponsiveContainer width="100%" height="100%" minHeight={400} minWidth={300} debounce={100}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 200, right: 60, top: 20, bottom: 20 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={160}
-                    tick={{ fontSize: 11, fontWeight: 700, fill: 'hsl(var(--foreground))', width: 150 }}
+                    width={200}
+                    tickLine={false}
+                    tickMargin={10}
+                    tick={{ fontSize: 12, fontWeight: 600, fill: 'hsl(var(--foreground))' }}
                   />
                   <Tooltip
                     cursor={{ fill: 'hsl(var(--primary)/0.03)' }}
