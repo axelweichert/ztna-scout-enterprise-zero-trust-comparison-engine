@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { ok, bad, notFound } from './core-utils';
-import { IndexedEntity, Entity } from "./core-utils";
+import { IndexedEntity, Entity, Index } from "./core-utils";
 import { calculateTCO, calculateScores } from "./calculator";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,

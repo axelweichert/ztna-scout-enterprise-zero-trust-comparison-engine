@@ -40,7 +40,7 @@ export default function HomePage() {
       <Header />
       <main className="flex-1 overflow-x-hidden">
         {/* Hero Section */}
-        <section className="relative pt-24 pb-32 md:pt-40 md:pb-56">
+        <section className="relative pt-24 pb-24 md:pt-40 md:pb-40">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(244,129,32,0.12),transparent_70%)] -z-10" />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <motion.div
@@ -96,7 +96,7 @@ export default function HomePage() {
               initial="hidden"
               animate="visible"
               custom={4}
-              className="mt-16 flex flex-col items-center gap-4"
+              className="mt-12 flex flex-col items-center gap-4"
             >
               <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-muted-foreground/60">{t('home.hero.sase_map_cta')}</p>
               <a
@@ -118,9 +118,9 @@ export default function HomePage() {
           </div>
         </section>
         {/* Methodology Section */}
-        <section className="py-32 md:py-48 bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
+        <section className="py-24 md:py-40 bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-            <div className="text-center mb-24">
+            <div className="text-center mb-16 md:mb-20">
               <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-200/50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-6">
                 <BarChart3 className="w-3 h-3" />
                 <span>{t('home.steps.badge')}</span>
@@ -132,7 +132,7 @@ export default function HomePage() {
                 {t('home.steps.subtitle')}
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
               {[1, 2, 3].map((s) => (
                 <motion.div
                   key={s}
@@ -161,7 +161,7 @@ export default function HomePage() {
           </div>
         </section>
         {/* FAQ Section */}
-        <section className="py-32 md:py-48 bg-background">
+        <section className="py-24 md:py-40 bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div
               initial={{ opacity: 0 }}
