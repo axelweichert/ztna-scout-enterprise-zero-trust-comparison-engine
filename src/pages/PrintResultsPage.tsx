@@ -23,7 +23,7 @@ export function PrintResultsPage() {
       return () => clearTimeout(timer);
     }
   }, [snapshot]);
-  if (isLoading || !snapshot) return <div className="p-10 text-center">Preparing report...</div>;
+  if (isLoading || !snapshot) return <div className="p-10 text-center font-sans">Preparing analysis report...</div>;
   const sortedResults = [...snapshot.results].sort((a, b) => (b.scores?.totalScore ?? 0) - (a.scores?.totalScore ?? 0));
   const chartData = sortedResults.map(r => ({
     name: r.vendorName,
@@ -31,9 +31,9 @@ export function PrintResultsPage() {
     id: r.vendorId
   }));
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen font-sans selection:bg-transparent">
       <Header className="print:hidden" />
-      <div className="p-8 max-w-[21cm] mx-auto bg-white text-black print:p-0">
+      <div className="p-8 max-w-[21cm] mx-auto bg-white text-black print:p-0 print:m-0">
         {/* Header Block */}
         <div className="flex justify-between items-end border-b-2 border-black pb-4 mb-6">
           <div className="space-y-1">
@@ -49,23 +49,23 @@ export function PrintResultsPage() {
         <section className="mb-8">
           <h2 className="text-base font-bold mb-3 border-l-4 border-black pl-3 uppercase tracking-tight">{t('results.print.summary')}</h2>
           <div className="grid grid-cols-3 gap-4 text-sm">
-            <div className="bg-gray-50 p-3 border border-gray-200">
+            <div className="bg-gray-50 p-4 border border-gray-200 rounded-sm">
               <p className="text-gray-500 uppercase text-[9px] font-bold mb-1">{t('results.print.seats')}</p>
               <p className="text-lg font-bold">{snapshot.inputs.seats}</p>
             </div>
-            <div className="bg-gray-100 p-3 border border-gray-200 col-span-2">
+            <div className="bg-gray-100 p-4 border border-gray-200 col-span-2 rounded-sm">
               <p className="text-gray-500 uppercase text-[9px] font-bold mb-1">{t('results.print.top_recommendation')}</p>
-              <p className="text-lg font-bold">{sortedResults[0]?.vendorName} (Score: {sortedResults[0]?.scores?.totalScore})</p>
+              <p className="text-lg font-bold">{sortedResults[0]?.vendorName} (Scout Score: {sortedResults[0]?.scores?.totalScore})</p>
             </div>
           </div>
         </section>
         {/* TCO Chart */}
         <section className="mb-8">
           <h2 className="text-base font-bold mb-3 border-l-4 border-black pl-3 uppercase tracking-tight">{t('results.tco_title')}</h2>
-          <div className="w-full h-[500px] border border-gray-200 p-4 bg-white">
+          <div className="w-full h-[520px] border border-gray-200 p-6 bg-white rounded-sm">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 100, top: 10, bottom: 10 }}>
-                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#eee" />
+                <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                 <XAxis type="number" hide />
                 <YAxis
                   dataKey="name"
@@ -75,22 +75,22 @@ export function PrintResultsPage() {
                   axisLine={false}
                   tickLine={false}
                 />
-                <Bar dataKey="tco" barSize={20} radius={[0, 4, 4, 0]}>
+                <Bar dataKey="tco" barSize={18} radius={[0, 4, 4, 0]}>
                   {chartData.map((entry, index) => (
-                    <Cell key={index} fill={entry.id === 'cloudflare' ? '#000' : (index % 2 === 0 ? '#444' : '#888')} />
+                    <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : '#1E293B'} />
                   ))}
                   <LabelList
                     dataKey="tco"
                     position="right"
                     offset={10}
                     formatter={(v: number) => formatCurrency(v, i18n.language)}
-                    style={{ fontSize: 8, fontWeight: 'bold', fill: '#000' }}
+                    style={{ fontSize: 9, fontWeight: 'bold', fill: '#000', fontFamily: 'Inter, sans-serif' }}
                   />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
           </div>
-          <div className="mt-3 p-3 bg-gray-50 border border-gray-100 italic text-[8px] text-gray-500 leading-relaxed">
+          <div className="mt-3 p-4 bg-gray-50 border border-gray-100 italic text-[9px] text-gray-500 leading-relaxed rounded-sm">
              <p className="font-bold mb-1 underline">{t('results.print.transparency_title')}</p>
              <p>{t('results.print.transparency_desc')}</p>
           </div>
@@ -101,28 +101,36 @@ export function PrintResultsPage() {
           <table className="w-full text-[9px] border-collapse border border-gray-200">
             <thead>
               <tr className="bg-black text-white">
-                <th className="p-2 text-left border border-black uppercase tracking-widest">Vendor</th>
-                <th className="p-2 text-center border border-black uppercase tracking-widest">{t('results.matrix.market_rank')}</th>
-                <th className="p-2 text-center border border-black uppercase tracking-widest">{t('results.matrix.price_score')}</th>
-                <th className="p-2 text-center border border-black uppercase tracking-widest">{t('results.matrix.feature_score')}</th>
-                <th className="p-2 text-center border border-black uppercase tracking-widest font-bold">{t('results.matrix.total_score')}</th>
+                <th className="p-3 text-left border border-black uppercase tracking-widest font-bold">Vendor</th>
+                <th className="p-3 text-center border border-black uppercase tracking-widest font-bold">{t('results.matrix.market_rank')}</th>
+                <th className="p-3 text-center border border-black uppercase tracking-widest font-bold">{t('results.matrix.price_score')}</th>
+                <th className="p-3 text-center border border-black uppercase tracking-widest font-bold">{t('results.matrix.feature_score')}</th>
+                <th className="p-3 text-center border border-black uppercase tracking-widest font-bold">{t('results.matrix.total_score')}</th>
               </tr>
             </thead>
             <tbody>
               {sortedResults.map((r, i) => (
                 <tr key={r.vendorId} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
-                  <td className="p-2 font-bold border border-gray-200">{r.vendorName}</td>
-                  <td className="p-2 text-center border border-gray-200">{getRankLabel(i + 1, t)}</td>
-                  <td className="p-2 text-center border border-gray-200">{r.scores?.priceScore}</td>
-                  <td className="p-2 text-center border border-gray-200">{r.scores?.featureScore}</td>
-                  <td className="p-2 text-center border border-gray-200 font-bold bg-gray-100">{r.scores?.totalScore}</td>
+                  <td className="p-3 font-bold border border-gray-200">{r.vendorName}</td>
+                  <td className="p-3 text-center border border-gray-200">{getRankLabel(i + 1, t)}</td>
+                  <td className="p-3 text-center border border-gray-200">{r.scores?.priceScore}</td>
+                  <td className="p-3 text-center border border-gray-200">{r.scores?.featureScore}</td>
+                  <td className="p-3 text-center border border-gray-200 font-bold bg-gray-100">{r.scores?.totalScore}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </section>
       </div>
-      <Footer className="mt-8 border-none bg-transparent" />
+      <Footer className="mt-12 border-none bg-transparent print:bg-white print:py-8" />
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          body { background: white !important; -webkit-print-color-adjust: exact; }
+          .print\\:hidden { display: none !important; }
+          @page { size: A4; margin: 1.5cm; }
+          .text-primary { color: #F48120 !important; }
+        }
+      `}} />
     </div>
   );
 }

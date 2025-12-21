@@ -123,8 +123,8 @@ export function ResultsPage() {
             </p>
           </div>
           <div className="flex gap-4 w-full md:w-auto print:hidden">
-            <Button variant="outline" asChild className="hidden sm:flex h-14 px-8 border-2">
-              <Link to="/"><ArrowLeft className="mr-2 h-4 w-4" /> {t('form.buttons.back')}</Link>
+            <Button variant="outline" onClick={() => navigate('/')} className="hidden sm:flex h-14 px-8 border-2">
+              <ArrowLeft className="mr-2 h-4 w-4" /> {t('form.buttons.back')}
             </Button>
             <Button size="lg" className="h-14 flex-1 md:flex-none px-10 btn-gradient shadow-lg" onClick={() => navigate(`/vergleich/${snapshot.id}/print`)}>
               <Printer className="mr-2 h-5 w-5" /> {t('results.export_pdf')}
@@ -221,16 +221,16 @@ export function ResultsPage() {
           <Card className="p-2 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
             <div className="w-full h-[450px] md:h-[600px] relative">
               <ResponsiveContainer width="100%" height="100%" minHeight={400} debounce={50}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 10 : 20, right: 70, top: 10, bottom: 10 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 30 : 60, right: 70, top: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={isMobile ? 120 : 200}
+                    width={isMobile ? 120 : 180}
                     tickLine={false}
                     tickMargin={10}
-                    tick={{ fontSize: isMobile ? 9 : 12, fontWeight: 600, fill: 'hsl(var(--foreground))' }}
+                    tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 600, fill: 'hsl(var(--foreground))' }}
                   />
                   <Tooltip
                     cursor={{ fill: 'hsl(var(--primary)/0.03)' }}
@@ -273,13 +273,17 @@ export function ResultsPage() {
         </div>
       </main>
       <Footer />
-      <Dialog open={!!selectedVendor} onOpenChange={() => setSelectedVendor(null)}>
+      <Dialog open={!!selectedVendor} onOpenChange={(open) => !open && setSelectedVendor(null)}>
         <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none rounded-3xl shadow-3xl">
           <div className="bg-primary text-primary-foreground p-8 sm:p-10 relative overflow-hidden">
             <div className="absolute bottom-0 right-0 opacity-10 -mr-10 -mb-10"><ShieldCheck size={200} /></div>
             <DialogHeader>
-              <DialogTitle className="text-3xl font-display font-bold leading-tight">{selectedVendor?.vendorName} {t('results.matrix.analytical_breakdown')}</DialogTitle>
-              <DialogDescription className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</DialogDescription>
+              <DialogTitle className="text-3xl font-display font-bold leading-tight">
+                {selectedVendor?.vendorName}
+              </DialogTitle>
+              <DialogDescription className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">
+                {t('results.matrix.analytical_breakdown')}
+              </DialogDescription>
             </DialogHeader>
           </div>
           <div className="p-6 sm:p-10 space-y-8">

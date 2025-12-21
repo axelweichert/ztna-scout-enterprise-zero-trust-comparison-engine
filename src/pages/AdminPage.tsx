@@ -68,6 +68,7 @@ export function AdminPage() {
     queryClient.invalidateQueries({ queryKey: ['admin-pricing'] });
   };
   const copyToClipboard = (text: string) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     toast.success("Copied to clipboard");
   };
@@ -79,10 +80,10 @@ export function AdminPage() {
       .filter(l => {
         if (!normalizedTerm) return true;
         return (
-          l.companyName.toLowerCase().includes(normalizedTerm) ||
-          l.email.toLowerCase().includes(normalizedTerm) ||
-          l.contactName.toLowerCase().includes(normalizedTerm) ||
-          l.id.toLowerCase().includes(normalizedTerm)
+          (l.companyName?.toLowerCase() || "").includes(normalizedTerm) ||
+          (l.email?.toLowerCase() || "").includes(normalizedTerm) ||
+          (l.contactName?.toLowerCase() || "").includes(normalizedTerm) ||
+          (l.id?.toLowerCase() || "").includes(normalizedTerm)
         );
       });
   }, [leads, hideOptOuts, searchTerm]);
@@ -94,8 +95,8 @@ export function AdminPage() {
     const headers = ["ID", "Company", "Contact", "Email", "Phone", "Seats", "VPN", "Timing", "Status", "CreatedAt"];
     const rows = filteredLeads.map(l => [
       l.id,
-      `"${l.companyName.replace(/"/g, '""')}"`,
-      `"${l.contactName.replace(/"/g, '""')}"`,
+      `"${(l.companyName || "").replace(/"/g, '""')}"`,
+      `"${(l.contactName || "").replace(/"/g, '""')}"`,
       l.email,
       l.phone,
       l.seats,
@@ -159,7 +160,7 @@ export function AdminPage() {
           </div>
           <div className="flex gap-3">
             <Button variant="outline" className="h-12 border-2 rounded-xl" onClick={handleRefresh} disabled={leadsRefetching}>
-              <RefreshCw className={cn("mr-2 w-4 h-4", leadsRefetching && "animate-spin")} />
+              <RefreshCw className={cn("mr-2 w-4 h-4", (leadsRefetching || statsLoading) && "animate-spin")} />
               {t('admin.sync_data')}
             </Button>
             <Button onClick={handleExportCSV} className="h-12 btn-gradient px-6 rounded-xl shadow-lg">
@@ -171,8 +172,8 @@ export function AdminPage() {
           {[
             { label: t('admin.stats.total'), val: stats?.totalLeads, icon: Mail, color: 'text-primary', bg: 'bg-primary/5' },
             { label: t('admin.stats.verified'), val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
-            { label: t('admin.stats.conversion'), val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
-            { label: t('admin.stats.avg_seats'), val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : '...', icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' },
+            { label: t('admin.stats.conversion'), val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : null, icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
+            { label: t('admin.stats.avg_seats'), val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : null, icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' },
             { label: t('admin.stats.common_vpn'), val: stats?.mostCommonVpn && stats.mostCommonVpn !== "N/A" ? stats.mostCommonVpn.toUpperCase() : 'N/A', icon: Zap, color: 'text-indigo-600', bg: 'bg-indigo-50' }
           ].map((item, i) => (
             <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900 relative">
@@ -182,16 +183,14 @@ export function AdminPage() {
                     <item.icon className={cn("w-5 h-5", item.color)} />
                   </div>
                   <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground tracking-tighter uppercase">{t('admin.stats.lifetime')}</Badge>
-                  <button 
-                    onClick={handleRefresh}
-                    className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
-                  >
-                    <RefreshCw className={cn("w-3 h-3", leadsRefetching && "animate-spin")} />
-                  </button>
                 </div>
                 <div className="space-y-1">
-                  <div className="text-3xl font-bold tracking-tight">
-                    {statsLoading ? <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" /> : (item.val ?? '0')}
+                  <div className="text-3xl font-bold tracking-tight min-h-[40px] flex items-center">
+                    {statsLoading ? (
+                      <div className="h-8 w-16 bg-muted animate-pulse rounded" />
+                    ) : (
+                      item.val ?? '0'
+                    )}
                   </div>
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{item.label}</p>
                 </div>

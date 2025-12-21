@@ -5,7 +5,7 @@ import { IndexedEntity, Entity } from "./core-utils";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken
+  VerificationToken, OptOutToken, AdminStats, TimeSeriesData
 } from "./shared-types";
 /**
  * INLINED ENTERPRISE METADATA
@@ -69,10 +69,13 @@ function calculateScores(feats: FeatureMatrix, tco: number, maxTco: number, minT
   const featureScore = Math.round((featurePoints / featureList.length) * 100);
   let priceScore = 70;
   if (maxTco > minTco) {
-    priceScore = Math.round(100 - (((tco - minTco) / (maxTco - minTco)) * 100));
+    const spread = maxTco - minTco;
+    priceScore = Math.round(100 - (((tco - minTco) / spread) * 100));
   } else {
     priceScore = 75;
   }
+  // Clamp score
+  priceScore = Math.max(0, Math.min(100, priceScore));
   const complianceScore = feats.isBSIQualified ? 100 : 40;
   const totalScore = Math.round((featureScore * 0.4) + (priceScore * 0.4) + (complianceScore * 0.2));
   return { featureScore, priceScore, complianceScore, totalScore };
@@ -252,6 +255,58 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return ok(c, await comp.getState());
     } catch (e) {
       return bad(c, 'Error fetching report');
+    }
+  });
+  app.get('/api/admin/stats', async (c) => {
+    try {
+      const leads = await LeadEntity.list(c.env, null, 1000);
+      const items = leads.items;
+      const total = items.length;
+      const confirmed = items.filter(l => l.status === 'confirmed').length;
+      const pending = total - confirmed;
+      const convRate = total > 0 ? Math.round((confirmed / total) * 100) : 0;
+      const confirmedItems = items.filter(l => l.status === 'confirmed');
+      const avgSeats = confirmedItems.length > 0 
+        ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length) 
+        : 0;
+      const vpnCounts: Record<string, number> = {};
+      items.forEach(l => {
+        const vpn = l.vpnStatus || 'none';
+        vpnCounts[vpn] = (vpnCounts[vpn] || 0) + 1;
+      });
+      const mostCommonVpn = Object.entries(vpnCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+      // Generate 7-day time series
+      const dailyMap: Record<string, { pending: number; confirmed: number }> = {};
+      const now = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        dailyMap[dateStr] = { pending: 0, confirmed: 0 };
+      }
+      items.forEach(l => {
+        const dateStr = new Date(l.createdAt).toISOString().split('T')[0];
+        if (dailyMap[dateStr]) {
+          if (l.status === 'confirmed') dailyMap[dateStr].confirmed++;
+          else dailyMap[dateStr].pending++;
+        }
+      });
+      const dailyLeads: TimeSeriesData[] = Object.entries(dailyMap).map(([date, counts]) => ({
+        date,
+        ...counts
+      }));
+      const stats: AdminStats = {
+        totalLeads: total,
+        pendingLeads: pending,
+        confirmedLeads: confirmed,
+        conversionRate: convRate,
+        avgSeats: avgSeats,
+        mostCommonVpn: mostCommonVpn,
+        dailyLeads
+      };
+      return ok(c, stats);
+    } catch (e) {
+      return bad(c, 'Stats fetch failed');
     }
   });
   app.get('/api/admin/leads', async (c) => {
