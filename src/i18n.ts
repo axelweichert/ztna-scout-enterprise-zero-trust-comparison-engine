@@ -285,7 +285,7 @@ const resources = {
       common: { data_freshness: appConfig.data_freshness.fr, currency_symbol: "€" },
       layout: {
         header: { tooltips: { vonBusch: "Développé par von Busch Digital", cloudflare: "Propulsé par Cloudflare", ubiquiti: "Audit de sécurité" } },
-        footer: { imprint: "Mentions L��gales", privacy: "Confidentialité", service_line: "Un service de von Busch GmbH", address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld" }
+        footer: { imprint: "Mentions Légales", privacy: "Confidentialité", service_line: "Un service de von Busch GmbH", address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld" }
       },
       home: {
         hero: { badge: "Moteur d'analyse B2B", title1: "Sécurité d'entreprise", title2: "La comparaison redéfinie", description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO et des scores BSI.", cta_primary: "Lancer l'analyse", cta_secondary: "Voir un exemple", sase_map_cta: "SASE Cloud Map" },

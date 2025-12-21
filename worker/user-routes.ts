@@ -2,10 +2,10 @@ import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { ok, bad, notFound } from './core-utils';
 import { IndexedEntity, Entity } from "./core-utils";
-import type { 
-  Lead, ComparisonSnapshot, ComparisonResult, 
+import type {
+  Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, AdminStats, TimeSeriesData 
+  VerificationToken, OptOutToken, AdminStats, TimeSeriesData
 } from "./shared-types";
 /**
  * INLINED ENTERPRISE METADATA
@@ -68,23 +68,26 @@ function calculateScores(feats: FeatureMatrix, tco: number, maxTco: number, minT
   const featurePoints = featureList.reduce((acc, key) => acc + (feats[key] ? 1 : 0), 0);
   const featureScore = Math.round((featurePoints / featureList.length) * 100);
   let priceScore = 70;
-  if (maxTco > minTco && (maxTco - minTco) > 0.1) {
-    const spread = maxTco - minTco;
+  const spread = maxTco - minTco;
+  // Enhanced safety check for division by zero or near-zero spread
+  if (spread > 0.01) {
     priceScore = Math.round(100 - (((tco - minTco) / spread) * 100));
   } else {
-    // All vendors same price, but Cloudflare/BSI ones should rank higher
-    if (feats.vendorId === 'cloudflare') {
-      priceScore = 90;
-    } else if (feats.isBSIQualified) {
-      priceScore = 85;
-    } else {
-      priceScore = 80;
-    }
+    // Deterministic fallback for uniform market pricing
+    if (feats.vendorId === 'cloudflare') priceScore = 95;
+    else if (feats.isBSIQualified) priceScore = 90;
+    else priceScore = 80;
   }
   priceScore = Math.max(0, Math.min(100, priceScore));
   const complianceScore = feats.isBSIQualified ? 100 : 40;
+  // Weights: Features (40%), Price (40%), Compliance (20%)
   const totalScore = Math.round((featureScore * 0.4) + (priceScore * 0.4) + (complianceScore * 0.2));
-  return { featureScore, priceScore, complianceScore, totalScore };
+  return { 
+    featureScore: Math.round(featureScore), 
+    priceScore: Math.round(priceScore), 
+    complianceScore: Math.round(complianceScore), 
+    totalScore: Math.round(totalScore) 
+  };
 }
 /**
  * ENTITY DEFINITIONS
@@ -128,12 +131,7 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
   const overrideInst = new PricingOverrideEntity(env, vendorId);
   try {
     if (await overrideInst.exists()) {
-      let override;
-      try {
-        override = await overrideInst.getState();
-      } catch(e) {
-        return { ...base, basePricePerMonth: Number(base.basePricePerMonth.toFixed(2)) };
-      }
+      const override = await overrideInst.getState();
       if (override && typeof override.basePricePerMonth === 'number' && override.basePricePerMonth > 0) {
         return {
           ...base,
@@ -204,8 +202,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         return { v, feat, tco };
       }));
       const tcos = results.map(r => r.tco);
-      const maxTco = tcos.length > 0 ? Math.max(...tcos) : 10000;
-      const minTco = tcos.length > 0 ? Math.min(...tcos) : 0;
+      const maxTco = Math.max(...tcos, 1);
+      const minTco = Math.min(...tcos, 0);
       const snapshotResults: ComparisonResult[] = results.map(r => ({
         vendorId: r.v.id,
         vendorName: r.v.name,
@@ -243,8 +241,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         return { v, feat, tco };
       }));
       const tcos = processedResults.map(r => r.tco);
-      const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
-      const minTco = tcos.length > 0 ? Math.min(...tcos) : 0;
+      const maxTco = Math.max(...tcos, 1);
+      const minTco = Math.min(...tcos, 0);
       const snapshotResults: ComparisonResult[] = processedResults.map(r => ({
         vendorId: r.v.id,
         vendorName: r.v.name,
@@ -286,7 +284,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const convRate = total > 0 ? Math.round((confirmed / total) * 100) : 0;
       const confirmedItems = items.filter(l => l.status === 'confirmed');
       const avgSeats = confirmedItems.length > 0 
-        ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length) 
+        ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length)
         : 0;
       const vpnCounts: Record<string, number> = {};
       items.forEach(l => {
