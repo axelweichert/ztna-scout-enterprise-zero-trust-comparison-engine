@@ -77,14 +77,14 @@ export function PrintResultsPage() {
           <div className="w-full h-[550px] border border-gray-200 p-8 bg-white rounded-sm min-h-[550px] relative">
             {mounted && (
               <ResponsiveContainer width="99.9%" height="100%" debounce={50}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: 140, right: 110, top: 10, bottom: 10 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: 10, right: 110, top: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={130}
-                    tick={{ fontSize: 10, fontWeight: 'bold', fill: '#000' }}
+                    width={180}
+                    tick={{ fontSize: 10, fontWeight: 700, fill: '#000' }}
                     axisLine={false}
                     tickLine={false}
                   />
@@ -97,7 +97,7 @@ export function PrintResultsPage() {
                       position="right"
                       offset={12}
                       formatter={(v: number) => formatCurrency(v, i18n.language)}
-                      style={{ fontSize: 10, fontWeight: 'bold', fill: '#000', fontFamily: 'Inter, sans-serif' }}
+                      style={{ fontSize: 10, fontWeight: 700, fill: '#000', fontFamily: 'Inter, sans-serif' }}
                     />
                   </Bar>
                 </BarChart>
@@ -142,6 +142,7 @@ export function PrintResultsPage() {
           .print\\:hidden { display: none !important; }
           @page { size: A4; margin: 1cm; }
           .text-primary { color: #F48120 !important; }
+          * { -webkit-print-color-adjust: exact !important; color-adjust: exact !important; }
         }
       `}} />
     </div>

@@ -179,7 +179,7 @@ const resources = {
         stats: { total: "Total Inquiries", verified: "Verified Leads", conversion: "Conversion", avg_seats: "Avg Seats", lifetime: "LIFETIME", common_vpn: "Primary Legacy VPN" },
         tabs: { pipeline: "Pipeline", pricing: "Pricing Overrides", settings: "System Rules" },
         table: { timestamp: "Timestamp", org: "Organization", stakeholder: "Stakeholder", infra: "Infrastructure", verification: "Verification", management: "Management", no_leads: "No leads found.", purge_confirm: "Purge lead data?", opt_out: "Opt-Out" },
-        pricing: { market_rate: "Market Rate / User / Month", quote_required: "Quote Required", quote_desc: "Forces range display", updated_success: "Pricing updated" }
+        pricing: { market_rate: "Market Rate / User / Month", quote_required: "Quote Required", quote_desc: "Forces a 'Price on Request' range display instead of fixed estimates.", updated_success: "Pricing updated" }
       },
       optOut: {
         title: "Objection to Contact",
@@ -268,7 +268,7 @@ const resources = {
         expert_take_2: "Skalierbare Cloud-Architektur mit schnellen Implementierungswegen und intuitiver Verwaltung.",
         meta: { rid: "Bericht-ID", generated: "Erstellt am", verified: "Verifizierter Bericht" },
         chart: { calculated_tco: "Berechnete 1-Jahres TCO" },
-        print: { title: "ZTNA Scout Analysebericht", tagline: "Marktanalyse-Bericht – erstellt durch ZTNA Scout", summary: "Management Summary", seats: "Benutzerlizenzen", top_recommendation: "Top Empfehlung", transparency_title: "Transparenz & Quellen", transparency_desc: "Die Berechnungen basieren auf ��ffentlichen Marktlistenpreisen (EUR)." },
+        print: { title: "ZTNA Scout Analysebericht", tagline: "Marktanalyse-Bericht – erstellt durch ZTNA Scout", summary: "Management Summary", seats: "Benutzerlizenzen", top_recommendation: "Top Empfehlung", transparency_title: "Transparenz & Quellen", transparency_desc: "Die Berechnungen basieren auf öffentlichen Marktlistenpreisen (EUR)." },
         badges: {
           top_match: "Top Match",
           best_match: "Bester Treffer",
@@ -318,10 +318,10 @@ const resources = {
         stats: { total: "Gesamte Anfragen", verified: "Verifizierte Leads", conversion: "Konversion", avg_seats: "Durchschn. Plätze", lifetime: "GESAMTZEIT", common_vpn: "Häufigstes Legacy VPN" },
         tabs: { pipeline: "Pipeline", pricing: "Preis-Anpassungen", settings: "Systemregeln" },
         table: { timestamp: "Zeitstempel", org: "Organisation", stakeholder: "Ansprechpartner", infra: "Infrastruktur", verification: "Verifizierung", management: "Verwaltung", no_leads: "Keine Leads gefunden.", purge_confirm: "Lead-Daten löschen?", opt_out: "Widerspruch" },
-        pricing: { market_rate: "Marktrate / Benutzer / Monat", quote_required: "Angebot erforderlich", quote_desc: "Erzwingt Bereichsanzeige", updated_success: "Preise aktualisiert" }
+        pricing: { market_rate: "Marktrate / Benutzer / Monat", quote_required: "Angebot erforderlich", quote_desc: "Erzwingt eine 'Preis auf Anfrage' Anzeige anstatt geschätzter Festpreise.", updated_success: "Preise aktualisiert" }
       },
       optOut: { title: "Widerspruch", success: "Ihre Präferenz wurde aktualisiert. Keine weitere Kontaktaufnahme.", error: "Ungültiger Link.", back: "Zurück" },
-      verify: { loading: "Verifiziere Anfrage...", success: "Identität bestätigt!", success_desc: "Ihr Analyse-Bericht (ID: {{id}}) ist bereit.", error: "Verifizierung fehgeschlagen", error_desc: "Link abgelaufen oder ungültig." },
+      verify: { loading: "Verifiziere Anfrage...", success: "Identität bestätigt!", success_desc: "Ihr Analyse-Bericht (ID: {{id}}) ist bereit.", error: "Verifizierung fehlgeschlagen", error_desc: "Link abgelaufen oder ungültig." },
       legal: {
         imprint: { title: "Impressum", provider_title: "Dienstanbieter", provider_details: "von Busch GmbH\nAlfred-Bozi-Straße 12\n33602 Bielefeld\nDeutschland", contact_title: "Kontakt", contact_details: "E-Mail: security@vonbusch.digital\nWeb: www.vonbusch.digital", register_title: "Handelsregister", register_details: "Amtsgericht Bielefeld\nHRB 45678" },
         privacy: { title: "Datenschutzerklärung", section1_title: "1. Datenerhebung", section1_desc: "Wir erheben Daten für die ZTNA-Analyse.", section2_title: "2. Rechtsgrundlage", section2_desc: "Die Verarbeitung basiert auf Ihrer Einwilligung (Art. 6 DSGVO).", section3_title: "3. Aufbewahrung", section3_desc: "Leads werden für 24 Monate gespeichert.", section4_title: "4. Ihre Rechte", section4_desc: "Recht auf Auskunft und Löschung." }
@@ -371,7 +371,7 @@ const resources = {
         methodology_title: "Méthodologie & Transparence",
         methodology_desc: "Scores basés sur les fonctionnalités (40%), le prix (40%) et la conformité (20%).",
         expert_take_label: "L'avis de l'expert",
-        expert_take_0: "Équilibre exceptionnel entre co��t et conformité.",
+        expert_take_0: "Équilibre exceptionnel entre coût et conformité.",
         expert_take_1: "Fonctionnalités premium avec protection avancée.",
         expert_take_2: "Architecture cloud évolutive et gestion intuitive.",
         meta: { rid: "ID-Rapport", generated: "Généré le", verified: "Rapport vérifié" },
@@ -426,7 +426,7 @@ const resources = {
         stats: { total: "Demandes", verified: "Prospects vérifiés", conversion: "Conversion", avg_seats: "Sièges moyens", lifetime: "À VIE", common_vpn: "VPN Legacy Principal" },
         tabs: { pipeline: "Pipeline", pricing: "Prix", settings: "Système" },
         table: { timestamp: "Horodatage", org: "Organisation", stakeholder: "Contact", infra: "Infra", verification: "Vérification", management: "Gestion", no_leads: "Aucun prospect.", purge_confirm: "Supprimer ?", opt_out: "Opposition" },
-        pricing: { market_rate: "Prix / mois", quote_required: "Devis requis", quote_desc: "Force l'affichage", updated_success: "Prix mis à jour" }
+        pricing: { market_rate: "Prix / mois", quote_required: "Devis requis", quote_desc: "Force l'affichage de 'Prix sur demande' plutôt que des estimations.", updated_success: "Prix mis à jour" }
       },
       optOut: { title: "Opposition", success: "Préférence mise à jour. Aucun suivi.", error: "Lien invalide.", back: "Retour" },
       verify: { loading: "Vérification...", success: "Identité vérifiée!", success_desc: "Votre rapport (ID: {{id}}) est prêt.", error: "Échec", error_desc: "Lien expiré ou invalide." },

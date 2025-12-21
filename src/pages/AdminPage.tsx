@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
@@ -30,12 +30,19 @@ export function AdminPage() {
   const [password, setPassword] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [hideOptOuts, setHideOptOuts] = useState(false);
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSearchTerm("");
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
+  }, []);
   const { data: leads, isLoading: leadsLoading, isRefetching: leadsRefetching } = useQuery({
     queryKey: ['admin-leads'],
     queryFn: () => api<Lead[]>('/api/admin/leads'),
     enabled: isAuthenticated
   });
-  const { data: stats, isLoading: statsLoading } = useQuery({
+  const { data: stats, isLoading: statsLoading, isRefetching: statsRefetching } = useQuery({
     queryKey: ['admin-stats'],
     queryFn: () => api<AdminStats>('/api/admin/stats'),
     enabled: isAuthenticated
@@ -162,8 +169,8 @@ export function AdminPage() {
             </p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="h-12 border-2 rounded-xl hover:scale-105 active:scale-95 transition-transform" onClick={handleRefresh} disabled={leadsRefetching}>
-              <RefreshCw className={cn("mr-2 w-4 h-4", (leadsRefetching || statsLoading) && "animate-spin")} />
+            <Button variant="outline" className="h-12 border-2 rounded-xl hover:scale-105 active:scale-95 transition-transform" onClick={handleRefresh} disabled={leadsRefetching || statsRefetching}>
+              <RefreshCw className={cn("mr-2 w-4 h-4", (leadsRefetching || statsRefetching) && "animate-spin")} />
               {t('admin.sync_data')}
             </Button>
             <Button onClick={handleExportCSV} className="h-12 btn-gradient px-6 rounded-xl shadow-lg hover:scale-105 active:scale-95 transition-transform">
@@ -212,7 +219,7 @@ export function AdminPage() {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
               {searchTerm && (
-                <button 
+                <button
                   onClick={() => setSearchTerm("")}
                   className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
@@ -241,10 +248,15 @@ export function AdminPage() {
                     ) : filteredLeads.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={6} className="p-20 text-center">
-                          <div className="flex flex-col items-center gap-3">
-                             <AlertCircle className="w-10 h-10 text-muted-foreground/30" />
-                             <p className="text-muted-foreground font-medium">{searchTerm ? "No leads matching filter" : t('admin.table.no_leads')}</p>
-                             {searchTerm && <Button variant="ghost" size="sm" onClick={() => setSearchTerm("")}>Clear search</Button>}
+                          <div className="flex flex-col items-center gap-4 py-12">
+                             <div className="bg-slate-100 p-4 rounded-full">
+                               <AlertCircle className="w-10 h-10 text-slate-400" />
+                             </div>
+                             <div className="space-y-1">
+                               <p className="text-slate-900 font-bold text-lg">{searchTerm ? "No results match your search" : "No leads in pipeline"}</p>
+                               <p className="text-slate-500 text-sm max-w-xs mx-auto">Try adjusting your filters or search terms to find what you are looking for.</p>
+                             </div>
+                             {searchTerm && <Button variant="outline" size="sm" className="rounded-xl border-2 px-6" onClick={() => setSearchTerm("")}>Clear search</Button>}
                           </div>
                         </TableCell>
                       </TableRow>
@@ -368,8 +380,20 @@ export function AdminPage() {
                     </div>
                     <div className="flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
                       <div className="space-y-0.5">
-                        <Label className="text-sm font-bold">{t('admin.pricing.quote_required')}</Label>
-                        <p className="text-[10px] text-muted-foreground uppercase font-mono">{t('admin.pricing.quote_desc')}</p>
+                        <div className="flex items-center gap-2">
+                           <Label className="text-sm font-bold">{t('admin.pricing.quote_required')}</Label>
+                           <TooltipProvider>
+                              <Tooltip>
+                                 <TooltipTrigger asChild>
+                                    <AlertCircle className="w-3.5 h-3.5 text-muted-foreground" />
+                                 </TooltipTrigger>
+                                 <TooltipContent className="max-w-[200px]">
+                                    {t('admin.pricing.quote_desc')}
+                                 </TooltipContent>
+                              </Tooltip>
+                           </TooltipProvider>
+                        </div>
+                        <p className="text-[10px] text-muted-foreground uppercase font-mono tracking-tighter">Toggle visibility</p>
                       </div>
                       <Switch
                         checked={p.isQuoteOnly}

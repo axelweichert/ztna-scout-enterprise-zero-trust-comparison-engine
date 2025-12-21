@@ -6,7 +6,7 @@ import { calculateTCO, calculateScores } from "./calculator";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, AdminStats, VpnStatus
+  VerificationToken, OptOutToken, AdminStats
 } from "./shared-types";
 const VENDORS = [
   { "id": "cloudflare", "name": "Cloudflare", "website": "https://www.cloudflare.com" },
@@ -147,9 +147,26 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await LeadEntity.create(c.env, lead);
       const vToken = crypto.randomUUID();
       await new VerificationTokenEntity(c.env, vToken).save({ hash: vToken, leadId, expiresAt: Date.now() + 604800000 });
+      const oToken = crypto.randomUUID();
+      await new OptOutTokenEntity(c.env, oToken).save({ hash: oToken, leadId, createdAt: Date.now() });
       return ok(c, { leadId, verificationToken: vToken });
     } catch (e) {
       return bad(c, 'Submission failed');
+    }
+  });
+  app.post('/api/opt-out', async (c) => {
+    try {
+      const { token } = await c.req.json();
+      const tokenEntity = new OptOutTokenEntity(c.env, token);
+      if (!(await tokenEntity.exists())) return bad(c, 'Invalid token');
+      const { leadId } = await tokenEntity.getState();
+      const leadEntity = new LeadEntity(c.env, leadId);
+      if (await leadEntity.exists()) {
+        await leadEntity.patch({ contactAllowed: false, optedOutAt: Date.now() });
+      }
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Opt-out failed');
     }
   });
   app.get('/api/sample-comparison', async (c) => {
@@ -196,31 +213,51 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, (leads.items || []).sort((a, b) => b.createdAt - a.createdAt));
   });
   app.get('/api/admin/stats', async (c) => {
-    const leadsRes = await LeadEntity.list(c.env, null, 1000);
-    const allLeads = leadsRes.items || [];
-    // Filter out potential demo/sample leads from real business metrics
-    const businessLeads = allLeads.filter(l => l.id !== 'demo' && !l.companyName.toLowerCase().includes('test'));
-    // Calculate Most Common VPN
-    const vpnCounts: Record<string, number> = {};
-    businessLeads.forEach(l => {
-      const vpn = l.vpnStatus || 'none';
-      vpnCounts[vpn] = (vpnCounts[vpn] || 0) + 1;
-    });
-    const mostCommonVpn = Object.entries(vpnCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
-    const stats: AdminStats = {
-      totalLeads: businessLeads.length,
-      pendingLeads: businessLeads.filter(l => l.status === 'pending').length,
-      confirmedLeads: businessLeads.filter(l => l.status === 'confirmed').length,
-      conversionRate: businessLeads.length > 0 
-        ? Math.round((businessLeads.filter(l => l.status === 'confirmed').length / businessLeads.length) * 100) 
-        : 0,
-      avgSeats: businessLeads.length > 0 
-        ? Math.round(businessLeads.reduce((acc, l) => acc + (l.seats || 0), 0) / businessLeads.length) 
-        : 0,
-      mostCommonVpn,
-      dailyLeads: [] // Placeholder for time-series if needed later
-    };
-    return ok(c, stats);
+    try {
+      const leadsRes = await LeadEntity.list(c.env, null, 1000);
+      const allLeads = leadsRes.items || [];
+      const businessLeads = allLeads.filter(l => l.id !== 'demo' && !l.companyName.toLowerCase().includes('test'));
+      const vpnCounts: Record<string, number> = {};
+      businessLeads.forEach(l => {
+        const vpn = l.vpnStatus || 'none';
+        vpnCounts[vpn] = (vpnCounts[vpn] || 0) + 1;
+      });
+      const mostCommonVpn = Object.entries(vpnCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
+      // Generate 7-day time-series
+      const dailyLeads: any[] = [];
+      const now = new Date();
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(now);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayLeads = businessLeads.filter(l => {
+          const lDate = new Date(l.createdAt).toISOString().split('T')[0];
+          return lDate === dateStr;
+        });
+        dailyLeads.push({
+          date: dateStr,
+          pending: dayLeads.filter(l => l.status === 'pending').length,
+          confirmed: dayLeads.filter(l => l.status === 'confirmed').length
+        });
+      }
+      const stats: AdminStats = {
+        totalLeads: businessLeads.length,
+        pendingLeads: businessLeads.filter(l => l.status === 'pending').length,
+        confirmedLeads: businessLeads.filter(l => l.status === 'confirmed').length,
+        conversionRate: businessLeads.length > 0
+          ? Math.round((businessLeads.filter(l => l.status === 'confirmed').length / businessLeads.length) * 100)
+          : 0,
+        avgSeats: businessLeads.length > 0
+          ? Math.round(businessLeads.reduce((acc, l) => acc + (l.seats || 0), 0) / businessLeads.length)
+          : 0,
+        mostCommonVpn,
+        dailyLeads
+      };
+      return ok(c, stats);
+    } catch (e) {
+      console.error('[ADMIN STATS ERROR]', e);
+      return bad(c, 'Stats failed');
+    }
   });
   app.get('/api/admin/pricing', async (c) => {
     const data = await Promise.all(VENDORS.map(async (v) => {
@@ -237,11 +274,22 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, { success: true });
   });
   app.delete('/api/admin/leads/:id', async (c) => {
-    const id = c.req.param('id');
-    const lead = new LeadEntity(c.env, id);
-    const state = await lead.getState();
-    if (state.comparisonId) await ComparisonEntity.delete(c.env, state.comparisonId);
-    await LeadEntity.delete(c.env, id);
-    return ok(c, { success: true });
+    try {
+      const id = c.req.param('id');
+      const lead = new LeadEntity(c.env, id);
+      const state = await lead.getState();
+      if (state.comparisonId) await ComparisonEntity.delete(c.env, state.comparisonId);
+      // Secondary cleanup (idempotent)
+      const vTokens = await new Index<string>(c.env, "v-token").list();
+      for (const t of vTokens) {
+        const inst = new VerificationTokenEntity(c.env, t);
+        const s = await inst.getState();
+        if (s.leadId === id) await inst.delete();
+      }
+      await LeadEntity.delete(c.env, id);
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Purge failed');
+    }
   });
 }
