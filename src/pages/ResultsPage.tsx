@@ -2,13 +2,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { api } from '@/lib/api-client';
 import type { ComparisonSnapshot, ComparisonResult } from '@shared/types';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar, BadgeCheck } from 'lucide-react';
+import { ShieldCheck, Printer, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
@@ -98,7 +98,7 @@ export function ResultsPage() {
       <div className={cn("fixed top-16 left-0 right-0 z-40 bg-background/90 backdrop-blur-md border-b transition-transform duration-300 print:hidden shadow-sm", scrolled ? "translate-y-0" : "-translate-y-full")}>
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[10px] text-muted-foreground uppercase tracking-widest">Market Leader:</span>
+            <span className="font-bold text-[10px] text-muted-foreground uppercase tracking-widest">{t('results.badges.market_leader')}:</span>
             <Badge className="bg-primary text-[10px] font-bold px-3 py-1 rounded-lg">{sortedResults[0]?.vendorName}</Badge>
           </div>
           <Button size="sm" className="btn-gradient h-9 px-6 rounded-xl text-xs font-bold" onClick={() => navigate(`/vergleich/${snapshot.id}/print`)}>
@@ -110,9 +110,9 @@ export function ResultsPage() {
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20">
           <div className="space-y-4 text-pretty w-full md:w-auto">
             <div className="flex flex-wrap items-center gap-4 text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
-              <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> ID: {snapshot.id.slice(0, 8)}</span>
+              <span className="flex items-center gap-1.5"><FileText className="w-3.5 h-3.5" /> {t('results.meta.rid')}: {snapshot.id.slice(0, 8)}</span>
               <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> {formatDate(snapshot.createdAt, i18n.language)}</span>
-              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200"><BadgeCheck className="w-3 h-3 mr-1" /> Verified</Badge>
+              <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200"><BadgeCheck className="w-3 h-3 mr-1" /> {t('results.badges.verified')}</Badge>
             </div>
             <h1 className="text-4xl md:text-7xl font-display font-bold tracking-tight leading-none">
               {snapshot.isSample ? t('results.sample_title') : t('results.title')}
@@ -136,27 +136,27 @@ export function ResultsPage() {
             {top3.map((v, i) => (
               <motion.div key={v.vendorId} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="flex">
                 <Card className={cn("relative flex-1 overflow-hidden border-2 transition-all duration-300 rounded-[2rem] flex flex-col", i === 0 ? "border-primary shadow-2xl scale-105 z-10" : "border-muted shadow-sm hover:shadow-md")}>
-                  {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest">Best Match</div>}
+                  {i === 0 && <div className="absolute top-0 right-0 bg-primary text-white text-[10px] font-bold px-4 py-1.5 rounded-bl-xl uppercase tracking-widest">{t('results.badges.best_match')}</div>}
                   <CardHeader>
                     <CardTitle className="text-2xl font-bold font-display">{v.vendorName}</CardTitle>
                     <div className="flex flex-wrap items-center gap-2 mt-1.5">
                       <Badge variant="outline" className="text-[10px] font-bold">{getRankLabel(i + 1, t)}</Badge>
-                      {v.features.isBSIQualified && <Badge className="bg-emerald-100 text-emerald-700 text-[9px] font-bold uppercase"><ShieldCheck className="w-3 h-3 mr-1" /> BSI-Qualifiziert</Badge>}
+                      {v.features.isBSIQualified && <Badge className="bg-emerald-100 text-emerald-700 text-[9px] font-bold uppercase"><ShieldCheck className="w-3 h-3 mr-1" /> {t('results.bsi_qualified')}</Badge>}
                     </div>
                   </CardHeader>
                   <CardContent className="space-y-6 flex-1 flex flex-col">
                     <div className="flex justify-between items-center p-4 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800">
-                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">Scout Score</span>
+                       <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.matrix.total_score')}</span>
                        <span className="text-2xl font-bold text-primary font-mono">{v.scores?.totalScore}</span>
                     </div>
                     <div className="p-5 bg-muted/30 rounded-2xl flex-1 border border-muted/50">
-                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Market Insight</p>
+                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">{t('results.expert_take_label')}</p>
                       <p className="text-sm leading-relaxed italic text-foreground/80 font-medium">
                         {t(`results.expert_take_${i}`)}
                       </p>
                     </div>
                     <Button variant="secondary" className="w-full h-12 font-bold rounded-xl mt-auto" onClick={() => setSelectedVendor(v)}>
-                      View Analysis
+                      {t('results.matrix.deep_dive')}
                     </Button>
                   </CardContent>
                 </Card>
@@ -166,17 +166,17 @@ export function ResultsPage() {
         </section>
         <section className="space-y-8 mb-24">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-3xl font-display font-bold">Capability Comparison</h2>
+            <h2 className="text-3xl font-display font-bold">{t('results.matrix.comparison_title')}</h2>
             <Button variant="ghost" size="sm" onClick={() => setHideSimilar(!hideSimilar)} className={cn("gap-2 border px-4 rounded-xl print:hidden", hideSimilar && "text-primary border-primary/20 bg-primary/5")}>
               <Filter className="w-4 h-4" />
-              {hideSimilar ? "Show All Rows" : "Highlight Differences"}
+              {hideSimilar ? t('results.matrix.show_all') : t('results.matrix.diff_only')}
             </Button>
           </div>
           <div className="overflow-x-auto rounded-[2rem] border bg-white dark:bg-slate-950 shadow-xl">
             <table className="w-full border-collapse min-w-[600px]">
               <thead className="bg-slate-50 dark:bg-slate-900">
                 <tr className="border-b">
-                  <th className="p-6 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground w-1/4">Capability Matrix</th>
+                  <th className="p-6 text-left text-[10px] font-bold uppercase tracking-widest text-muted-foreground w-1/4">{t('results.matrix.title')}</th>
                   {top3.map(v => (
                     <th key={v.vendorId} className="p-6 text-center border-l bg-white/50 dark:bg-slate-900/50">
                       <p className="font-bold text-lg">{v.vendorName}</p>
@@ -206,9 +206,9 @@ export function ResultsPage() {
         <section className="space-y-8 mb-24">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden">
-            <div className="w-full aspect-video min-h-[400px] md:min-h-[500px]" style={{ minHeight: '400px' }}>
+            <div className="w-full min-h-[400px]" style={{ minHeight: '400px' }}>
               {mounted && (
-                <ResponsiveContainer width="100%" height="100%" minHeight={400}>
+                <ResponsiveContainer width="100%" height="100%" minHeight={400} aspect={undefined}>
                   <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 10 : 60, right: 60, top: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                     <XAxis type="number" hide />
@@ -220,7 +220,7 @@ export function ResultsPage() {
                               <p className="font-bold text-[10px] mb-2 text-muted-foreground uppercase tracking-widest">{payload[0].payload.name}</p>
                               <p className="text-primary font-bold text-2xl font-mono">{formatCurrency(payload[0].value as number, i18n.language)}</p>
                               <div className="h-px bg-slate-100 my-4" />
-                              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">Calculated 1-Year TCO</p>
+                              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest">{t('results.chart.calculated_tco')}</p>
                             </div>
                           );
                         }
@@ -260,7 +260,7 @@ export function ResultsPage() {
                 {selectedVendor?.vendorName}
               </DialogTitle>
               <DialogDescription className="text-primary-foreground/80 font-mono text-[10px] uppercase tracking-[0.4em] mt-3 font-bold">
-                Analytical Breakdown
+                {t('results.matrix.analytical_breakdown')}
               </DialogDescription>
             </DialogHeader>
           </div>
@@ -286,11 +286,11 @@ export function ResultsPage() {
             <div className="pt-8 border-t">
               <div className="flex justify-between items-center bg-slate-50 p-8 rounded-[2rem] border shadow-inner">
                 <div>
-                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">Total Scout Score</p>
+                  <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-2">{t('results.matrix.scout_total')}</p>
                   <p className="text-6xl font-display font-bold text-primary tracking-tighter">{selectedVendor?.scores?.totalScore}</p>
                 </div>
                 <div className="text-right">
-                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">Market Position</p>
+                   <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-[0.2em] mb-3">{t('results.matrix.market_position')}</p>
                    <Badge variant="outline" className="h-12 px-6 text-xl font-bold bg-white border-2 rounded-xl">
                     {getRankLabel(sortedResults.findIndex(r => r.vendorId === selectedVendor?.vendorId) + 1, t)}
                    </Badge>
@@ -298,7 +298,7 @@ export function ResultsPage() {
               </div>
             </div>
             <Button className="w-full btn-gradient py-8 text-lg rounded-2xl font-bold" onClick={() => setSelectedVendor(null)}>
-              Close Analysis
+              {t('results.matrix.close_analysis')}
             </Button>
           </div>
         </DialogContent>

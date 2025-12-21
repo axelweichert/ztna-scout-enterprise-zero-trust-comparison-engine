@@ -23,7 +23,7 @@ export function PrintResultsPage() {
     if (snapshot && mounted) {
       const timer = setTimeout(() => {
         window.print();
-      }, 2500); // Stable delay for Recharts SVG rendering
+      }, 2500); 
       return () => clearTimeout(timer);
     }
   }, [snapshot, mounted]);
@@ -67,15 +67,15 @@ export function PrintResultsPage() {
             </div>
             <div className="bg-gray-100 p-5 border border-gray-200 col-span-2 rounded-sm shadow-sm">
               <p className="text-gray-500 uppercase text-[9px] font-bold mb-1">{t('results.print.top_recommendation')}</p>
-              <p className="text-xl font-bold">{sortedResults[0]?.vendorName} (Scout Score: {sortedResults[0]?.scores?.totalScore})</p>
+              <p className="text-xl font-bold">{sortedResults[0]?.vendorName} ({t('results.matrix.total_score')}: {sortedResults[0]?.scores?.totalScore})</p>
             </div>
           </div>
         </section>
         <section className="mb-12">
           <h2 className="text-base font-bold mb-4 border-l-4 border-black pl-3 uppercase tracking-tight">{t('results.tco_title')}</h2>
-          <div className="w-full h-[550px] border border-gray-200 p-8 bg-white rounded-sm">
+          <div className="w-full h-[550px] border border-gray-200 p-8 bg-white rounded-sm min-h-[550px]">
             {mounted && (
-              <ResponsiveContainer width="99.9%" height="100%">
+              <ResponsiveContainer width="99.9%" height="100%" minHeight={550} aspect={undefined}>
                 <BarChart data={chartData} layout="vertical" margin={{ left: 160, right: 110, top: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" />
                   <XAxis type="number" hide />

@@ -23,7 +23,7 @@ export function formatDate(timestamp: number | Date, locale: string = "de-DE"): 
  */
 export function formatCurrency(amount: number | undefined | null, locale: string = "de-DE"): string {
   const safeAmount = amount ?? 0;
-  const safeLocale = (locale && locale.startsWith('en')) ? 'en-GB' : 
+  const safeLocale = (locale && locale.startsWith('en')) ? 'en-GB' :
                      (locale && locale.startsWith('fr')) ? 'fr-FR' : 'de-DE';
   return new Intl.NumberFormat(safeLocale, {
     style: 'currency',
@@ -39,8 +39,15 @@ export function getRankLabel(rank: number, t: TFunction): string {
   const key = `results.matrix.rank_${rank}`;
   const translated = t(key);
   // If the key wasn't found or returns the raw key, or rank is high, fallback to localized rank #
-  if (translated === key || rank > 3) {
+  if (translated === key || !translated || rank > 3) {
     return `#${rank}`;
   }
   return translated;
+}
+/**
+ * Sanitizes vendor names to ensure proper encoding and display in UI components.
+ */
+export function sanitizeVendorName(name: string | undefined): string {
+  if (!name) return 'Unknown Vendor';
+  return name.trim();
 }
