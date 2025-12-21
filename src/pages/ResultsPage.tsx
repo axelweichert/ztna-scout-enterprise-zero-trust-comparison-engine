@@ -219,16 +219,16 @@ export function ResultsPage() {
           <Card className="p-2 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
             <div className="w-full h-[450px] md:h-[600px] relative">
               <ResponsiveContainer width="100%" height="100%" minHeight={400} debounce={50}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 0 : 20, right: 60, top: 10, bottom: 10 }}>
+                <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 10 : 20, right: 70, top: 10, bottom: 10 }}>
                   <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                   <XAxis type="number" hide />
                   <YAxis
                     dataKey="name"
                     type="category"
-                    width={isMobile ? 100 : 200}
+                    width={isMobile ? 120 : 200}
                     tickLine={false}
                     tickMargin={10}
-                    tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 600, fill: 'hsl(var(--foreground))' }}
+                    tick={{ fontSize: isMobile ? 9 : 12, fontWeight: 600, fill: 'hsl(var(--foreground))' }}
                   />
                   <Tooltip
                     cursor={{ fill: 'hsl(var(--primary)/0.03)' }}
@@ -237,7 +237,7 @@ export function ResultsPage() {
                         return (
                           <div className="bg-white dark:bg-slate-900 p-4 shadow-2xl border border-primary/10 rounded-2xl min-w-[180px]">
                             <p className="font-bold text-xs mb-2 text-muted-foreground uppercase tracking-tighter">{payload[0].payload.name}</p>
-                            <p className="text-primary font-bold text-xl">{formatCurrency(payload[0].value as number, i18n.language)}</p>
+                            <p className="text-primary font-bold text-xl">{formatCurrency(payload[0].value as number, i18n.language.slice(0, 2))}</p>
                             <div className="h-px bg-slate-100 dark:bg-slate-800 my-3" />
                             <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest leading-none">12-Month Est. TCO</p>
                           </div>

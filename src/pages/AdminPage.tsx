@@ -173,15 +173,21 @@ export function AdminPage() {
             { label: t('admin.stats.verified'), val: stats?.confirmedLeads, icon: ShieldCheck, color: 'text-emerald-600', bg: 'bg-emerald-50' },
             { label: t('admin.stats.conversion'), val: stats?.conversionRate !== undefined ? `${stats.conversionRate}%` : '...', icon: TrendingUp, color: 'text-blue-600', bg: 'bg-blue-50' },
             { label: t('admin.stats.avg_seats'), val: stats?.avgSeats !== undefined ? `${stats.avgSeats}` : '...', icon: Users, color: 'text-orange-600', bg: 'bg-orange-50' },
-            { label: t('admin.stats.common_vpn'), val: stats?.mostCommonVpn ? stats.mostCommonVpn.toUpperCase() : '...', icon: Zap, color: 'text-indigo-600', bg: 'bg-indigo-50' }
+            { label: t('admin.stats.common_vpn'), val: stats?.mostCommonVpn && stats.mostCommonVpn !== "N/A" ? stats.mostCommonVpn.toUpperCase() : 'N/A', icon: Zap, color: 'text-indigo-600', bg: 'bg-indigo-50' }
           ].map((item, i) => (
-            <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900">
+            <Card key={i} className="border-none shadow-soft rounded-2xl overflow-hidden group hover:shadow-lg transition-all duration-300 bg-white dark:bg-slate-900 relative">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className={cn("p-2.5 rounded-xl", item.bg)}>
                     <item.icon className={cn("w-5 h-5", item.color)} />
                   </div>
                   <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground tracking-tighter uppercase">{t('admin.stats.lifetime')}</Badge>
+                  <button 
+                    onClick={handleRefresh}
+                    className="absolute top-2 right-2 p-1 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-primary"
+                  >
+                    <RefreshCw className={cn("w-3 h-3", leadsRefetching && "animate-spin")} />
+                  </button>
                 </div>
                 <div className="space-y-1">
                   <div className="text-3xl font-bold tracking-tight">
@@ -246,7 +252,7 @@ export function AdminPage() {
                           <div className="flex flex-col">
                             <span className="font-bold text-base leading-none mb-1.5 flex items-center gap-2">
                               {lead.companyName}
-                              {lead.status === 'confirmed' && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
+                              {lead.status === 'confirmed' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Clock className="w-3.5 h-3.5 text-amber-500" />}
                             </span>
                             <div className="flex items-center gap-2">
                               <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200 dark:border-slate-700">ID: {lead.id.slice(0, 8)}</Badge>
@@ -286,7 +292,7 @@ export function AdminPage() {
                           <div className="flex flex-col items-end gap-1.5">
                             <Badge className={cn("px-2.5 py-0.5 text-[10px] uppercase font-bold border-none",
                               lead.status === 'confirmed' ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700")}>
-                              {lead.status}
+                              {lead.status === 'confirmed' ? 'Verified' : 'Inquiry'}
                             </Badge>
                             {lead.emailStatus === 'failed' && (
                               <Badge variant="destructive" className="text-[9px] h-4">Email Failed</Badge>

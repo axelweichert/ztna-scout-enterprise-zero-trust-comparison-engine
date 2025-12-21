@@ -10,7 +10,6 @@ import type {
 } from "./shared-types";
 /**
  * INLINED ENTERPRISE METADATA
- * Isolated from frontend source tree for strict worker bundling.
  */
 const VENDORS = [
   { "id": "cloudflare", "name": "Cloudflare", "website": "https://www.cloudflare.com" },
@@ -72,9 +71,9 @@ function calculateScores(feats: FeatureMatrix, tco: number, maxTco: number, minT
   let priceScore = 70;
   if (maxTco > minTco) {
     priceScore = Math.round(100 - (((tco - minTco) / (maxTco - minTco)) * 100));
-  } else if (tco > 0) {
-    const relativePrice = tco / 1200;
-    priceScore = Math.max(0, Math.min(100, Math.round(100 - (relativePrice * 10))));
+  } else {
+    // Safety check for division by zero or identical pricing
+    priceScore = 75; 
   }
   const complianceScore = feats.isBSIQualified ? 100 : 40;
   const totalScore = Math.round((featureScore * 0.4) + (priceScore * 0.4) + (complianceScore * 0.2));
@@ -156,96 +155,192 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await LeadEntity.create(c.env, lead);
       const vToken = crypto.randomUUID();
       await new VerificationTokenEntity(c.env, vToken).save({ hash: vToken, leadId, expiresAt: Date.now() + 604800000 });
+      // Also generate an opt-out token for the email footer
+      const optOutToken = crypto.randomUUID();
+      await new OptOutTokenEntity(c.env, optOutToken).save({ hash: optOutToken, leadId, createdAt: Date.now() });
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
       return bad(c, 'Submission failed.');
     }
   });
+  app.post('/api/opt-out', async (c) => {
+    try {
+      const { token } = await c.req.json();
+      const optOutInst = new OptOutTokenEntity(c.env, token);
+      if (!(await optOutInst.exists())) return bad(c, 'Invalid token');
+      const data = await optOutInst.getState();
+      const leadInst = new LeadEntity(c.env, data.leadId);
+      await leadInst.patch({ 
+        contactAllowed: false, 
+        optedOutAt: Date.now() 
+      });
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Opt-out failed');
+    }
+  });
   app.get('/api/sample-comparison', async (c) => {
-    const sampleSeats = 250;
-    const results = await Promise.all(VENDORS.map(async (v) => {
-      const model = await getMergedPricing(c.env, v.id);
-      const feat = FEATURES.find(f => f.vendorId === v.id) as FeatureMatrix;
-      const tco = calculateTCO(sampleSeats, model);
-      return { v, feat, tco };
-    }));
-    const tcos = results.map(r => r.tco);
-    const maxTco = Math.max(...tcos);
-    const minTco = Math.min(...tcos);
-    const snapshotResults: ComparisonResult[] = results.map(r => ({
-      vendorId: r.v.id,
-      vendorName: r.v.name,
-      tcoYear1: Number(r.tco.toFixed(2)),
-      scores: calculateScores(r.feat, r.tco, maxTco, minTco),
-      features: r.feat
-    }));
-    return ok(c, {
-      id: 'sample',
-      leadId: 'demo',
-      results: snapshotResults,
-      inputs: { seats: sampleSeats, vpnStatus: 'active', budgetRange: 'med' },
-      createdAt: Date.now(),
-      isSample: true
-    });
+    try {
+      const sampleSeats = 250;
+      const results = await Promise.all(VENDORS.map(async (v) => {
+        const model = await getMergedPricing(c.env, v.id);
+        const feat = FEATURES.find(f => f.vendorId === v.id) as FeatureMatrix;
+        const tco = calculateTCO(sampleSeats, model);
+        return { v, feat, tco };
+      }));
+      const tcos = results.map(r => r.tco);
+      const maxTco = Math.max(...tcos);
+      const minTco = Math.min(...tcos);
+      const snapshotResults: ComparisonResult[] = results.map(r => ({
+        vendorId: r.v.id,
+        vendorName: r.v.name,
+        tcoYear1: Number(r.tco.toFixed(2)),
+        scores: calculateScores(r.feat, r.tco, maxTco, minTco),
+        features: r.feat
+      }));
+      return ok(c, {
+        id: 'sample',
+        leadId: 'demo',
+        results: snapshotResults,
+        inputs: { seats: sampleSeats, vpnStatus: 'active', budgetRange: 'med' },
+        createdAt: Date.now(),
+        isSample: true
+      });
+    } catch (e) {
+      return bad(c, 'Failed to generate sample');
+    }
   });
   app.get('/api/verify/:token', async (c) => {
-    const token = c.req.param('token');
-    const tokenEntity = new VerificationTokenEntity(c.env, token);
-    if (!(await tokenEntity.exists())) return notFound(c, 'Link invalid.');
-    const tokenData = await tokenEntity.getState();
-    const leadEntity = new LeadEntity(c.env, tokenData.leadId);
-    const leadState = await leadEntity.getState();
-    if (leadState.status === 'confirmed' && leadState.comparisonId) {
-      return ok(c, { comparisonId: leadState.comparisonId });
+    try {
+      const token = c.req.param('token');
+      const tokenEntity = new VerificationTokenEntity(c.env, token);
+      if (!(await tokenEntity.exists())) return notFound(c, 'Link invalid.');
+      const tokenData = await tokenEntity.getState();
+      const leadEntity = new LeadEntity(c.env, tokenData.leadId);
+      const leadState = await leadEntity.getState();
+      if (leadState.status === 'confirmed' && leadState.comparisonId) {
+        return ok(c, { comparisonId: leadState.comparisonId });
+      }
+      const processedResults = await Promise.all(VENDORS.map(async (v) => {
+        const model = await getMergedPricing(c.env, v.id);
+        const feat = FEATURES.find(f => f.vendorId === v.id) as FeatureMatrix;
+        const tco = calculateTCO(leadState.seats, model);
+        return { v, feat, tco };
+      }));
+      const tcos = processedResults.map(r => r.tco);
+      const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
+      const minTco = tcos.length > 0 ? Math.min(...tcos) : 0;
+      const snapshotResults: ComparisonResult[] = processedResults.map(r => ({
+        vendorId: r.v.id,
+        vendorName: r.v.name,
+        tcoYear1: Number(r.tco.toFixed(2)),
+        scores: calculateScores(r.feat, r.tco, maxTco, minTco),
+        features: r.feat
+      }));
+      const snapshotId = crypto.randomUUID();
+      await ComparisonEntity.create(c.env, {
+        id: snapshotId,
+        leadId: leadState.id,
+        results: snapshotResults,
+        inputs: { seats: leadState.seats, vpnStatus: leadState.vpnStatus, budgetRange: leadState.budgetRange },
+        createdAt: Date.now()
+      });
+      await leadEntity.patch({ status: 'confirmed', confirmedAt: Date.now(), comparisonId: snapshotId });
+      return ok(c, { comparisonId: snapshotId });
+    } catch (e) {
+      return bad(c, 'Verification failed');
     }
-    const processedResults = await Promise.all(VENDORS.map(async (v) => {
-      const model = await getMergedPricing(c.env, v.id);
-      const feat = FEATURES.find(f => f.vendorId === v.id) as FeatureMatrix;
-      const tco = calculateTCO(leadState.seats, model);
-      return { v, feat, tco };
-    }));
-    const tcos = processedResults.map(r => r.tco);
-    const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
-    const minTco = tcos.length > 0 ? Math.min(...tcos) : 0;
-    const snapshotResults: ComparisonResult[] = processedResults.map(r => ({
-      vendorId: r.v.id,
-      vendorName: r.v.name,
-      tcoYear1: Number(r.tco.toFixed(2)),
-      scores: calculateScores(r.feat, r.tco, maxTco, minTco),
-      features: r.feat
-    }));
-    const snapshotId = crypto.randomUUID();
-    await ComparisonEntity.create(c.env, {
-      id: snapshotId,
-      leadId: leadState.id,
-      results: snapshotResults,
-      inputs: { seats: leadState.seats, vpnStatus: leadState.vpnStatus, budgetRange: leadState.budgetRange },
-      createdAt: Date.now()
-    });
-    await leadEntity.patch({ status: 'confirmed', confirmedAt: Date.now(), comparisonId: snapshotId });
-    return ok(c, { comparisonId: snapshotId });
   });
   app.get('/api/comparison/:id', async (c) => {
-    const comp = new ComparisonEntity(c.env, c.req.param('id'));
-    if (!(await comp.exists())) return notFound(c, 'Report not found.');
-    return ok(c, await comp.getState());
+    try {
+      const comp = new ComparisonEntity(c.env, c.req.param('id'));
+      if (!(await comp.exists())) return notFound(c, 'Report not found.');
+      return ok(c, await comp.getState());
+    } catch (e) {
+      return bad(c, 'Error fetching report');
+    }
   });
   app.get('/api/admin/leads', async (c) => {
-    const leads = await LeadEntity.list(c.env, null, 1000);
-    return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
+    try {
+      const leads = await LeadEntity.list(c.env, null, 1000);
+      return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
+    } catch (e) {
+      return bad(c, 'Error listing leads');
+    }
+  });
+  app.delete('/api/admin/leads/:id', async (c) => {
+    try {
+      const id = c.req.param('id');
+      const lead = new LeadEntity(c.env, id);
+      const state = await lead.getState();
+      if (state.comparisonId) {
+        await ComparisonEntity.delete(c.env, state.comparisonId);
+      }
+      await LeadEntity.delete(c.env, id);
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Deletion failed');
+    }
+  });
+  app.get('/api/admin/stats', async (c) => {
+    try {
+      const leads = (await LeadEntity.list(c.env, null, 1000)).items;
+      const totalLeads = leads.length;
+      const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
+      const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, l) => acc + l.seats, 0) / totalLeads) : 0;
+      const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
+      const vpnCounts: Record<string, number> = {};
+      leads.forEach(l => { vpnCounts[l.vpnStatus] = (vpnCounts[l.vpnStatus] || 0) + 1; });
+      const mostCommonVpn = Object.keys(vpnCounts).sort((a, b) => vpnCounts[b] - vpnCounts[a])[0] || "N/A";
+      // Mock daily leads for the last 7 days
+      const dailyLeads = Array.from({ length: 7 }).map((_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - (6 - i));
+        const dateStr = d.toISOString().split('T')[0];
+        const dayLeads = leads.filter(l => new Date(l.createdAt).toISOString().startsWith(dateStr));
+        return {
+          date: dateStr,
+          pending: dayLeads.filter(l => l.status === 'pending').length,
+          confirmed: dayLeads.filter(l => l.status === 'confirmed').length
+        };
+      });
+      return ok(c, { totalLeads, confirmedLeads, conversionRate, avgSeats, mostCommonVpn, dailyLeads });
+    } catch (e) {
+      return bad(c, 'Stats calculation failed');
+    }
   });
   app.get('/api/admin/pricing', async (c) => {
-    const data = await Promise.all(VENDORS.map(async (v) => {
-      const inst = new PricingOverrideEntity(c.env, v.id);
-      if (await inst.exists()) return inst.getState();
-      const base = PRICING.find(p => p.vendorId === v.id);
-      return { vendorId: v.id, basePricePerMonth: base?.basePricePerMonth || 0, isQuoteOnly: base?.isQuoteOnly || false, updatedAt: 0 };
-    }));
-    return ok(c, data);
+    try {
+      const data = await Promise.all(VENDORS.map(async (v) => {
+        const inst = new PricingOverrideEntity(c.env, v.id);
+        const base = PRICING.find(p => p.vendorId === v.id);
+        if (await inst.exists()) {
+          const state = await inst.getState();
+          return { ...state, basePricePerMonth: Number(state.basePricePerMonth.toFixed(2)) };
+        }
+        return { 
+          vendorId: v.id, 
+          basePricePerMonth: base?.basePricePerMonth || 0, 
+          isQuoteOnly: base?.isQuoteOnly || false, 
+          updatedAt: 0 
+        };
+      }));
+      return ok(c, data);
+    } catch (e) {
+      return bad(c, 'Pricing fetch failed');
+    }
   });
   app.post('/api/admin/pricing', async (c) => {
-    const update = await c.req.json<PricingOverride>();
-    await new PricingOverrideEntity(c.env, update.vendorId).save({ ...update, updatedAt: Date.now() });
-    return ok(c, { success: true });
+    try {
+      const update = await c.req.json<PricingOverride>();
+      await new PricingOverrideEntity(c.env, update.vendorId).save({ 
+        ...update, 
+        basePricePerMonth: Number(update.basePricePerMonth),
+        updatedAt: Date.now() 
+      });
+      return ok(c, { success: true });
+    } catch (e) {
+      return bad(c, 'Pricing update failed');
+    }
   });
 }
