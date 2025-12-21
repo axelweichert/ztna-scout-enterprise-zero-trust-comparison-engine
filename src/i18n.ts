@@ -230,7 +230,7 @@ const resources = {
         steps: { company: "Unternehmen", requirements: "Infrastruktur", legal: "Compliance" },
         labels: { companyName: "Firmenname", contactName: "Ansprechpartner", phone: "Telefonnummer", workEmail: "Geschäftliche E-Mail", seats: "Anzahl Benutzer", vpnStatus: "VPN Status", timing: "Zeitrahmen Migration", budgetRange: "Geplantes Budget" },
         buttons: { continue: "Weiter", back: "Zurück", submit: "Bestätigen & Generieren", generating: "Analysiere..." },
-        options: { vpn_active: "Aktives Legacy VPN", vpn_replacing: "Migration läuft", vpn_none: "SDP / Cloud Native", timing_immediate: "Sofort", timing_3m: "Innerhalb 3 Monate", timing_6m: "In 6 Monaten", timing_planning: "Strategische Planung", budget_low: "< 10.000 € / Jahr", budget_med: "10.000 € - 50.000 € / Jahr", budget_high: "50.000 € - 100.000 € / Jahr", budget_enterprise: "100.000 €+ / Jahr" },
+        options: { vpn_active: "Aktives Legacy VPN", vpn_replacing: "Migration läuft", vpn_none: "SDP / Cloud Native", timing_immediate: "Sofort", timing_3m: "Innerhalb 3 Monate", timing_6m: "In 6 Monaten", timing_planning: "Strategische Planung", budget_low: "< €10k / Jahr", budget_med: "10.000 € - 50.000 € / Jahr", budget_high: "50.000 € - 100.000 € / Jahr", budget_enterprise: "100.000 €+ / Jahr" },
         legal: { disclaimer: "Ihre Daten werden zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital verwendet. Keine Weitergabe an Dritte. Widerspruch jederzeit möglich." },
         submitted: { title: "E-Mail Bestätigung", desc: "Bitte prüfen Sie Ihr Postfach und klicken Sie auf den Bestätigungslink, um Ihren Bericht freizuschalten." }
       },

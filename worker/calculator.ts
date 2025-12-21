@@ -18,20 +18,21 @@ export function calculateScores(feats: FeatureMatrix, tco: number, maxTco: numbe
   const featureScore = Math.round((featurePoints / featureList.length) * 100);
   let priceScore = 70;
   const spread = maxTco - minTco;
+  // Defensive check for division by zero or uniform market pricing
   if (spread > 0.01) {
-    // Inverse scaling: lower price = higher score
     priceScore = Math.round(100 - (((tco - minTco) / spread) * 100));
   } else {
-    // If all prices are the same, tie-break by specific vendor preference or BSI status
+    // Deterministic fallback if all prices are identical
     if (feats.vendorId === 'cloudflare') priceScore = 95;
     else if (feats.isBSIQualified) priceScore = 90;
     else priceScore = 80;
   }
   priceScore = Math.max(0, Math.min(100, priceScore));
   const complianceScore = feats.isBSIQualified ? 100 : 40;
+  // Final weighted calculation
   const totalScore = Math.round(
-    (featureScore * 0.4) +
-    (priceScore * 0.4) +
+    (featureScore * 0.4) + 
+    (priceScore * 0.4) + 
     (complianceScore * 0.2)
   );
   return {

@@ -93,7 +93,7 @@ export function HomePage() {
                 </Link>
               </Button>
             </motion.div>
-            {/* SASE Cloud Map Integration */}
+            {/* Trust Integration */}
             <motion.div
               variants={fadeIn}
               initial="hidden"
@@ -117,26 +117,6 @@ export function HomePage() {
                 </div>
                 <ArrowRight className="ml-4 w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
               </a>
-            </motion.div>
-            {/* Trust Badges */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 1 }}
-              className="mt-32 pt-16 border-t flex flex-wrap justify-center gap-12 md:gap-24"
-            >
-              {[
-                { icon: ShieldCheck, label: t('home.trust.bsi') },
-                { icon: Lock, label: t('home.trust.gdpr') },
-                { icon: FileText, label: t('home.trust.pdf') },
-                { icon: Globe, label: t('home.trust.sase') }
-              ].map((trust, idx) => (
-                <div key={idx} className="flex items-center gap-3 opacity-40 hover:opacity-100 transition-opacity duration-300 group cursor-default">
-                  <trust.icon className="w-5 h-5 text-foreground group-hover:text-primary transition-colors" />
-                  <span className="font-bold tracking-[0.2em] text-[10px] uppercase text-foreground">{trust.label}</span>
-                </div>
-              ))}
             </motion.div>
           </div>
         </section>
