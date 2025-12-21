@@ -2,10 +2,10 @@ import { Hono } from "hono";
 import type { Env } from './core-utils';
 import { ok, bad, notFound } from './core-utils';
 import { IndexedEntity, Entity } from "./core-utils";
-import type {
-  Lead, ComparisonSnapshot, ComparisonResult,
+import type { 
+  Lead, ComparisonSnapshot, ComparisonResult, 
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, AdminStats, TimeSeriesData
+  VerificationToken, OptOutToken, AdminStats, TimeSeriesData 
 } from "./shared-types";
 /**
  * INLINED ENTERPRISE METADATA
@@ -68,12 +68,11 @@ function calculateScores(feats: FeatureMatrix, tco: number, maxTco: number, minT
   const featurePoints = featureList.reduce((acc, key) => acc + (feats[key] ? 1 : 0), 0);
   const featureScore = Math.round((featurePoints / featureList.length) * 100);
   let priceScore = 70;
-  // Robust spread handling to avoid division by zero or NaN
-  if (maxTco > minTco && (maxTco - minTco) > 0.01) {
+  if (maxTco > minTco && (maxTco - minTco) > 0.1) {
     const spread = maxTco - minTco;
     priceScore = Math.round(100 - (((tco - minTco) / spread) * 100));
   } else {
-    // If all prices are the same, give a neutral high score
+    // Zero-spread or negative scenario fallback
     priceScore = 80;
   }
   priceScore = Math.max(0, Math.min(100, priceScore));
@@ -124,15 +123,17 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
   try {
     if (await overrideInst.exists()) {
       const override = await overrideInst.getState();
-      if (override && override.basePricePerMonth > 0) {
+      if (override && typeof override.basePricePerMonth === 'number' && override.basePricePerMonth > 0) {
         return {
           ...base,
           basePricePerMonth: Number(override.basePricePerMonth.toFixed(2)),
-          isQuoteOnly: override.isQuoteOnly
+          isQuoteOnly: !!override.isQuoteOnly
         };
       }
     }
-  } catch (e) { /* ignore */ }
+  } catch (e) {
+    console.error(`[WORKER] Override fetch failed for ${vendorId}:`, e);
+  }
   return { ...base, basePricePerMonth: Number(base.basePricePerMonth.toFixed(2)) };
 }
 /**
@@ -141,11 +142,13 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/config', (c) => {
     const env = c.env as any;
-    return ok(c, { turnstileSiteKey: env.TURNSTILE_SITE_KEY || env.PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA" });
+    const siteKey = env.TURNSTILE_SITE_KEY || env.PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+    return ok(c, { turnstileSiteKey: siteKey });
   });
   app.post('/api/submit', async (c) => {
     try {
       const input = await c.req.json();
+      if (!input.email || !input.companyName) return bad(c, 'Required fields missing');
       const leadId = crypto.randomUUID();
       const lead: Lead = {
         ...input,
@@ -163,6 +166,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await new OptOutTokenEntity(c.env, optOutToken).save({ hash: optOutToken, leadId, createdAt: Date.now() });
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
+      console.error('[WORKER] Submit error:', e);
       return bad(c, 'Submission failed.');
     }
   });
@@ -189,8 +193,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         return { v, feat, tco };
       }));
       const tcos = results.map(r => r.tco);
-      const maxTco = Math.max(...tcos);
-      const minTco = Math.min(...tcos);
+      const maxTco = tcos.length > 0 ? Math.max(...tcos) : 10000;
+      const minTco = tcos.length > 0 ? Math.min(...tcos) : 0;
       const snapshotResults: ComparisonResult[] = results.map(r => ({
         vendorId: r.v.id,
         vendorName: r.v.name,
@@ -224,7 +228,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const processedResults = await Promise.all(VENDORS.map(async (v) => {
         const model = await getMergedPricing(c.env, v.id);
         const feat = FEATURES.find(f => f.vendorId === v.id) as FeatureMatrix;
-        const tco = calculateTCO(leadState.seats, model);
+        const tco = calculateTCO(leadState.seats || 50, model);
         return { v, feat, tco };
       }));
       const tcos = processedResults.map(r => r.tco);
@@ -248,6 +252,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await leadEntity.patch({ status: 'confirmed', confirmedAt: Date.now(), comparisonId: snapshotId });
       return ok(c, { comparisonId: snapshotId });
     } catch (e) {
+      console.error('[WORKER] Verify error:', e);
       return bad(c, 'Verification failed');
     }
   });
@@ -263,14 +268,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/admin/stats', async (c) => {
     try {
       const leads = await LeadEntity.list(c.env, null, 1000);
-      const items = leads.items;
+      const items = leads.items || [];
       const total = items.length;
       const confirmed = items.filter(l => l.status === 'confirmed').length;
       const pending = total - confirmed;
       const convRate = total > 0 ? Math.round((confirmed / total) * 100) : 0;
       const confirmedItems = items.filter(l => l.status === 'confirmed');
-      const avgSeats = confirmedItems.length > 0
-        ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length)
+      const avgSeats = confirmedItems.length > 0 
+        ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length) 
         : 0;
       const vpnCounts: Record<string, number> = {};
       items.forEach(l => {
@@ -278,7 +283,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         vpnCounts[vpn] = (vpnCounts[vpn] || 0) + 1;
       });
       const mostCommonVpn = Object.entries(vpnCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
-      // Robust daily mapping for 7-day window
       const dailyMap: Record<string, { pending: number; confirmed: number }> = {};
       const now = new Date();
       for (let i = 6; i >= 0; i--) {
@@ -288,6 +292,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         dailyMap[dateStr] = { pending: 0, confirmed: 0 };
       }
       items.forEach(l => {
+        if (!l.createdAt) return;
         const dateStr = new Date(l.createdAt).toISOString().split('T')[0];
         if (dailyMap[dateStr]) {
           if (l.status === 'confirmed') dailyMap[dateStr].confirmed++;
@@ -315,7 +320,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/admin/leads', async (c) => {
     try {
       const leads = await LeadEntity.list(c.env, null, 1000);
-      return ok(c, leads.items.sort((a, b) => b.createdAt - a.createdAt));
+      return ok(c, (leads.items || []).sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0)));
     } catch (e) {
       return bad(c, 'Error listing leads');
     }
@@ -324,6 +329,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     try {
       const id = c.req.param('id');
       const lead = new LeadEntity(c.env, id);
+      if (!(await lead.exists())) return notFound(c);
       const state = await lead.getState();
       if (state.comparisonId) {
         await ComparisonEntity.delete(c.env, state.comparisonId);
@@ -346,7 +352,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
         return {
           vendorId: v.id,
           basePricePerMonth: base?.basePricePerMonth || 0,
-          isQuoteOnly: base?.isQuoteOnly || false,
+          isQuoteOnly: !!base?.isQuoteOnly,
           updatedAt: 0
         };
       }));
@@ -358,6 +364,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/admin/pricing', async (c) => {
     try {
       const update = await c.req.json<PricingOverride>();
+      if (!update.vendorId) return bad(c, 'Vendor ID missing');
       await new PricingOverrideEntity(c.env, update.vendorId).save({
         ...update,
         basePricePerMonth: Number(update.basePricePerMonth),

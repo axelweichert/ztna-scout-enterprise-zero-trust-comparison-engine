@@ -80,10 +80,10 @@ export function AdminPage() {
       .filter(l => {
         if (!normalizedTerm) return true;
         return (
-          (l.companyName?.toLowerCase() || "").includes(normalizedTerm) ||
-          (l.email?.toLowerCase() || "").includes(normalizedTerm) ||
-          (l.contactName?.toLowerCase() || "").includes(normalizedTerm) ||
-          (l.id?.toLowerCase() || "").includes(normalizedTerm)
+          (l.companyName || "").toLowerCase().includes(normalizedTerm) ||
+          (l.email || "").toLowerCase().includes(normalizedTerm) ||
+          (l.contactName || "").toLowerCase().includes(normalizedTerm) ||
+          (l.id || "").toLowerCase().includes(normalizedTerm)
         );
       });
   }, [leads, hideOptOuts, searchTerm]);
@@ -93,18 +93,25 @@ export function AdminPage() {
       return;
     }
     const headers = ["ID", "Company", "Contact", "Email", "Phone", "Seats", "VPN", "Timing", "Status", "CreatedAt"];
-    const rows = filteredLeads.map(l => [
-      l.id,
-      `"${(l.companyName || "").replace(/"/g, '""')}"`,
-      `"${(l.contactName || "").replace(/"/g, '""')}"`,
-      l.email,
-      l.phone,
-      l.seats,
-      l.vpnStatus,
-      l.timing,
-      l.status,
-      new Date(l.createdAt).toISOString()
-    ]);
+    const rows = filteredLeads.map(l => {
+      const escape = (str: string | number | undefined) => {
+        if (str === undefined || str === null) return '""';
+        const s = String(str).replace(/"/g, '""');
+        return `"${s}"`;
+      };
+      return [
+        escape(l.id),
+        escape(l.companyName),
+        escape(l.contactName),
+        escape(l.email),
+        escape(l.phone),
+        l.seats || 0,
+        escape(l.vpnStatus),
+        escape(l.timing),
+        escape(l.status),
+        escape(l.createdAt ? new Date(l.createdAt).toISOString() : '')
+      ];
+    });
     const BOM = '\uFEFF';
     const csvContent = BOM + [headers, ...rows]
       .map(e => e.join(";"))
@@ -244,8 +251,8 @@ export function AdminPage() {
                     ) : filteredLeads.map(lead => (
                       <TableRow key={lead.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-colors group">
                         <TableCell className="text-[10px] text-muted-foreground font-mono pl-5">
-                          {format(lead.createdAt, 'MMM dd')}<br/>
-                          <span className="opacity-50">{format(lead.createdAt, 'HH:mm:ss')}</span>
+                          {lead.createdAt ? format(lead.createdAt, 'MMM dd') : 'N/A'}<br/>
+                          <span className="opacity-50">{lead.createdAt ? format(lead.createdAt, 'HH:mm:ss') : ''}</span>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-col">
@@ -254,7 +261,7 @@ export function AdminPage() {
                               {lead.status === 'confirmed' ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> : <Clock className="w-3.5 h-3.5 text-amber-500" />}
                             </span>
                             <div className="flex items-center gap-2">
-                              <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200 dark:border-slate-700">ID: {lead.id.slice(0, 8)}</Badge>
+                              <Badge variant="outline" className="text-[9px] h-4 font-mono px-1.5 border-slate-200 dark:border-slate-700">ID: {(lead.id || "").slice(0, 8)}</Badge>
                               {!lead.contactAllowed && <Badge variant="destructive" className="text-[9px] h-4 py-0 uppercase">{t('admin.table.opt_out')}</Badge>}
                             </div>
                           </div>
@@ -279,11 +286,11 @@ export function AdminPage() {
                         <TableCell>
                           <div className="flex flex-col gap-1.5">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs font-bold">{lead.seats} Seats</span>
-                              <span className="text-[10px] text-muted-foreground">• {lead.vpnStatus.toUpperCase()} VPN</span>
+                              <span className="text-xs font-bold">{lead.seats || 0} Seats</span>
+                              <span className="text-[10px] text-muted-foreground">• {(lead.vpnStatus || "none").toUpperCase()} VPN</span>
                             </div>
                             <Badge variant="secondary" className="text-[9px] w-fit font-bold uppercase tracking-tighter bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                              {lead.timing.replace('_', ' ')}
+                              {(lead.timing || "").replace('_', ' ')}
                             </Badge>
                           </div>
                         </TableCell>

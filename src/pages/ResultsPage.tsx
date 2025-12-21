@@ -17,6 +17,15 @@ import { Footer } from '@/components/layout/Footer';
 import { Progress } from '@/components/ui/progress';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { cn, formatDate, getRankLabel, formatCurrency } from '@/lib/utils';
+// Move featureKeys outside component to avoid re-renders and satisfy ESLint hooks/exhaustive-deps
+const FEATURE_KEYS = [
+  { key: 'hasZTNA', label: 'ZTNA' },
+  { key: 'hasSWG', label: 'SWG' },
+  { key: 'hasCASB', label: 'CASB' },
+  { key: 'hasDLP', label: 'DLP' },
+  { key: 'hasFWaaS', label: 'Firewall-as-a-Service' },
+  { key: 'hasRBI', label: 'Remote Browser Isolation' }
+];
 export function ResultsPage() {
   const { id } = useParams();
   const location = useLocation();
@@ -26,8 +35,10 @@ export function ResultsPage() {
   const [selectedVendor, setSelectedVendor] = useState<ComparisonResult | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [hideSimilar, setHideSimilar] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const isSampleRoute = location.pathname === '/beispiel' || location.pathname === '/vergleich/sample' || id === 'sample';
   useEffect(() => {
+    setMounted(true);
     const handleScroll = () => setScrolled(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
@@ -42,22 +53,13 @@ export function ResultsPage() {
     return [...snapshot.results].sort((a, b) => (b.scores?.totalScore ?? 0) - (a.scores?.totalScore ?? 0));
   }, [snapshot]);
   const top3 = useMemo(() => sortedResults.slice(0, 3), [sortedResults]);
-  const featureKeys = [
-    { key: 'hasZTNA', label: 'ZTNA' },
-    { key: 'hasSWG', label: 'SWG' },
-    { key: 'hasCASB', label: 'CASB' },
-    { key: 'hasDLP', label: 'DLP' },
-    { key: 'hasFWaaS', label: 'Firewall-as-a-Service' },
-    { key: 'hasRBI', label: 'Remote Browser Isolation' }
-  ];
   const filteredFeatures = useMemo(() => {
-    if (!hideSimilar || top3.length < 2) return featureKeys;
-    return featureKeys.filter(fk => {
+    if (!hideSimilar || top3.length < 2) return FEATURE_KEYS;
+    return FEATURE_KEYS.filter(fk => {
       const values = top3.map(v => !!(v.features as any)?.[fk.key]);
-      // If all values are the same (all true or all false), filter it out
       return !values.every(v => v === values[0]);
     });
-  }, [hideSimilar, top3, featureKeys]);
+  }, [hideSimilar, top3]);
   if (isLoading) return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -95,7 +97,6 @@ export function ResultsPage() {
           </p>
         </div>
       )}
-      {/* Floating Mini Header */}
       <div className={cn(
         "fixed top-16 left-0 right-0 z-40 bg-background/90 backdrop-blur-md border-b transition-transform duration-300 print:hidden",
         scrolled ? "translate-y-0" : "-translate-y-full"
@@ -111,7 +112,6 @@ export function ResultsPage() {
         </div>
       </div>
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-8 md:py-16">
-        {/* Report Identification Header */}
         <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 border-b border-primary/10 pb-12 mb-20">
           <div className="space-y-4 text-pretty w-full md:w-auto">
             <div className="flex flex-wrap items-center gap-4 text-xs font-mono text-muted-foreground uppercase tracking-widest">
@@ -138,7 +138,6 @@ export function ResultsPage() {
             </Button>
           </div>
         </header>
-        {/* Top Recommendations */}
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold flex items-center gap-3">
             <Sparkles className="text-primary w-8 h-8" />
@@ -174,7 +173,6 @@ export function ResultsPage() {
                       <div className="p-4 bg-muted/30 rounded-xl space-y-1.5 border border-muted/50">
                         <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">{t('results.expert_take_label')}</p>
                         <p className="text-sm leading-relaxed italic text-foreground/80 font-medium">
-                          {/* Map index accurately to expert take translations */}
                           {t(`results.expert_take_${i}`)}
                         </p>
                       </div>
@@ -186,7 +184,6 @@ export function ResultsPage() {
             </AnimatePresence>
           </div>
         </section>
-        {/* Feature Comparison Table */}
         <section className="space-y-8 mb-20">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <h2 className="text-3xl font-display font-bold">{t('results.matrix.title')}</h2>
@@ -226,50 +223,50 @@ export function ResultsPage() {
             </table>
           </div>
         </section>
-        {/* TCO Analysis Chart */}
         <section className="space-y-8 mb-20">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
           <Card className="p-2 md:p-10 shadow-2xl border-none bg-slate-50/50 dark:bg-slate-900/50 rounded-3xl overflow-hidden">
-            <div className="w-full h-[450px] md:h-[600px] relative">
-              <ResponsiveContainer width="100%" height="100%" minHeight={400} debounce={100}>
-                <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 30 : 60, right: 70, top: 10, bottom: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
-                  <XAxis type="number" hide />
-                  <YAxis
-                    dataKey="name"
-                    type="category"
-                    width={isMobile ? 120 : 180}
-                    tickLine={false}
-                    tickMargin={10}
-                    tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 600, fill: 'hsl(var(--foreground))' }}
-                  />
-                  <Tooltip
-                    cursor={{ fill: 'hsl(var(--primary)/0.03)' }}
-                    content={({ active, payload }) => {
-                      if (active && payload && payload.length) {
-                        return (
-                          <div className="bg-white dark:bg-slate-900 p-4 shadow-2xl border border-primary/10 rounded-2xl min-w-[180px]">
-                            <p className="font-bold text-xs mb-2 text-muted-foreground uppercase tracking-tighter">{payload[0].payload.name}</p>
-                            <p className="text-primary font-bold text-xl">{formatCurrency(payload[0].value as number, i18n.language.slice(0, 2))}</p>
-                            <div className="h-px bg-slate-100 dark:bg-slate-800 my-3" />
-                            <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest leading-none">12-Month Est. TCO</p>
-                          </div>
-                        );
-                      }
-                      return null;
-                    }}
-                  />
-                  <Bar dataKey="tco" radius={[0, 8, 8, 0]} barSize={isMobile ? 20 : 32}>
-                    {chartData.map((entry, index) => (
-                      <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : (entry.id === 'zscaler' ? '#0045D6' : '#1E293B')} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="w-full h-[450px] md:h-[600px] relative min-w-0">
+              {mounted && (
+                <ResponsiveContainer width="99.9%" height="100%" minHeight={400}>
+                  <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 30 : 60, right: 70, top: 10, bottom: 10 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
+                    <XAxis type="number" hide />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      width={isMobile ? 120 : 180}
+                      tickLine={false}
+                      tickMargin={10}
+                      tick={{ fontSize: isMobile ? 10 : 12, fontWeight: 600, fill: 'hsl(var(--foreground))' }}
+                    />
+                    <Tooltip
+                      cursor={{ fill: 'hsl(var(--primary)/0.03)' }}
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-white dark:bg-slate-900 p-4 shadow-2xl border border-primary/10 rounded-2xl min-w-[180px]">
+                              <p className="font-bold text-xs mb-2 text-muted-foreground uppercase tracking-tighter">{payload[0].payload.name}</p>
+                              <p className="text-primary font-bold text-xl">{formatCurrency(payload[0].value as number, i18n.language.slice(0, 2))}</p>
+                              <div className="h-px bg-slate-100 dark:bg-slate-800 my-3" />
+                              <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-widest leading-none">12-Month Est. TCO</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="tco" radius={[0, 8, 8, 0]} barSize={isMobile ? 20 : 32}>
+                      {chartData.map((entry, index) => (
+                        <Cell key={index} fill={entry.id === 'cloudflare' ? '#F48120' : (entry.id === 'zscaler' ? '#0045D6' : '#1E293B')} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </Card>
         </section>
-        {/* Methodology Block */}
         <div className="bg-slate-900 dark:bg-slate-950 text-slate-100 rounded-3xl p-8 md:p-12 flex flex-col md:flex-row gap-8 items-center border shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 blur-[100px] rounded-full -mr-32 -mt-32" />
           <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center shrink-0 shadow-lg">
@@ -285,7 +282,6 @@ export function ResultsPage() {
         </div>
       </main>
       <Footer />
-      {/* Deep-Dive Modal */}
       <Dialog open={!!selectedVendor} onOpenChange={(open) => !open && setSelectedVendor(null)}>
         <DialogContent className="sm:max-w-xl p-0 overflow-hidden border-none rounded-3xl shadow-3xl">
           <div className="bg-primary text-primary-foreground p-8 sm:p-10 relative overflow-hidden">
