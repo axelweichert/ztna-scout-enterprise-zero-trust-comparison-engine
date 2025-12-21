@@ -10,7 +10,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
 import '@/index.css'
-import { HomePage } from '@/pages/HomePage';
+import HomePage from '@/pages/HomePage';
 import { LeadFormPage } from '@/pages/LeadFormPage';
 import { ResultsPage } from '@/pages/ResultsPage';
 import { AdminPage } from '@/pages/AdminPage';

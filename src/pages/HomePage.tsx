@@ -6,11 +6,8 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Button } from '@/components/ui/button';
 import {
-  ShieldCheck,
   ArrowRight,
-  FileText,
   Zap,
-  Lock,
   Globe,
   HelpCircle,
   Sparkles,
@@ -35,14 +32,13 @@ const fadeIn: Variants = {
     }
   })
 };
-export function HomePage() {
+export default function HomePage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
   return (
     <div className="min-h-screen flex flex-col bg-background selection:bg-primary selection:text-white">
       <Header />
       <main className="flex-1 overflow-x-hidden">
-        {/* Hero Section */}
         <section className="relative pt-24 pb-32 md:pt-40 md:pb-56">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(244,129,32,0.12),transparent_70%)] -z-10" />
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -93,7 +89,6 @@ export function HomePage() {
                 </Link>
               </Button>
             </motion.div>
-            {/* Trust Integration */}
             <motion.div
               variants={fadeIn}
               initial="hidden"
@@ -120,7 +115,6 @@ export function HomePage() {
             </motion.div>
           </div>
         </section>
-        {/* Methodology Section */}
         <section className="py-32 md:py-48 bg-slate-50/50 dark:bg-slate-950/50 relative overflow-hidden">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
             <div className="text-center mb-24">
@@ -163,7 +157,6 @@ export function HomePage() {
             </div>
           </div>
         </section>
-        {/* FAQ Section */}
         <section className="py-32 md:py-48 bg-background">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <motion.div

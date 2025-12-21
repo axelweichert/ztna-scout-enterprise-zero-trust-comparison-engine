@@ -202,8 +202,8 @@ export function ResultsPage() {
         </section>
         <section className="space-y-8 mb-24">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
-          <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden">
-            <div className="w-full h-[500px] relative">
+          <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden min-h-[500px]">
+            <div className="w-full h-[500px] relative" style={{ minHeight: '500px' }}>
               {mounted && (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 20 : 60, right: 80, top: 10, bottom: 10 }}>

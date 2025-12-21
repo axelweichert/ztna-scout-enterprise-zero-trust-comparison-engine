@@ -389,3 +389,4 @@ export function AdminPage() {
     </AppLayout>
   );
 }
+import { Skeleton } from '@/components/ui/skeleton';

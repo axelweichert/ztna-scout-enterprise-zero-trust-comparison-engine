@@ -91,17 +91,13 @@ async function getMergedPricing(env: Env, vendorId: string): Promise<PricingMode
     if (await overrideInst.exists()) {
       const override = await overrideInst.getState();
       if (override && typeof override.basePricePerMonth === 'number' && override.basePricePerMonth > 0) {
-        return {
-          ...base,
-          basePricePerMonth: Number(override.basePricePerMonth.toFixed(2)),
-          isQuoteOnly: !!override.isQuoteOnly
-        };
+        return { ...base, basePricePerMonth: override.basePricePerMonth, isQuoteOnly: !!override.isQuoteOnly };
       }
     }
   } catch (e) {
     console.error(`[WORKER] Override fetch failed for ${vendorId}:`, e);
   }
-  return { ...base, basePricePerMonth: Number(base.basePricePerMonth.toFixed(2)) };
+  return base;
 }
 async function buildComparison(env: Env, leadId: string, seats: number, inputs: any): Promise<ComparisonSnapshot> {
   const processedResults = await Promise.all(VENDORS.map(async (v) => {
@@ -131,14 +127,14 @@ async function buildComparison(env: Env, leadId: string, seats: number, inputs: 
 export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/config', (c) => {
     const env = c.env as any;
-    const siteKey = env.TURNSTILE_SITE_KEY || env.PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+    const siteKey = env.TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
     return ok(c, { turnstileSiteKey: siteKey });
   });
   app.post('/api/submit', async (c) => {
     try {
       const input = await c.req.json();
       if (!input.email || !input.companyName) return bad(c, 'Required fields missing');
-      const leadId = `${Date.now().toString(36)}-${crypto.randomUUID()}`;
+      const leadId = crypto.randomUUID();
       const lead: Lead = {
         ...input,
         id: leadId,
@@ -151,25 +147,9 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await LeadEntity.create(c.env, lead);
       const vToken = crypto.randomUUID();
       await new VerificationTokenEntity(c.env, vToken).save({ hash: vToken, leadId, expiresAt: Date.now() + 604800000 });
-      const optOutToken = crypto.randomUUID();
-      await new OptOutTokenEntity(c.env, optOutToken).save({ hash: optOutToken, leadId, createdAt: Date.now() });
-      return ok(c, { leadId, requiresVerification: true, verificationToken: vToken });
+      return ok(c, { leadId, verificationToken: vToken });
     } catch (e) {
-      return bad(c, 'Submission failed.');
-    }
-  });
-  app.post('/api/opt-out', async (c) => {
-    try {
-      const { token } = await c.req.json();
-      const entity = new OptOutTokenEntity(c.env, token);
-      if (!(await entity.exists())) return bad(c, 'Invalid token');
-      const tokenData = await entity.getState();
-      const lead = new LeadEntity(c.env, tokenData.leadId);
-      if (!(await lead.exists())) return notFound(c, 'Lead not found');
-      await lead.patch({ contactAllowed: false, optedOutAt: Date.now() });
-      return ok(c, { success: true });
-    } catch (e) {
-      return bad(c, 'Opt-out failed');
+      return bad(c, 'Submission failed');
     }
   });
   app.get('/api/sample-comparison', async (c) => {
@@ -178,27 +158,25 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       const snapshot = await buildComparison(c.env, 'demo', seats, { seats, vpnStatus: 'active', budgetRange: 'med' });
       return ok(c, { ...snapshot, id: 'sample', isSample: true });
     } catch (e) {
-      return bad(c, 'Failed to generate sample');
+      return bad(c, 'Sample failed');
     }
   });
   app.get('/api/verify/:token', async (c) => {
     try {
       const token = c.req.param('token');
       const tokenEntity = new VerificationTokenEntity(c.env, token);
-      if (!(await tokenEntity.exists())) return notFound(c, 'Link invalid.');
+      if (!(await tokenEntity.exists())) return notFound(c, 'Link invalid');
       const tokenData = await tokenEntity.getState();
       const leadEntity = new LeadEntity(c.env, tokenData.leadId);
       const leadState = await leadEntity.getState();
-      if (leadState.status === 'confirmed' && leadState.comparisonId) {
-        return ok(c, { comparisonId: leadState.comparisonId });
-      }
+      if (leadState.comparisonId) return ok(c, { comparisonId: leadState.comparisonId });
       const snapshot = await buildComparison(c.env, leadState.id, leadState.seats || 50, {
         seats: leadState.seats,
         vpnStatus: leadState.vpnStatus,
         budgetRange: leadState.budgetRange
       });
       await ComparisonEntity.create(c.env, snapshot);
-      await leadEntity.patch({ status: 'confirmed', confirmedAt: Date.now(), comparisonId: snapshot.id });
+      await leadEntity.patch({ status: 'confirmed', comparisonId: snapshot.id });
       return ok(c, { comparisonId: snapshot.id });
     } catch (e) {
       return bad(c, 'Verification failed');
@@ -207,61 +185,29 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.get('/api/comparison/:id', async (c) => {
     try {
       const comp = new ComparisonEntity(c.env, c.req.param('id'));
-      if (!(await comp.exists())) return notFound(c, 'Report not found.');
+      if (!(await comp.exists())) return notFound(c, 'Report not found');
       return ok(c, await comp.getState());
     } catch (e) {
-      return bad(c, 'Error fetching report');
-    }
-  });
-  app.get('/api/admin/stats', async (c) => {
-    try {
-      const leads = await LeadEntity.list(c.env, null, 1000);
-      const items = leads.items || [];
-      const confirmedItems = items.filter(l => l.status === 'confirmed');
-      const vpnCounts: Record<string, number> = {};
-      items.forEach(l => {
-        const v = l.vpnStatus || 'none';
-        vpnCounts[v] = (vpnCounts[v] || 0) + 1;
-      });
-      let mostCommon = 'none';
-      let maxCount = 0;
-      Object.entries(vpnCounts).forEach(([vpn, count]) => {
-        if (count > maxCount) {
-          maxCount = count;
-          mostCommon = vpn;
-        }
-      });
-      const stats: AdminStats = {
-        totalLeads: items.length,
-        pendingLeads: items.length - confirmedItems.length,
-        confirmedLeads: confirmedItems.length,
-        conversionRate: items.length > 0 ? Math.round((confirmedItems.length / items.length) * 100) : 0,
-        avgSeats: confirmedItems.length > 0 ? Math.round(confirmedItems.reduce((acc, l) => acc + (l.seats || 0), 0) / confirmedItems.length) : 0,
-        mostCommonVpn: mostCommon,
-        dailyLeads: [] // Time-series data would require D1 date grouping
-      };
-      return ok(c, stats);
-    } catch (e) {
-      return bad(c, 'Stats failed');
+      return bad(c, 'Fetch error');
     }
   });
   app.get('/api/admin/leads', async (c) => {
     const leads = await LeadEntity.list(c.env, null, 1000);
     return ok(c, (leads.items || []).sort((a, b) => b.createdAt - a.createdAt));
   });
-  app.delete('/api/admin/leads/:id', async (c) => {
-    try {
-      const id = c.req.param('id');
-      const leadInst = new LeadEntity(c.env, id);
-      const leadState = await leadInst.getState();
-      if (leadState.comparisonId) {
-        await ComparisonEntity.delete(c.env, leadState.comparisonId);
-      }
-      await LeadEntity.delete(c.env, id);
-      return ok(c, { success: true });
-    } catch (e) {
-      return bad(c, 'Failed to purge lead');
-    }
+  app.get('/api/admin/stats', async (c) => {
+    const leads = await LeadEntity.list(c.env, null, 1000);
+    const items = leads.items || [];
+    const stats: AdminStats = {
+      totalLeads: items.length,
+      pendingLeads: items.filter(l => l.status === 'pending').length,
+      confirmedLeads: items.filter(l => l.status === 'confirmed').length,
+      conversionRate: items.length > 0 ? Math.round((items.filter(l => l.status === 'confirmed').length / items.length) * 100) : 0,
+      avgSeats: items.length > 0 ? Math.round(items.reduce((acc, l) => acc + (l.seats || 0), 0) / items.length) : 0,
+      mostCommonVpn: "N/A",
+      dailyLeads: []
+    };
+    return ok(c, stats);
   });
   app.get('/api/admin/pricing', async (c) => {
     const data = await Promise.all(VENDORS.map(async (v) => {
@@ -275,6 +221,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/admin/pricing', async (c) => {
     const update = await c.req.json<PricingOverride>();
     await new PricingOverrideEntity(c.env, update.vendorId).save({ ...update, updatedAt: Date.now() });
+    return ok(c, { success: true });
+  });
+  app.delete('/api/admin/leads/:id', async (c) => {
+    const id = c.req.param('id');
+    const lead = new LeadEntity(c.env, id);
+    const state = await lead.getState();
+    if (state.comparisonId) await ComparisonEntity.delete(c.env, state.comparisonId);
+    await LeadEntity.delete(c.env, id);
     return ok(c, { success: true });
   });
 }
