@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS comparisons (
   lead_id TEXT NOT NULL,
   input_snapshot TEXT NOT NULL, -- JSON string
   result_snapshot TEXT NOT NULL, -- JSON string
+  is_sample INTEGER DEFAULT 0,
   created_at INTEGER NOT NULL
 );
 -- Table: pricing_overrides

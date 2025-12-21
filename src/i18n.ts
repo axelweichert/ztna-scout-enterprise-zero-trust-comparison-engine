@@ -20,7 +20,7 @@ const resources = {
         footer: {
           imprint: "Imprint",
           privacy: "Privacy Policy",
-          service_line: "Ein Service der von Busch GmbH",
+          service_line: "A service of von Busch GmbH",
           address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld"
         }
       },
@@ -31,7 +31,8 @@ const resources = {
           title2: "Comparison Redefined",
           description: "Stop guessing. Compare 13+ ZTNA providers with deterministic TCO projections and BSI compliance scoring.",
           cta_primary: "Start Free Analysis",
-          cta_secondary: "Explore Live Sample"
+          cta_secondary: "Explore Live Sample",
+          sase_map_cta: "View SASE Cloud Map"
         },
         trust: {
           bsi: "BSI Qualified",
@@ -62,7 +63,7 @@ const resources = {
         steps: { company: "Entity", requirements: "Architecture", legal: "Compliance" },
         labels: {
           companyName: "Entity Name",
-          contactPerson: "Liaison Name",
+          contactName: "Liaison Name",
           phone: "Phone Number",
           workEmail: "Corporate Email",
           seats: "Deployment Scale",
@@ -243,7 +244,8 @@ const resources = {
           title2: "Vergleich neu gedacht",
           description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
           cta_primary: "Analyse starten",
-          cta_secondary: "Live-Beispiel ansehen"
+          cta_secondary: "Live-Beispiel ansehen",
+          sase_map_cta: "SASE Cloud Map ansehen"
         },
         trust: {
           bsi: "BSI-qualifiziert",
@@ -291,10 +293,10 @@ const resources = {
           timing_3m: "Innerhalb 3 Monate",
           timing_6m: "In 6 Monaten",
           timing_planning: "Strategische Planung",
-          budget_low: "< ��10k / Jahr",
-          budget_med: "€10k - €50k / Jahr",
-          budget_high: "€50k - €100k / Jahr",
-          budget_enterprise: "€100k+ / Jahr"
+          budget_low: "< 10.000 € / Jahr",
+          budget_med: "10.000 € - 50.000 € / Jahr",
+          budget_high: "50.000 € - 100.000 € / Jahr",
+          budget_enterprise: "100.000 €+ / Jahr"
         },
         legal: {
           disclaimer: "Ihre Daten werden ausschließlich zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital (security@vonbusch.digital) verwendet. Es erfolgt keine Weitergabe an Dritte. Sie können der Kontaktaufnahme jederzeit über den Link in unseren Bestätigungs-E-Mails widersprechen."
@@ -444,7 +446,7 @@ const resources = {
         footer: {
           imprint: "Mentions Légales",
           privacy: "Confidentialité",
-          service_line: "Ein Service der von Busch GmbH",
+          service_line: "Un service de von Busch GmbH",
           address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld"
         }
       },
@@ -455,7 +457,8 @@ const resources = {
           title2: "La comparaison redéfinie",
           description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO déterministes et des scores de conformité BSI.",
           cta_primary: "Lancer l'analyse",
-          cta_secondary: "Voir un exemple"
+          cta_secondary: "Voir un exemple",
+          sase_map_cta: "Voir la SASE Cloud Map"
         },
         trust: {
           bsi: "Qualifié BSI",
@@ -483,7 +486,7 @@ const resources = {
         }
       },
       form: {
-        steps: { company: "Entité", requirements: "Architecture", legal: "Conformité" },
+        steps: { company: "Entit��", requirements: "Architecture", legal: "Conformité" },
         labels: {
           companyName: "Nom de l'entreprise",
           contactPerson: "Nom du contact",
@@ -503,10 +506,10 @@ const resources = {
           timing_3m: "Sous 3 mois",
           timing_6m: "Sous 6 mois",
           timing_planning: "Planification",
-          budget_low: "< €10k / an",
-          budget_med: "€10k - €50k / an",
-          budget_high: "€50k - €100k / an",
-          budget_enterprise: "€100k+ / an"
+          budget_low: "< 10.000 € / an",
+          budget_med: "10.000 € - 50.000 € / an",
+          budget_high: "50.000 € - 100.000 € / an",
+          budget_enterprise: "100.000 €+ / an"
         },
         legal: {
           disclaimer: "Vos données sont utilisées exclusivement pour l'analyse et le suivi professionnel par des architectes de von Busch Digital (security@vonbusch.digital). Aucune donnée n'est partagée. Vous pouvez vous opposer au suivi via l'email de vérification."

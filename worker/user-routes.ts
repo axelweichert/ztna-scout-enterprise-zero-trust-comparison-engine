@@ -180,6 +180,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     }
   });
   app.get('/api/sample-comparison', async (c) => {
+    console.log('[API] Generating deterministic sample report');
     const sampleSeats = 250;
     const sampleVpnStatus = 'active';
     const allVendorResults = await Promise.all(vendors.map(async (v) => {

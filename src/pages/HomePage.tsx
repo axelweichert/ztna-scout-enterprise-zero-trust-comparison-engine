@@ -111,6 +111,24 @@ export function HomePage() {
                 </div>
               ))}
             </motion.div>
+            <motion.div
+              variants={fadeIn}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              custom={4}
+              className="mt-12 flex justify-center"
+            >
+              <a
+                href="https://sasecloudmap.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl border-2 border-primary/10 hover:border-primary/40 hover:shadow-glow transition-all duration-300 text-sm font-bold text-foreground/80 hover:text-primary uppercase tracking-widest"
+              >
+                <Globe className="w-4 h-4" />
+                {t('home.hero.sase_map_cta')}
+              </a>
+            </motion.div>
           </div>
         </section>
         {/* Methodology Section */}
