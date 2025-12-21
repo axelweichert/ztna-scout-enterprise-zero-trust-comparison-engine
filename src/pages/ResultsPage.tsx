@@ -40,11 +40,14 @@ export function ResultsPage() {
     return p === '/beispiel' || p === '/vergleich/sample' || id === 'sample' || id === 'demo';
   }, [location.pathname, id]);
   useEffect(() => {
-    setMounted(true);
+    const timer = setTimeout(() => setMounted(true), 150);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const handleScroll = () => setScrolled(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
+    };
   }, [id]);
   const { data: snapshot, isLoading, error } = useQuery({
     queryKey: ['comparison', isSampleRoute ? 'sample' : id],
@@ -202,14 +205,14 @@ export function ResultsPage() {
         </section>
         <section className="space-y-8 mb-24">
           <h2 className="text-3xl font-display font-bold">{t('results.tco_title')}</h2>
-          <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden min-h-[500px]">
-            <div className="w-full h-[500px] relative" style={{ minHeight: '500px' }}>
+          <Card className="p-8 md:p-12 shadow-2xl border-none bg-slate-50/50 rounded-[2.5rem] overflow-hidden">
+            <div className="w-full aspect-video min-h-[400px] md:min-h-[500px]" style={{ minHeight: '400px' }}>
               {mounted && (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 20 : 60, right: 80, top: 10, bottom: 10 }}>
+                <ResponsiveContainer width="100%" height="100%" minHeight={400}>
+                  <BarChart data={chartData} layout="vertical" margin={{ left: isMobile ? 10 : 60, right: 60, top: 20, bottom: 20 }}>
                     <CartesianGrid strokeDasharray="3 3" horizontal={false} opacity={0.1} />
                     <XAxis type="number" hide />
-                    <YAxis dataKey="name" type="category" width={isMobile ? 110 : 180} tickLine={false} axisLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: 'hsl(var(--foreground))' }} />
+                    <YAxis dataKey="name" type="category" width={isMobile ? 100 : 160} tickLine={false} axisLine={false} tick={{ fontSize: 12, fontWeight: 700, fill: 'hsl(var(--foreground))' }} />
                     <Tooltip cursor={{ fill: 'hsl(var(--primary)/0.03)' }} content={({ active, payload }) => {
                         if (active && payload?.length) {
                           return (
@@ -264,9 +267,9 @@ export function ResultsPage() {
           <div className="p-10 space-y-10">
             <div className="space-y-8">
               {[
-                { label: t('results.matrix.feature_score'), val: selectedVendor?.scores?.featureScore ?? 0, desc: "Capabilities & Modules" },
-                { label: t('results.matrix.price_score'), val: selectedVendor?.scores?.priceScore ?? 0, desc: "Market Competitiveness" },
-                { label: t('results.matrix.compliance_score'), val: selectedVendor?.scores?.complianceScore ?? 0, desc: "BSI & Regulatory Profile" }
+                { label: t('results.matrix.feature_score'), val: selectedVendor?.scores?.featureScore ?? 0, desc: t('results.matrix.expert_take_desc.features') },
+                { label: t('results.matrix.price_score'), val: selectedVendor?.scores?.priceScore ?? 0, desc: t('results.matrix.expert_take_desc.price') },
+                { label: t('results.matrix.compliance_score'), val: selectedVendor?.scores?.complianceScore ?? 0, desc: t('results.matrix.expert_take_desc.compliance') }
               ].map((stat, i) => (
                 <div key={i} className="space-y-4">
                   <div className="flex justify-between items-end">

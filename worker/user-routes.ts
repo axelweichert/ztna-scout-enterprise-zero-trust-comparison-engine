@@ -6,7 +6,7 @@ import { calculateTCO, calculateScores } from "./calculator";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, AdminStats
+  VerificationToken, OptOutToken, AdminStats, VpnStatus
 } from "./shared-types";
 const VENDORS = [
   { "id": "cloudflare", "name": "Cloudflare", "website": "https://www.cloudflare.com" },
@@ -196,16 +196,29 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
     return ok(c, (leads.items || []).sort((a, b) => b.createdAt - a.createdAt));
   });
   app.get('/api/admin/stats', async (c) => {
-    const leads = await LeadEntity.list(c.env, null, 1000);
-    const items = leads.items || [];
+    const leadsRes = await LeadEntity.list(c.env, null, 1000);
+    const allLeads = leadsRes.items || [];
+    // Filter out potential demo/sample leads from real business metrics
+    const businessLeads = allLeads.filter(l => l.id !== 'demo' && !l.companyName.toLowerCase().includes('test'));
+    // Calculate Most Common VPN
+    const vpnCounts: Record<string, number> = {};
+    businessLeads.forEach(l => {
+      const vpn = l.vpnStatus || 'none';
+      vpnCounts[vpn] = (vpnCounts[vpn] || 0) + 1;
+    });
+    const mostCommonVpn = Object.entries(vpnCounts).sort((a, b) => b[1] - a[1])[0]?.[0] || 'N/A';
     const stats: AdminStats = {
-      totalLeads: items.length,
-      pendingLeads: items.filter(l => l.status === 'pending').length,
-      confirmedLeads: items.filter(l => l.status === 'confirmed').length,
-      conversionRate: items.length > 0 ? Math.round((items.filter(l => l.status === 'confirmed').length / items.length) * 100) : 0,
-      avgSeats: items.length > 0 ? Math.round(items.reduce((acc, l) => acc + (l.seats || 0), 0) / items.length) : 0,
-      mostCommonVpn: "N/A",
-      dailyLeads: []
+      totalLeads: businessLeads.length,
+      pendingLeads: businessLeads.filter(l => l.status === 'pending').length,
+      confirmedLeads: businessLeads.filter(l => l.status === 'confirmed').length,
+      conversionRate: businessLeads.length > 0 
+        ? Math.round((businessLeads.filter(l => l.status === 'confirmed').length / businessLeads.length) * 100) 
+        : 0,
+      avgSeats: businessLeads.length > 0 
+        ? Math.round(businessLeads.reduce((acc, l) => acc + (l.seats || 0), 0) / businessLeads.length) 
+        : 0,
+      mostCommonVpn,
+      dailyLeads: [] // Placeholder for time-series if needed later
     };
     return ok(c, stats);
   });

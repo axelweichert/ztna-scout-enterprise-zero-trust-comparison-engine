@@ -2,6 +2,12 @@ import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
+import { format } from 'date-fns';
+import {
+  Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp,
+  Loader2, CheckCircle2, RefreshCw, Users, Clock,
+  Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle, Zap
+} from 'lucide-react';
 import { api } from '@/lib/api-client';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -13,14 +19,9 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
-import {
-  Download, Shield, Trash2, ShieldCheck, Mail, TrendingUp,
-  Loader2, CheckCircle2, RefreshCw, Users, Clock,
-  Settings2, Euro, Phone, ExternalLink, Copy, Search, AlertCircle, Zap
-} from 'lucide-react';
 import type { Lead, AdminStats, PricingOverride } from '@shared/types';
-import { format } from 'date-fns';
 import { cn } from "@/lib/utils";
 export function AdminPage() {
   const { t } = useTranslation();
@@ -83,9 +84,9 @@ export function AdminPage() {
         const email = (l.email || "").toLowerCase();
         const contact = (l.contactName || "").toLowerCase();
         const id = (l.id || "").toLowerCase();
-        return name.includes(normalizedTerm) || 
-               email.includes(normalizedTerm) || 
-               contact.includes(normalizedTerm) || 
+        return name.includes(normalizedTerm) ||
+               email.includes(normalizedTerm) ||
+               contact.includes(normalizedTerm) ||
                id.includes(normalizedTerm);
       });
   }, [leads, hideOptOuts, searchTerm]);
@@ -280,9 +281,16 @@ export function AdminPage() {
                               <span className="text-xs font-bold">{lead.seats || 0} Seats</span>
                               <span className="text-[10px] text-muted-foreground">• {(lead.vpnStatus || "none").toUpperCase()} VPN</span>
                             </div>
-                            <Badge variant="secondary" className="text-[9px] w-fit font-bold uppercase tracking-tighter bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                              {(lead.timing || "").replace('_', ' ')}
-                            </Badge>
+                            <TooltipProvider>
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Badge variant="secondary" className="text-[9px] w-fit font-bold uppercase tracking-tighter bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 cursor-help">
+                                            {(lead.timing || "").replace('_', ' ')}
+                                        </Badge>
+                                    </TooltipTrigger>
+                                    <TooltipContent>Target Migration Timeline</TooltipContent>
+                                </Tooltip>
+                            </TooltipProvider>
                           </div>
                         </TableCell>
                         <TableCell className="text-right pr-12">
@@ -321,7 +329,9 @@ export function AdminPage() {
           </TabsContent>
           <TabsContent value="pricing" className="animate-in fade-in duration-500">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {pricingLoading ? <Loader2 className="animate-spin mx-auto text-primary w-12 h-12" /> : pricingData?.map((p) => (
+              {pricingLoading ? (
+                <div className="col-span-full py-20 text-center"><Loader2 className="animate-spin mx-auto text-primary w-12 h-12" /></div>
+              ) : pricingData?.map((p) => (
                 <Card key={p.vendorId} className="border-none shadow-soft overflow-hidden rounded-2xl bg-white dark:bg-slate-900">
                   <CardHeader className="bg-slate-50/80 dark:bg-slate-800/80 border-b py-4 px-6">
                     <CardTitle className="text-lg flex justify-between items-center">
@@ -389,4 +399,3 @@ export function AdminPage() {
     </AppLayout>
   );
 }
-import { Skeleton } from '@/components/ui/skeleton';
