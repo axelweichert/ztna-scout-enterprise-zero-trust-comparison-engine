@@ -17,8 +17,9 @@ import pricing from "../data/pricing.json";
  * Logic migrated from src/lib/calculator.ts to ensure worker isolation.
  */
 function calculateTCO(seats: number, model: PricingModel): number {
-  const annualSubscription = seats * model.basePricePerMonth * 12;
-  return annualSubscription + model.installationFee;
+  const safeSeats = Math.max(1, seats);
+  const annualSubscription = safeSeats * (model.basePricePerMonth || 0) * 12;
+  return Number((annualSubscription + (model.installationFee || 0)).toFixed(2));
 }
 function calculateScores(features: FeatureMatrix, tco: number, maxTco: number, minTco: number) {
   // 1. Feature Score (40%)
@@ -26,9 +27,14 @@ function calculateScores(features: FeatureMatrix, tco: number, maxTco: number, m
   const featurePoints = featureList.reduce((acc, key) => acc + (features[key] ? 1 : 0), 0);
   const featureScore = Math.round((featurePoints / featureList.length) * 100);
   // 2. Price Score (40%) - Lower TCO is better
-  let priceScore = 50;
-  if (maxTco !== minTco) {
+  let priceScore = 70; // Default fallback for single vendor or identical TCOs
+  if (maxTco > minTco) {
     priceScore = Math.round(100 - (((tco - minTco) / (maxTco - minTco)) * 100));
+  } else if (tco > 0) {
+    // If all prices are the same, give a baseline score based on relative affordability
+    // compared to an arbitrary "expensive" benchmark of 100 EUR/user
+    const relativePrice = tco / 1200; 
+    priceScore = Math.max(0, Math.min(100, Math.round(100 - (relativePrice * 10))));
   }
   // 3. Compliance Score (20%)
   const complianceScore = features.isBSIQualified ? 100 : 40;
@@ -123,7 +129,10 @@ async function sendVerificationEmail(env: any, lead: Lead, token: string, optOut
   const fromEmail = env.EMAIL_FROM || 'security@vonbusch.digital';
   const subject = lead.vpnStatus === 'none' ? "ZTNA Scout: Your Security Analysis" : "ZTNA Scout: Verify your analysis request";
   const body = `Hello ${lead.contactName},\n\nThank you for using ZTNA Scout. To provide you with your report, please verify your request:\n\n${verifyUrl}\n\nProject: ${lead.companyName} (${lead.seats} seats)\n\nOpt-out: ${optOutUrl}`;
-  if (!env.RESEND_API_KEY) return { success: false, error: 'Email service not configured' };
+  if (!env.RESEND_API_KEY) {
+    console.warn('[EMAIL] RESEND_API_KEY missing, skipping mail send');
+    return { success: false, error: 'Email service not configured' };
+  }
   try {
     const res = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -182,12 +191,14 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await new LeadEntity(c.env, leadId).patch({ emailStatus, emailError: emailRes.error });
       return ok(c, { leadId, requiresVerification: true });
     } catch (e) {
+      console.error('[SUBMIT] error:', e);
       return bad(c, 'Submission failed.');
     }
   });
   // Sample Comparison Generator
   app.get('/api/sample-comparison', async (c) => {
     const sampleSeats = 250;
+    if (!vendors || vendors.length === 0) return bad(c, 'No vendor data available');
     const results = await Promise.all(vendors.map(async (v) => {
       const model = await getMergedPricing(c.env, v.id);
       const feat = features.find(f => f.vendorId === v.id) as FeatureMatrix;
@@ -195,8 +206,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return { v, feat, tco };
     }));
     const tcos = results.map(r => r.tco);
-    const maxTco = Math.max(...tcos, 1);
-    const minTco = Math.min(...tcos, 1);
+    const maxTco = Math.max(...tcos);
+    const minTco = Math.min(...tcos);
     const snapshotResults: ComparisonResult[] = results.map(r => ({
       vendorId: r.v.id,
       vendorName: r.v.name,
@@ -231,8 +242,8 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return { v, feat, tco };
     }));
     const tcos = processedResults.map(r => r.tco);
-    const maxTco = Math.max(...tcos, 1);
-    const minTco = Math.min(...tcos, 1);
+    const maxTco = tcos.length > 0 ? Math.max(...tcos) : 1;
+    const minTco = tcos.length > 0 ? Math.min(...tcos) : 0;
     const snapshotResults: ComparisonResult[] = processedResults.map(r => ({
       vendorId: r.v.id,
       vendorName: r.v.name,
