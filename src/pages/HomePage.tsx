@@ -85,13 +85,14 @@ export function HomePage() {
                 {t('home.hero.cta_primary')}
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Button>
-              <Button asChild size="lg" variant="outline" className="h-16 px-12 text-lg rounded-2xl border-2 hover:bg-slate-50 transition-colors gap-2 cursor-pointer">
+              <Button asChild size="lg" variant="outline" className="h-16 px-12 text-lg rounded-2xl border-2 hover:bg-slate-50 transition-colors gap-2">
                 <Link to="/vergleich/sample">
                   <Sparkles className="w-5 h-5 text-primary" />
                   {t('home.hero.cta_secondary')}
                 </Link>
               </Button>
             </motion.div>
+            {/* Trust Badges */}
             <motion.div
               initial={{ opacity: 0 }}
               whileInView={{ opacity: 1 }}
@@ -111,6 +112,7 @@ export function HomePage() {
                 </div>
               ))}
             </motion.div>
+            {/* SASE Cloud Map Integration */}
             <motion.div
               variants={fadeIn}
               initial="hidden"
