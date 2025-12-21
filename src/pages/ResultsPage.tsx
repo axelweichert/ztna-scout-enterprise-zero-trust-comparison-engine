@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { ShieldCheck, Printer, ArrowLeft, Info, Check, X, Sparkles, Filter, AlertTriangle, FileText, Calendar, BadgeCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { Progress } from '@/components/ui/progress';
@@ -19,20 +19,22 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { cn, formatDate, getRankLabel, formatCurrency } from '@/lib/utils';
 export function ResultsPage() {
   const { id } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { t, i18n } = useTranslation();
   const [selectedVendor, setSelectedVendor] = useState<ComparisonResult | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const [hideSimilar, setHideSimilar] = useState(false);
+  const isSampleRoute = location.pathname === '/beispiel' || id === 'sample';
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 300);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   const { data: snapshot, isLoading, error } = useQuery({
-    queryKey: ['comparison', id],
-    queryFn: () => api<ComparisonSnapshot>(id === 'sample' ? '/api/sample-comparison' : `/api/comparison/${id}`),
+    queryKey: ['comparison', isSampleRoute ? 'sample' : id],
+    queryFn: () => api<ComparisonSnapshot>(isSampleRoute ? '/api/sample-comparison' : `/api/comparison/${id}`),
     retry: 1
   });
   if (isLoading) return (
@@ -97,7 +99,7 @@ export function ResultsPage() {
             <span className="font-bold text-xs text-muted-foreground uppercase tracking-tighter">{t('results.badges.top_match')}:</span>
             <Badge className="bg-primary text-[10px]">{sortedResults[0]?.vendorName}</Badge>
           </div>
-          <Button size="sm" className="btn-gradient h-8" onClick={() => navigate(`/vergleich/${id}/print`)}>
+          <Button size="sm" className="btn-gradient h-8" onClick={() => navigate(`/vergleich/${snapshot.id}/print`)}>
             <Printer className="mr-2 h-3.5 w-3.5" /> {t('results.export_pdf')}
           </Button>
         </div>
@@ -124,7 +126,7 @@ export function ResultsPage() {
             <Button variant="outline" asChild className="hidden sm:flex h-14 px-8 border-2">
               <Link to="/"><ArrowLeft className="mr-2 h-4 w-4" /> {t('form.buttons.back')}</Link>
             </Button>
-            <Button size="lg" className="h-14 flex-1 md:flex-none px-10 btn-gradient shadow-lg" onClick={() => navigate(`/vergleich/${id}/print`)}>
+            <Button size="lg" className="h-14 flex-1 md:flex-none px-10 btn-gradient shadow-lg" onClick={() => navigate(`/vergleich/${snapshot.id}/print`)}>
               <Printer className="mr-2 h-5 w-5" /> {t('results.export_pdf')}
             </Button>
           </div>
@@ -277,7 +279,7 @@ export function ResultsPage() {
             <div className="absolute bottom-0 right-0 opacity-10 -mr-10 -mb-10"><ShieldCheck size={200} /></div>
             <DialogHeader>
               <DialogTitle className="text-3xl font-display font-bold leading-tight">{selectedVendor?.vendorName} {t('results.matrix.analytical_breakdown')}</DialogTitle>
-              <CardDescription className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</CardDescription>
+              <DialogDescription className="text-primary-foreground/70 font-mono text-xs uppercase tracking-[0.3em] mt-2">{t('results.matrix.analytical_breakdown')}</DialogDescription>
             </DialogHeader>
           </div>
           <div className="p-6 sm:p-10 space-y-8">

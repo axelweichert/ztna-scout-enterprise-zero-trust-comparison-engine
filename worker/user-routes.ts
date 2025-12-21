@@ -5,8 +5,7 @@ import { IndexedEntity, Entity } from "./core-utils";
 import type {
   Lead, ComparisonSnapshot, ComparisonResult,
   PricingModel, FeatureMatrix, PricingOverride,
-  VerificationToken, OptOutToken, AdminStats,
-  EmailEvent
+  VerificationToken, OptOutToken
 } from "./shared-types";
 /**
  * INLINED ENTERPRISE METADATA
@@ -72,8 +71,7 @@ function calculateScores(feats: FeatureMatrix, tco: number, maxTco: number, minT
   if (maxTco > minTco) {
     priceScore = Math.round(100 - (((tco - minTco) / (maxTco - minTco)) * 100));
   } else {
-    // Safety check for division by zero or identical pricing
-    priceScore = 75; 
+    priceScore = 75;
   }
   const complianceScore = feats.isBSIQualified ? 100 : 40;
   const totalScore = Math.round((featureScore * 0.4) + (priceScore * 0.4) + (complianceScore * 0.2));
@@ -155,7 +153,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       await LeadEntity.create(c.env, lead);
       const vToken = crypto.randomUUID();
       await new VerificationTokenEntity(c.env, vToken).save({ hash: vToken, leadId, expiresAt: Date.now() + 604800000 });
-      // Also generate an opt-out token for the email footer
       const optOutToken = crypto.randomUUID();
       await new OptOutTokenEntity(c.env, optOutToken).save({ hash: optOutToken, leadId, createdAt: Date.now() });
       return ok(c, { leadId, requiresVerification: true });
@@ -170,10 +167,7 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       if (!(await optOutInst.exists())) return bad(c, 'Invalid token');
       const data = await optOutInst.getState();
       const leadInst = new LeadEntity(c.env, data.leadId);
-      await leadInst.patch({ 
-        contactAllowed: false, 
-        optedOutAt: Date.now() 
-      });
+      await leadInst.patch({ contactAllowed: false, optedOutAt: Date.now() });
       return ok(c, { success: true });
     } catch (e) {
       return bad(c, 'Opt-out failed');
@@ -282,33 +276,6 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
       return bad(c, 'Deletion failed');
     }
   });
-  app.get('/api/admin/stats', async (c) => {
-    try {
-      const leads = (await LeadEntity.list(c.env, null, 1000)).items;
-      const totalLeads = leads.length;
-      const confirmedLeads = leads.filter(l => l.status === 'confirmed').length;
-      const avgSeats = totalLeads > 0 ? Math.round(leads.reduce((acc, l) => acc + l.seats, 0) / totalLeads) : 0;
-      const conversionRate = totalLeads > 0 ? Math.round((confirmedLeads / totalLeads) * 100) : 0;
-      const vpnCounts: Record<string, number> = {};
-      leads.forEach(l => { vpnCounts[l.vpnStatus] = (vpnCounts[l.vpnStatus] || 0) + 1; });
-      const mostCommonVpn = Object.keys(vpnCounts).sort((a, b) => vpnCounts[b] - vpnCounts[a])[0] || "N/A";
-      // Mock daily leads for the last 7 days
-      const dailyLeads = Array.from({ length: 7 }).map((_, i) => {
-        const d = new Date();
-        d.setDate(d.getDate() - (6 - i));
-        const dateStr = d.toISOString().split('T')[0];
-        const dayLeads = leads.filter(l => new Date(l.createdAt).toISOString().startsWith(dateStr));
-        return {
-          date: dateStr,
-          pending: dayLeads.filter(l => l.status === 'pending').length,
-          confirmed: dayLeads.filter(l => l.status === 'confirmed').length
-        };
-      });
-      return ok(c, { totalLeads, confirmedLeads, conversionRate, avgSeats, mostCommonVpn, dailyLeads });
-    } catch (e) {
-      return bad(c, 'Stats calculation failed');
-    }
-  });
   app.get('/api/admin/pricing', async (c) => {
     try {
       const data = await Promise.all(VENDORS.map(async (v) => {
@@ -318,11 +285,11 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
           const state = await inst.getState();
           return { ...state, basePricePerMonth: Number(state.basePricePerMonth.toFixed(2)) };
         }
-        return { 
-          vendorId: v.id, 
-          basePricePerMonth: base?.basePricePerMonth || 0, 
-          isQuoteOnly: base?.isQuoteOnly || false, 
-          updatedAt: 0 
+        return {
+          vendorId: v.id,
+          basePricePerMonth: base?.basePricePerMonth || 0,
+          isQuoteOnly: base?.isQuoteOnly || false,
+          updatedAt: 0
         };
       }));
       return ok(c, data);
@@ -333,10 +300,10 @@ export function userRoutes(app: Hono<{ Bindings: Env }>) {
   app.post('/api/admin/pricing', async (c) => {
     try {
       const update = await c.req.json<PricingOverride>();
-      await new PricingOverrideEntity(c.env, update.vendorId).save({ 
-        ...update, 
+      await new PricingOverrideEntity(c.env, update.vendorId).save({
+        ...update,
         basePricePerMonth: Number(update.basePricePerMonth),
-        updatedAt: Date.now() 
+        updatedAt: Date.now()
       });
       return ok(c, { success: true });
     } catch (e) {

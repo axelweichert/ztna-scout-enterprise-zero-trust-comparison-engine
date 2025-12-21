@@ -24,6 +24,7 @@ const queryClient = new QueryClient({
 });
 const router = createBrowserRouter([
   { path: "/", element: <HomePage />, errorElement: <RouteErrorBoundary /> },
+  { path: "/beispiel", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/vergleich/neu", element: <LeadFormPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/vergleich/:id", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
   { path: "/vergleich/:id/print", element: <PrintResultsPage />, errorElement: <RouteErrorBoundary /> },

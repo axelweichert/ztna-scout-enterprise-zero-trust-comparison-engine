@@ -32,7 +32,7 @@ const resources = {
           description: "Stop guessing. Compare 13+ ZTNA providers with deterministic TCO projections and BSI compliance scoring.",
           cta_primary: "Start Free Analysis",
           cta_secondary: "Explore Live Sample",
-          sase_map_cta: "View SASE Cloud Map"
+          sase_map_cta: "SASE Cloud Map"
         },
         trust: {
           bsi: "BSI Qualified",
@@ -193,10 +193,10 @@ const resources = {
           badge: "B2B Analyse Engine",
           title1: "Enterprise Security",
           title2: "Vergleich neu gedacht",
-          description: "Schluss mit Sch��tzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen.",
+          description: "Schluss mit Schätzungen. Vergleichen Sie 13+ ZTNA-Anbieter mit deterministischen TCO-Projektionen und BSI-Konformitätsbewertungen.",
           cta_primary: "Analyse starten",
           cta_secondary: "Live-Beispiel ansehen",
-          sase_map_cta: "SASE Cloud Map ansehen"
+          sase_map_cta: "SASE Cloud Map"
         },
         trust: { bsi: "BSI-qualifiziert", gdpr: "DSGVO-konform", pdf: "PDF-Export", sase: "Global SASE" },
         steps: {
@@ -223,7 +223,7 @@ const resources = {
         labels: { companyName: "Firmenname", contactName: "Ansprechpartner", phone: "Telefonnummer", workEmail: "Geschäftliche E-Mail", seats: "Anzahl Benutzer", vpnStatus: "VPN Status", timing: "Zeitrahmen Migration", budgetRange: "Geplantes Budget" },
         buttons: { continue: "Weiter", back: "Zurück", submit: "Bestätigen & Generieren", generating: "Analysiere..." },
         options: { vpn_active: "Aktives Legacy VPN", vpn_replacing: "Migration läuft", vpn_none: "SDP / Cloud Native", timing_immediate: "Sofort", timing_3m: "Innerhalb 3 Monate", timing_6m: "In 6 Monaten", timing_planning: "Strategische Planung", budget_low: "< 10.000 € / Jahr", budget_med: "10.000 € - 50.000 € / Jahr", budget_high: "50.000 € - 100.000 € / Jahr", budget_enterprise: "100.000 €+ / Jahr" },
-        legal: { disclaimer: "Ihre Daten werden zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital verwendet. Kein Weitergabe an Dritte. Widerspruch jederzeit möglich." },
+        legal: { disclaimer: "Ihre Daten werden zur Erstellung dieser Analyse und für eine professionelle Nachbetreuung durch zertifizierte Security-Architekten von von Busch Digital verwendet. Keine Weitergabe an Dritte. Widerspruch jederzeit möglich." },
         submitted: { title: "E-Mail Bestätigung", desc: "Bitte prüfen Sie Ihr Postfach und klicken Sie auf den Bestätigungslink, um Ihren Bericht freizuschalten." }
       },
       results: {
@@ -243,7 +243,7 @@ const resources = {
         expert_take_2: "Skalierbare Cloud-Architektur mit schnellen Implementierungswegen und intuitiver Verwaltung.",
         meta: { rid: "Bericht-ID", generated: "Erstellt am", verified: "Verifizierter Bericht" },
         print: { title: "ZTNA Scout Analysebericht", tagline: "Automatisierte Marktanalyse – erstellt durch ZTNA Scout", summary: "Management Summary", seats: "Benutzerlizenzen", top_recommendation: "Top Empfehlung", transparency_title: "Transparenz & Quellen", transparency_desc: "Die Berechnungen basieren auf öffentlichen Marktlistenpreisen (EUR)." },
-        badges: { top_match: "Top Match", best_fit: "Beste Wahl", top_recommendations: "Top Empfehlungen" },
+        badges: { top_match: "Top Match", beste_wahl: "Beste Wahl", top_recommendations: "Top Empfehlungen" },
         matrix: {
           title: "Fähigkeiten-Matrix", capability: "Funktion", show_all: "Alle Zeilen", diff_only: "Unterschiede hervorheben", best_fit: "Beste Wahl", deep_dive: "Analyse-Details", feature_score: "Funktionsumfang (40%)", price_score: "Preis-Leistung (40%)", compliance_score: "Compliance (20%)", total_score: "Scout Score", analytical_breakdown: "Analytische Aufschlüsselung", market_rank: "Marktrang", rank_1: "1. Platz", rank_2: "2. Platz", rank_3: "3. Platz", scout_total: "Scout Gesamt", close_deep_dive: "Analyse schließen",
           expert_take_desc: { features: "ZTNA, SWG, CASB, DLP und Isolationsfunktionen.", price: "Wettbewerbsfähigkeit im Vergleich zum Marktdurchschnitt.", compliance: "BSI-Qualifizierungen und Sicherheitszertifikate." }
@@ -272,7 +272,7 @@ const resources = {
         footer: { imprint: "Mentions Légales", privacy: "Confidentialité", service_line: "Un service de von Busch GmbH", address: "von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld" }
       },
       home: {
-        hero: { badge: "Moteur d'analyse B2B", title1: "Sécurité d'entreprise", title2: "La comparaison redéfinie", description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO et des scores BSI.", cta_primary: "Lancer l'analyse", cta_secondary: "Voir un exemple", sase_map_cta: "Voir la SASE Cloud Map" },
+        hero: { badge: "Moteur d'analyse B2B", title1: "Sécurité d'entreprise", title2: "La comparaison redéfinie", description: "Comparez plus de 13 fournisseurs ZTNA avec des projections TCO et des scores BSI.", cta_primary: "Lancer l'analyse", cta_secondary: "Voir un exemple", sase_map_cta: "SASE Cloud Map" },
         trust: { bsi: "Qualifié BSI", gdpr: "Conforme RGPD", pdf: "Export PDF", sase: "SASE Global" },
         steps: { title: "La méthodologie ZTNA Scout", subtitle: "Comment nous fournissons des analyses de précision.", step1: { title: "Périmètre", desc: "Modifier le nombre d'utilisateurs et l'architecture." }, step2: { title: "Balayage", desc: "Comparaison avec les prix catalogue et les fonctionnalités." }, step3: { title: "Rapport", desc: "Recevez un export PDF professionnel avec projections TCO." } },
         faq: { title: "Perspectives stratégiques", q1: "Données à jour ?", a1: "Notre équipe vérifie les prix chaque trimestre. {{freshness}}", q2: "Pourquoi Cloudflare ?", a2: "Cloudflare propose la plateforme ZTNA la plus robuste et qualifiée BSI.", q3: "Prix définitifs ?", a3: "Estimations basées sur les prix catalogue. Remises possibles.", q4: "Données protégées ?", a4: "Nous sommes conformes au RGPD. Les données sont chiffrées." }
@@ -297,7 +297,7 @@ const resources = {
       },
       admin: {
         terminal_title: "Porte Sentinelle", terminal_desc: "Accès requis", terminal_key: "Clé secrète", terminal_unlock: "Déverrouiller", dashboard_title: "Dashboard", dashboard_desc: "Suivi en temps réel", sync_data: "Synchroniser", export_csv: "Exporter CSV", export_success: "Export CSV lancé",
-        stats: { total: "Demandes", verified: "Prospects vérifiés", conversion: "Conversion", avg_seats: "Si��ges moyens", lifetime: "À VIE", common_vpn: "VPN Legacy Principal" },
+        stats: { total: "Demandes", verified: "Prospects vérifiés", conversion: "Conversion", avg_seats: "Sièges moyens", lifetime: "À VIE", common_vpn: "VPN Legacy Principal" },
         tabs: { pipeline: "Pipeline", pricing: "Prix", settings: "Système" },
         table: { timestamp: "Horodatage", org: "Organisation", stakeholder: "Contact", infra: "Infra", verification: "Vérification", management: "Gestion", no_leads: "Aucun prospect.", purge_confirm: "Supprimer ?", opt_out: "Opposition" },
         pricing: { market_rate: "Prix / mois", quote_required: "Devis requis", quote_desc: "Force l'affichage", updated_success: "Prix mis à jour" }
@@ -306,7 +306,7 @@ const resources = {
       verify: { loading: "Vérification...", success: "Identité vérifiée!", success_desc: "Votre rapport (ID: {{id}}) est prêt.", error: "Échec", error_desc: "Lien expiré ou invalide." },
       legal: {
         imprint: { title: "Mentions Légales", provider_title: "Prestataire", provider_details: "von Busch GmbH\nAlfred-Bozi-Straße 12\n33602 Bielefeld\nAllemagne", contact_title: "Contact", contact_details: "Email : security@vonbusch.digital\nWeb : www.vonbusch.digital", register_title: "Registre", register_details: "Amtsgericht Bielefeld\nHRB 45678" },
-        privacy: { title: "Confidentialité", section1_title: "1. Collecte", section1_desc: "Nous collectons les données pour l'analyse.", section2_title: "2. Base juridique", section2_desc: "Consentement explicite (Art. 6 RGPD).", section3_title: "3. Conservation", section3_desc: "Prospects conservés 24 mois.", section4_title: "4. Droits", section4_desc: "Accès et suppression." }
+        privacy: { title: "Confidentialité", section1_title: "1. Collecte", section1_desc: "Nous collectons les données pour l'analyse.", section2_title: "2. Base juridique", section2_desc: "Consentement explicite (Art. 6 RGPD).", section3_title: "3. Conservation", section3_desc: "Prospects conservés 24 m.", section4_title: "4. Droits", section4_desc: "Accès et suppression." }
       }
     }
   }
