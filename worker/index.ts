@@ -1,11 +1,8 @@
-// NOTE: This file is intentionally deterministic for production builds.
-// Routes are registered via a static import (no dynamic import / no runtime module loading).
-
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { Env } from "./core-utils";
-import * as UserRoutes from "./user-routes";
+import { userRoutes } from "./user-routes";
 
 export * from "./core-utils";
 
@@ -29,10 +26,7 @@ app.use(
 );
 
 app.get("/api/health", (c) =>
-  c.json({
-    success: true,
-    data: { status: "healthy", timestamp: new Date().toISOString() },
-  }),
+  c.json({ success: true, data: { status: "healthy", timestamp: new Date().toISOString() } }),
 );
 
 app.post("/api/client-errors", async (c) => {
@@ -60,18 +54,8 @@ app.post("/api/client-errors", async (c) => {
   }
 });
 
-// Register user routes deterministically.
-// Supports both export styles:
-// - export function userRoutes(app) {}
-// - export default function(app) {}
-const routesFn = (UserRoutes as any).userRoutes ?? (UserRoutes as any).default;
-if (typeof routesFn === "function") {
-  routesFn(app);
-} else {
-  console.error(
-    "[ROUTES] worker/user-routes.ts must export userRoutes(app) or default(app).",
-  );
-}
+// Deterministic route registration (no dynamic import)
+userRoutes(app);
 
 app.notFound((c) => c.json({ success: false, error: "Not Found" }, 404));
 
