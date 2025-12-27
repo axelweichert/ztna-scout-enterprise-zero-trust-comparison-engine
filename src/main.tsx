@@ -1,55 +1,53 @@
-import '@/lib/errorReporter';
-import './i18n';
+import "@/lib/errorReporter";
 import { enableMapSet } from "immer";
 enableMapSet();
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
+
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { TooltipProvider } from '@/components/ui/tooltip';
-import { ErrorBoundary } from '@/components/ErrorBoundary';
-import { RouteErrorBoundary } from '@/components/RouteErrorBoundary';
-import '@/index.css'
-import HomePage from '@/pages/HomePage';
-import { LeadFormPage } from '@/pages/LeadFormPage';
-import { ResultsPage } from '@/pages/ResultsPage';
-import { AdminPage } from '@/pages/AdminPage';
-import { PrintResultsPage } from '@/pages/PrintResultsPage';
-import { VerifyPage } from '@/pages/VerifyPage';
-import { LegalPage } from '@/pages/LegalPage';
-import { OptOutPage } from '@/pages/OptOutPage';
-import { Toaster } from '@/components/ui/sonner';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { HomePage } from "@/pages/HomePage";
+import { ResultsPage } from "@/pages/ResultsPage";
+import { PrintResultsPage } from "@/pages/PrintResultsPage";
+import { VerifyPage } from "@/pages/VerifyPage";
+import { OptOutPage } from "@/pages/OptOutPage";
+import { AdminPage } from "@/pages/AdminPage";
+import { LegalPage } from "@/pages/LegalPage";
+import { I18nProvider } from "./i18n";
+
 const queryClient = new QueryClient({
-  defaultOptions: { 
-    queries: { 
-      refetchOnWindowFocus: false, 
-      staleTime: 1000 * 60 * 5,
-      retry: 1
-    } 
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
   },
 });
+
 const router = createBrowserRouter([
-  { path: "/", element: <HomePage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/beispiel", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/vergleich/sample", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/vergleich/neu", element: <LeadFormPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/vergleich/:id", element: <ResultsPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/vergleich/:id/print", element: <PrintResultsPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/verify/:token", element: <VerifyPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/opt-out", element: <OptOutPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/admin", element: <AdminPage />, errorElement: <RouteErrorBoundary /> },
-  { path: "/impressum", element: <LegalPage type="imprint" />, errorElement: <RouteErrorBoundary /> },
-  { path: "/datenschutz", element: <LegalPage type="privacy" />, errorElement: <RouteErrorBoundary /> },
+  { path: "/", element: <HomePage /> },
+  { path: "/vergleich/:leadId", element: <ResultsPage /> },
+  { path: "/vergleich/:leadId/print", element: <PrintResultsPage /> },
+  { path: "/vergleich/sample", element: <ResultsPage sample /> },
+  { path: "/verify/:token", element: <VerifyPage /> },
+  { path: "/optout/:token", element: <OptOutPage /> },
+  { path: "/admin", element: <AdminPage /> },
+  { path: "/impressum", element: <LegalPage type="imprint" /> },
+  { path: "/datenschutz", element: <LegalPage type="privacy" /> },
 ]);
-createRoot(document.getElementById('root')!).render(
+
+createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <ErrorBoundary>
-          <RouterProvider router={router} />
-          <Toaster richColors position="top-center" closeButton />
-        </ErrorBoundary>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <TooltipProvider>
+          <I18nProvider>
+            <RouterProvider router={router} />
+          </I18nProvider>
+        </TooltipProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   </StrictMode>,
-)
+);
