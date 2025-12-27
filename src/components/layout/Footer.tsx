@@ -1,36 +1,33 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-export function Footer({ className }: { className?: string }) {
+import React from "react";
+
+export function Footer(): JSX.Element {
   return (
-    <footer className={cn("border-t bg-slate-50/50 py-12 md:py-16 print:py-6 print:bg-white", className)}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col items-center text-center gap-6">
-          {/* 3-Line Branding Block */}
-          <div className="space-y-1 text-sm md:text-base font-medium text-foreground print:text-black print:text-[9pt]">
-            <p>von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld</p>
-            <p>A strategic security service by von Busch GmbH</p>
-            <p>Built with <span className="text-primary mx-0.5">♥</span> at Cloudflare.</p>
+    <footer className="border-t border-slate-200/60 dark:border-slate-800/60 bg-white/70 dark:bg-slate-950/70 backdrop-blur">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        <div className="flex flex-col gap-6 text-sm text-slate-700 dark:text-slate-300">
+          <div className="flex flex-col gap-1">
+            <div>von Busch GmbH – Alfred-Bozi-Straße 12 – 33602 Bielefeld</div>
+            <div>Ein Service der von Busch GmbH</div>
+            <div>Built with ♥ at Cloudflare</div>
           </div>
-          {/* Legal Links Row */}
-          <div className="flex items-center justify-center gap-6 text-xs text-muted-foreground print:hidden">
-            <Link
-              to="/impressum"
-              className="hover:text-primary transition-colors underline-offset-4 hover:underline font-semibold uppercase tracking-widest"
+
+          <div className="flex flex-wrap gap-x-6 gap-y-2">
+            <a
+              href="https://vonbusch.digital/impressum/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-slate-900 dark:hover:text-white"
             >
-              Imprint
-            </Link>
-            <div className="w-1 h-1 rounded-full bg-muted-foreground/30" />
-            <Link
-              to="/datenschutz"
-              className="hover:text-primary transition-colors underline-offset-4 hover:underline font-semibold uppercase tracking-widest"
+              Impressum
+            </a>
+            <a
+              href="https://vonbusch.digital/datenschutz/"
+              target="_blank"
+              rel="noreferrer"
+              className="underline underline-offset-4 hover:text-slate-900 dark:hover:text-white"
             >
-              Privacy Policy
-            </Link>
-          </div>
-          {/* Copyright Metadata */}
-          <div className="text-[10px] text-muted-foreground/60 font-mono tracking-tighter uppercase mt-4">
-            &copy; {new Date().getFullYear()} von Busch Digital. All Rights Reserved.
+              Datenschutz
+            </a>
           </div>
         </div>
       </div>
