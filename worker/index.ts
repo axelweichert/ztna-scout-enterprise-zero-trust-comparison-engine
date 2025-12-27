@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { logger } from 'hono/logger';
 import { Env } from './core-utils';
-import { userRoutes } from './user-routes';
+import userRoutes from './user-routes';
 export * from './core-utils';
 
 export type ClientErrorReport = { message: string; url: string; timestamp: string } & Record<string, unknown>;
